@@ -49,7 +49,9 @@ rm -rf /tmp/pensieve
 ```markdown
 ## Pensieve
 
-Load pensieve skill IMMEDIATELY when user expresses any intent. When user wants to improve Pensieve (add/modify pipelines, decisions, maxims, or any content), MUST use _self-improve.md pipeline.
+Load pensieve skill IMMEDIATELY when user expresses any intent.
+
+When user wants to improve Pensieve (add/modify pipelines, decisions, maxims, or any content), MUST use _self-improve.md pipeline.
 ```
 
 ### 4. 重启 Claude Code
@@ -120,7 +122,9 @@ EOF
 ```markdown
 ## Pensieve
 
-Load pensieve skill IMMEDIATELY when user expresses any intent. When user wants to improve Pensieve (add/modify pipelines, decisions, maxims, or any content), MUST use _self-improve.md pipeline.
+Load pensieve skill IMMEDIATELY when user expresses any intent.
+
+When user wants to improve Pensieve (add/modify pipelines, decisions, maxims, or any content), MUST use _self-improve.md pipeline.
 ```
 
 4. 提醒用户重启 Claude Code

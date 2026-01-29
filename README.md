@@ -128,6 +128,7 @@ rm -rf /tmp/pensieve
 ```markdown
 ## Pensieve
 Load pensieve skill IMMEDIATELY when user expresses any intent.
+When user wants to improve Pensieve, MUST use _self-improve.md pipeline.
 ```
 
 #### 4. Restart Claude Code
@@ -150,7 +151,7 @@ If you're an LLM agent, help the user:
    ```json
    {"plugins": [{"source": {"type": "url", "url": "https://github.com/kingkongshot/Pensieve"}}]}
    ```
-3. Add to `CLAUDE.md`: `## Pensieve\nLoad pensieve skill IMMEDIATELY when user expresses any intent.`
+3. Add to `CLAUDE.md`: `## Pensieve\nLoad pensieve skill IMMEDIATELY. To improve Pensieve, use _self-improve.md.`
 4. Remind user to restart Claude Code
 
 ---

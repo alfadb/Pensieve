@@ -128,6 +128,7 @@ rm -rf /tmp/pensieve
 ```markdown
 ## Pensieve
 Load pensieve skill IMMEDIATELY when user expresses any intent.
+When user wants to improve Pensieve, MUST use _self-improve.md pipeline.
 ```
 
 #### 4. 重启 Claude Code
@@ -150,7 +151,7 @@ Load pensieve skill IMMEDIATELY when user expresses any intent.
    ```json
    {"plugins": [{"source": {"type": "url", "url": "https://github.com/kingkongshot/Pensieve"}}]}
    ```
-3. 在 `CLAUDE.md` 中添加：`## Pensieve\nLoad pensieve skill IMMEDIATELY when user expresses any intent.`
+3. 在 `CLAUDE.md` 中添加：`## Pensieve\nLoad pensieve skill IMMEDIATELY. To improve Pensieve, use _self-improve.md.`
 4. 提醒用户重启 Claude Code
 
 ---
