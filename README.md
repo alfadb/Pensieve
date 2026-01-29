@@ -123,7 +123,14 @@ mkdir -p .claude/skills && cp -r /tmp/pensieve/skill .claude/skills/pensieve
 rm -rf /tmp/pensieve
 ```
 
-#### 3. Restart Claude Code
+#### 3. Add to CLAUDE.md
+
+```markdown
+## Pensieve
+Load pensieve skill IMMEDIATELY when user expresses any intent.
+```
+
+#### 4. Restart Claude Code
 
 Say `loop` to verify installation.
 
@@ -143,7 +150,8 @@ If you're an LLM agent, help the user:
    ```json
    {"plugins": [{"source": {"type": "url", "url": "https://github.com/kingkongshot/Pensieve"}}]}
    ```
-3. Remind user to restart Claude Code
+3. Add to `CLAUDE.md`: `## Pensieve\nLoad pensieve skill IMMEDIATELY when user expresses any intent.`
+4. Remind user to restart Claude Code
 
 ---
 

@@ -123,7 +123,14 @@ mkdir -p .claude/skills && cp -r /tmp/pensieve/skill .claude/skills/pensieve
 rm -rf /tmp/pensieve
 ```
 
-#### 3. 重启 Claude Code
+#### 3. 配置 CLAUDE.md
+
+```markdown
+## Pensieve
+Load pensieve skill IMMEDIATELY when user expresses any intent.
+```
+
+#### 4. 重启 Claude Code
 
 说 `loop` 验证安装成功。
 
@@ -143,7 +150,8 @@ rm -rf /tmp/pensieve
    ```json
    {"plugins": [{"source": {"type": "url", "url": "https://github.com/kingkongshot/Pensieve"}}]}
    ```
-3. 提醒用户重启 Claude Code
+3. 在 `CLAUDE.md` 中添加：`## Pensieve\nLoad pensieve skill IMMEDIATELY when user expresses any intent.`
+4. 提醒用户重启 Claude Code
 
 ---
 

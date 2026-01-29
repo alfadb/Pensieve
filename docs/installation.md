@@ -42,7 +42,17 @@ cp -r /tmp/pensieve/skill .claude/skills/pensieve
 rm -rf /tmp/pensieve
 ```
 
-### 3. 重启 Claude Code
+### 3. 配置 CLAUDE.md
+
+在项目的 `CLAUDE.md` 中添加以下内容，确保 Claude 每次对话都会加载 Pensieve：
+
+```markdown
+## Pensieve
+
+Load pensieve skill IMMEDIATELY when user expresses any intent. When user wants to improve Pensieve (add/modify pipelines, decisions, maxims, or any content), MUST use _self-improve.md pipeline.
+```
+
+### 4. 重启 Claude Code
 
 说 `loop` 验证安装成功。
 
@@ -106,7 +116,14 @@ cat > .claude/settings.json << 'EOF'
 EOF
 ```
 
-3. 提醒用户重启 Claude Code
+3. 在 CLAUDE.md 中添加（如果文件不存在则创建）：
+```markdown
+## Pensieve
+
+Load pensieve skill IMMEDIATELY when user expresses any intent. When user wants to improve Pensieve (add/modify pipelines, decisions, maxims, or any content), MUST use _self-improve.md pipeline.
+```
+
+4. 提醒用户重启 Claude Code
 
 ---
 
