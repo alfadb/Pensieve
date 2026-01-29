@@ -10,7 +10,9 @@
 
 ## 附属资源
 
-`source/google-style-guides/` 包含 Google 官方语言风格指南：
+`source/` 目录用于存放项目相关的参考文档。根据项目使用的语言，可从官方仓库拉取对应的风格指南：
+
+**Google Style Guides**: https://github.com/google/styleguide
 
 | 语言 | 文件 |
 |------|------|
@@ -19,15 +21,15 @@
 | Python | `pyguide.md` |
 | JavaScript | `jsguide.html` |
 | TypeScript | `tsguide.html` |
-| Go | （见 Google 官方文档） |
 | Shell | `shellguide.md` |
 | C# | `csharp-style.md` |
-| Objective-C | `objcguide.md` |
-| R | `Rguide.md` |
-| HTML/CSS | `htmlcssguide.html` |
-| JSON | `jsoncstyleguide.html` |
 
-审查特定语言代码时，可参考对应的风格指南。
+示例：项目使用 Python 和 TypeScript，可拉取对应文档：
+```bash
+mkdir -p source/google-style-guides
+curl -o source/google-style-guides/pyguide.md https://raw.githubusercontent.com/google/styleguide/gh-pages/pyguide.md
+curl -o source/google-style-guides/tsguide.html https://raw.githubusercontent.com/google/styleguide/gh-pages/tsguide.html
+```
 
 ## 摘要
 
