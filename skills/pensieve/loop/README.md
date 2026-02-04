@@ -22,6 +22,10 @@ TaskCreate subject="初始化 loop" description="1. 初始化 loop 目录 2. 为
 ### Step 2: 初始化 loop 目录
 
 ```bash
+# 推荐：用插件根级脚本入口（避免路径混淆）
+"$CLAUDE_PLUGIN_ROOT/scripts/init-loop.sh" <taskListId> <slug>
+
+# 或：直接用系统 Skill 绝对路径（由 SessionStart 注入）
 <SYSTEM_SKILL_ROOT>/scripts/init-loop.sh <taskListId> <slug>
 # 例如：
 <SYSTEM_SKILL_ROOT>/scripts/init-loop.sh abc-123-uuid login-feature

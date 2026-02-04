@@ -44,10 +44,42 @@ FORCE="${3:-}"
 DATE=$(date +%Y-%m-%d)
 TIMESTAMP=$(date -Iseconds)
 
+# ============================================
+# taskListId 容错（避免误用 "default"）
+# ============================================
+
+maybe_resolve_task_list_id() {
+    local candidate="$1"
+
+    # 只有在明显是占位符时才尝试自动解析
+    if [[ "$candidate" != "default" ]]; then
+        echo "$candidate"
+        return 0
+    fi
+
+    # best-effort: 如果 claude CLI 存在，尝试读取当前 taskListId
+    if command -v claude >/dev/null 2>&1; then
+        local resolved
+        resolved="$(claude task-list-id 2>/dev/null | tr -d '[:space:]' || true)"
+        if [[ -n "$resolved" ]]; then
+            echo "$resolved"
+            return 0
+        fi
+    fi
+
+    echo "$candidate"
+}
+
+TASK_LIST_ID="$(maybe_resolve_task_list_id "$TASK_LIST_ID")"
+
 # 验证 task 目录存在
 TASKS_DIR="$CLAUDE_TASKS_BASE/$TASK_LIST_ID"
 if [[ ! -d "$TASKS_DIR" ]]; then
     echo "错误: Task 目录不存在: $TASKS_DIR"
+    echo ""
+    echo "请确保使用真实的 taskListId："
+    echo "- 优先从 TaskCreate 的返回中复制"
+    echo "- 如果没有看到 taskListId，可尝试运行：`claude task-list-id`"
     exit 1
 fi
 

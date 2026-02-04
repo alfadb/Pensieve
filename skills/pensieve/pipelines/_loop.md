@@ -52,9 +52,14 @@ You are orchestrating an automated task execution loop. Break down complex work 
    # Returns { taskListId: "abc-123-uuid", taskId: "1" }
    ```
    ⚠️ **必须使用返回的真实 taskListId**（如 `5e600100-9157-4888-...`），不是 "default"。
+   如果你没有看到 taskListId，可尝试运行：`claude task-list-id`
 
 2. Run init script to create loop directory and the agent prompt:
    ```bash
+   # 推荐：用插件根级脚本入口（避免路径混淆）
+   "$CLAUDE_PLUGIN_ROOT/scripts/init-loop.sh" <taskListId> <slug>
+
+   # 或：直接用系统 Skill 绝对路径（由 SessionStart 注入）
    <SYSTEM_SKILL_ROOT>/scripts/init-loop.sh <taskListId> <slug>
    ```
    **IMPORTANT**: 这一步不要用 `run_in_background: true`。你需要立刻看到脚本输出的 `LOOP_DIR` 才能进入 Phase 2。
