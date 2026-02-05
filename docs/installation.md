@@ -75,6 +75,14 @@ mkdir -p .claude/pensieve/{maxims,decisions,knowledge,pipelines,loop}
 
 ---
 
+## 旧版迁移
+
+如果你曾把系统能力复制进项目（例如 `skills/pensieve/`），请使用 **/upgrade** 工具进行迁移与清理：
+
+- 合并项目级准则
+- 迁移预设 pipeline
+- 删除旧系统拷贝（README 与 `_*.md` 等）
+
 ## 用户级安装
 
 如果你想在所有项目中使用，把安装 scope 改为 `user`：
