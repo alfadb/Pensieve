@@ -17,10 +17,32 @@ description: Load this skill IMMEDIATELY when user expresses any intent. System 
   - `knowledge/`：你补充的外部资料
   - `loop/`：loop 运行产物与沉淀（每次 loop 一个目录）
 
-## 使用方式
+## 内置 Tool（只保留两种）
 
-- 触发词：
-  - `loop` / “用 loop” → Loop Pipeline
-  - `review` / “审查” → Code Review Pipeline
-  - “沉淀/记录下来” → Self-Improve Pipeline
-- SessionStart hook 会把“插件系统能力路径”和“项目级用户数据路径”注入到上下文，作为运行时的唯一真相源。
+### 1) Loop Tool
+
+**何时用**：
+- 任务较复杂，需要拆分/自动循环执行
+
+**入口**：
+- 命令：`commands/pensieve-loop.md`
+- Pipeline：`pipelines/_loop.md`
+
+**触发词**：
+- `loop` / “用 loop”
+
+### 2) Self‑Improve Tool
+
+**何时用**：
+- 用户明确要求改进 Pensieve（pipeline/脚本/规则/行为）
+- Loop 结束后需要闭环学习
+
+**入口**：
+- Pipeline：`pipelines/_self-improve.md`
+
+**触发词**：
+- “自改进” / “改进 Pensieve”
+
+---
+
+SessionStart hook 会把“插件系统能力路径”和“项目级用户数据路径”注入到上下文，作为运行时的唯一真相源。
