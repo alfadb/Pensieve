@@ -60,6 +60,15 @@ description: 指导用户数据升级到项目级 `.claude/pensieve/` 目录结�
    - 新文件改名为 `*.migrated.md` 或提醒用户手动合并
 5. 迁移完成后，输出迁移结果清单（旧路径 → 新路径）
 
+## 插件升级命令（两条）
+
+迁移完成后，按以下顺序执行：
+
+```bash
+claude plugin marketplace update pensieve-claude-plugin
+claude plugin update pensieve@pensieve-claude-plugin --scope user
+```
+
 ## 约束
 
 - 不要删除系统内置文件
