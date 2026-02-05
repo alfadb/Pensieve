@@ -26,9 +26,9 @@ echo "|----------|-------------|"
 
 for pipeline_file in "${pipeline_files[@]}"; do
   description="$(awk '
-    NR==1 && $0=="---" {in=1; next}
-    in==1 && $0=="---" {exit}
-    in==1 && $0 ~ /^description:/ {sub(/^description:[[:space:]]*/, "", $0); print $0; exit}
+    NR==1 && $0=="---" {in_yaml=1; next}
+    in_yaml==1 && $0=="---" {exit}
+    in_yaml==1 && $0 ~ /^description:/ {sub(/^description:[[:space:]]*/, "", $0); print $0; exit}
   ' "$pipeline_file")"
 
   if [[ -z "$description" ]]; then
