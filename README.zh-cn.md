@@ -12,7 +12,7 @@
 
 **存下你的决策与准则，让 Claude 做出更好的选择。**
 
-[![GitHub Stars](https://img.shields.io/github/stars/mamajiaa/Pensieve?color=ffcb47&labelColor=black&style=flat-square)](https://github.com/mamajiaa/Pensieve/stargazers)
+[![GitHub Stars](https://img.shields.io/github/stars/kingkongshot/Pensieve?color=ffcb47&labelColor=black&style=flat-square)](https://github.com/kingkongshot/Pensieve/stargazers)
 [![License](https://img.shields.io/badge/license-MIT-white?labelColor=black&style=flat-square)](LICENSE)
 
 [English](https://github.com/kingkongshot/Pensieve/blob/main/README.md)

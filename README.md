@@ -12,7 +12,7 @@
 
 **Store your decisions and principles. Claude reads them to make better choices.**
 
-[![GitHub Stars](https://img.shields.io/github/stars/mamajiaa/Pensieve?color=ffcb47&labelColor=black&style=flat-square)](https://github.com/mamajiaa/Pensieve/stargazers)
+[![GitHub Stars](https://img.shields.io/github/stars/kingkongshot/Pensieve?color=ffcb47&labelColor=black&style=flat-square)](https://github.com/kingkongshot/Pensieve/stargazers)
 [![License](https://img.shields.io/badge/license-MIT-white?labelColor=black&style=flat-square)](LICENSE)
 
 [Chinese README](https://github.com/kingkongshot/Pensieve/blob/zh/README.zh-cn.md)
