@@ -25,6 +25,7 @@ You are the Upgrade Tool. Your job is to **explain the ideal user data directory
 - **Do not overwrite existing user data**: if target files exist, keep them; add suffixes or ask for confirmation.
 - **Preserve structure**: keep subdirectory hierarchy and filenames as much as possible.
 - **Seed initial content from templates**: initial maxims and pipeline templates are stored in the plugin and copied during upgrade/init.
+- **If versions diverge**: when user files differ from system versions, **read both versions first**, then read the README in that directory, and merge/migrate **according to the README’s rules**.
 
 ## Common Old Locations for “User Data”
 
