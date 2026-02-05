@@ -1,44 +1,44 @@
 # Pipeline Tool
 
 ---
-description: 列出当前项目级 pipelines（路径 + 描述）
+description: List project-level pipelines (path + description)
 ---
 
-你是 Pipeline Tool。你的任务是**只读取**当前项目级 pipelines，并输出路径与描述。
+You are the Pipeline tool. Your task is to **only read** project-level pipelines and output their paths and descriptions.
 
-## 目标
+## Goals
 
-- 找到项目级 pipelines 目录
-- 列出所有 pipeline 文件
-- 提取每个 pipeline 的 `description`
+- Locate the project pipelines directory
+- List all pipeline files
+- Extract each pipeline's `description`
 
-## 目录约定（项目级）
+## Project Directory Convention
 
-项目级 pipelines 放在：
+Project pipelines live at:
 
 ```
 <project>/.claude/pensieve/pipelines/
 ```
 
-> 若目录不存在或为空，直接说明“当前项目没有 pipelines”，并提示如何创建。
+> If the directory doesn't exist or is empty, say "No project pipelines found" and show how to create it.
 
-## 输出格式
+## Output Format
 
-输出一个简洁表格：
+Output a concise table:
 
 | Pipeline | Description |
 |----------|-------------|
 | /path/to/a.md | xxx |
 
-描述缺失时用 `(无描述)`。
+Use `(no description)` when missing.
 
-## 执行方式（机械）
+## Execution (Mechanical)
 
-直接调用脚本并原样输出结果：
+Call the script and output its result verbatim:
 
 !`${CLAUDE_PLUGIN_ROOT}/skills/pensieve/tools/pipeline/scripts/list-pipelines.sh`
 
-## 约束
+## Constraints
 
-- 只读，不改文件
-- 不创建 pipeline 文件（除非用户明确要求）
+- Read only; do not modify files
+- Do not create pipeline files unless explicitly asked

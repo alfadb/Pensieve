@@ -1,115 +1,115 @@
-# Knowledge（知识）
+# Knowledge
 
-外部参考资料。技术文档、API 说明、最佳实践等。
+External reference material: technical docs, API references, best practices, etc.
 
-## 目的
+## Purpose
 
-Knowledge 存在的理由是**减少执行摩擦**。
+Knowledge exists to **reduce execution friction**.
 
-如果没有这份知识，模型会在哪里卡住？卡住的成本有多高？
+Without this knowledge, where does the model get stuck, and how costly is that?
 
-### 三类摩擦来源
+### Three sources of friction
 
-| 摩擦类型 | 特征 | 例子 |
-|----------|------|------|
-| **时间差** | 模型训练截止后的新知识 | Next.js 15 的新 API、Claude Code 的新功能 |
-| **隐性知识** | 需要从结构中推演，不是直接获得 | 项目的命名约定、架构决策背后的 why |
-| **分散知识** | 存在但难以检索 | 散落在 GitHub issue、邮件列表、源码注释 |
+| Friction type | Characteristics | Examples |
+|--------------|-----------------|----------|
+| **Time gap** | New knowledge after model training cutoff | Next.js 15 APIs, new Claude Code features |
+| **Implicit knowledge** | Must be inferred from structure, not explicit | Naming conventions, architectural rationale |
+| **Scattered knowledge** | Exists but hard to retrieve | GitHub issues, mailing lists, source comments |
 
-## 沉淀判断
+## Capture Criteria
 
-问自己：**这个知识如果不写下来，会产生什么摩擦？**
+Ask yourself: **If we don't write this down, what friction will it cause?**
 
-| 摩擦程度 | 动作 |
-|----------|------|
-| 每次都会卡住，恢复成本高 | 必须沉淀 |
-| 偶尔卡住，搜索能解决 | 不沉淀，保持链接即可 |
-| 一次性问题 | 不沉淀 |
+| Friction level | Action |
+|---------------|--------|
+| Always blocks, high recovery cost | Must capture |
+| Sometimes blocks, searchable | Don't capture; keep a link |
+| One‑off issue | Don't capture |
 
-### 沉淀信号
+### Capture signals
 
-| 信号 | 说明 |
-|------|------|
-| 模型反复问同一个问题 | 时间差或隐性知识缺失 |
-| 搜索结果不准确或过时 | 时间差 |
-| 每次都要从代码推演某个约定 | 隐性知识未显性化 |
-| 某个 pipeline 依赖的外部标准 | 需要固化为可引用的知识 |
+| Signal | Explanation |
+|--------|-------------|
+| The model keeps asking the same question | Time gap or missing implicit knowledge |
+| Search results are inaccurate or outdated | Time gap |
+| Must infer a convention from code every time | Implicit knowledge not made explicit |
+| A pipeline depends on external standards | Should be captured for reference |
 
-## 关系与演化
+## Relationships & Evolution
 
-| 方向 | 说明 |
-|------|------|
-| Knowledge → Decision | 外部知识 + 项目实践 → 形成决策 |
-| Knowledge → Pipeline | 外部标准作为 pipeline 的执行依据 |
-| Knowledge → Maxim | 外部最佳实践内化为准则 |
+| Direction | Description |
+|-----------|-------------|
+| Knowledge → Decision | External knowledge + practice → decisions |
+| Knowledge → Pipeline | External standards inform pipeline execution |
+| Knowledge → Maxim | Best practices internalized into maxims |
 
 ### Knowledge vs Decision
 
-| 类型 | 本质 | 判断方式 |
-|------|------|----------|
-| Knowledge | 外部输入 | "世界是这样运作的" |
-| Decision | 内部产出 | "我们选择这样做" |
+| Type | Essence | Test |
+|------|---------|------|
+| Knowledge | External input | "This is how the world works" |
+| Decision | Internal output | "We chose to do this" |
 
-**边界案例**：发现框架的隐藏限制
-- 官方文档有但难找 → Knowledge（分散知识）
-- 官方没写，自己踩坑发现 → Decision（内部经验）
+**Edge case**: discovering hidden framework constraints
+- Documented but hard to find → Knowledge (scattered)
+- Not documented, learned by pain → Decision (internal experience)
 
-## 编写指南
+## Writing Guide
 
-### 目录结构
+### Directory Structure
 
 ```
 .claude/pensieve/knowledge/{name}/
-├── content.md      # 知识内容
-└── source/         # 附属源码（可选）
+├── content.md      # knowledge content
+└── source/         # supporting source files (optional)
 ```
 
-### 文件格式
+### File Format
 
 ```markdown
-# {知识标题}
+# {Knowledge Title}
 
-## 来源
-[原始链接或出处]
+## Source
+[Original link or reference]
 
-## 摘要
-[一句话总结]
+## Summary
+[One‑sentence summary]
 
-## 内容
-[知识正文，可以是摘录或整理]
+## Content
+[Knowledge body — excerpt or synthesis]
 
-## 适用场景
-[何时参考这份知识]
+## When to Use
+[When to consult this knowledge]
 ```
 
-### 示例
+### Example
 
 ```markdown
-# Agent 设计最佳实践
+# Agent Design Best Practices
 
-## 来源
+## Source
 https://www.anthropic.com/engineering/advanced-tool-use
 
-## 摘要
-Anthropic 官方的 Agent 工具设计指南。
+## Summary
+Anthropic’s official guide to agent tool design.
 
-## 内容
-- Tool Search Tool：动态发现工具，减少 token
-- Programmatic Tool Calling：代码编排，中间结果不进上下文
-- Tool Use Examples：示例教学，提高参数准确率
+## Content
+- Tool Search Tool: discover tools dynamically, reduce tokens
+- Programmatic Tool Calling: orchestrate with code, keep intermediates out of context
+- Tool Use Examples: teach with examples, improve parameter accuracy
 
-## 适用场景
-设计 Agent、优化工具调用、减少 token 消耗
+## When to Use
+Designing agents, optimizing tool calls, reducing token usage
 ```
 
-## 注意事项
+## Notes
 
-- 知识是**输入**，不是**产出**
-- 优先链接原文，避免复制 — content 建立与 source 的联系
-- 如果需要本地保存，使用命令复制移动，而不是重新输出
-- 定期清理过时知识
+- Knowledge is **input**, not **output**
+- Prefer linking originals; avoid copying — link content to source
+- If you need a local copy, use file copy/move commands, not re‑writing
+- Periodically clean outdated knowledge
 
-## 系统 Knowledge vs 项目 Knowledge
+## System Knowledge vs Project Knowledge
 
-- 插件内系统 knowledge 位于：`skills/pensieve/knowledge/`（随插件更新）
-- 项目级自定义 knowledge 位于：`.claude/pensieve/knowledge/`（插件不覆盖）
+- System knowledge lives at: `skills/pensieve/knowledge/` (updated via plugin)
+- Project knowledge lives at: `.claude/pensieve/knowledge/` (never overwritten)

@@ -1,7 +1,7 @@
 # Self-Improve Pipeline
 
 ---
-description: 知识沉淀流程。当 loop 完成、用户说"沉淀"、"记录下来"、"保存经验"时触发。
+description: Knowledge capture workflow. Trigger when loop completes or user says "capture", "record", or "save".
 ---
 
 You are helping capture learnings and patterns into Pensieve's knowledge system.
@@ -55,13 +55,13 @@ Determine what's worth preserving, categorize it correctly, and write it in the 
 
 2. **Present categorization to user**:
    ```markdown
-   ## 沉淀建议
+   ## Capture Recommendation
 
-   [内容描述] → 建议沉淀为 **[类型]**
+   [Content summary] → Recommend **[type]**
 
-   理由：[基于 README 判断标准的解释]
+   Reason: [Explanation based on README criteria]
 
-   是否同意？
+   Do you agree?
    ```
 
 **CRITICAL**: Wait for user confirmation before proceeding.
@@ -98,22 +98,22 @@ Determine what's worth preserving, categorize it correctly, and write it in the 
 1. Draft the file content following README specifications
 
 2. Choose the target location:
-   - **pipeline** → `<SYSTEM_SKILL_ROOT>/tools/{tool}/{name}.md` (system prompt, plugin-managed)
+   - **pipeline** → `.claude/pensieve/pipelines/{name}.md` (project user data)
    - **maxim** → `.claude/pensieve/maxims/{name}.md` (project user data)
    - **decision** → `.claude/pensieve/decisions/{date}-{conclusion}.md` (project user data)
    - **knowledge** → `.claude/pensieve/knowledge/{name}/content.md` (project user data)
 
 3. **Present draft to user for review**:
    ```markdown
-   ## 草稿预览
+   ## Draft Preview
 
-   文件：`{target_path}`
+   File: `{target_path}`
 
    ---
    [draft content]
    ---
 
-   确认写入？
+   Write it?
    ```
 
 **CRITICAL**: Wait for user approval before writing.
@@ -138,8 +138,8 @@ Determine what's worth preserving, categorize it correctly, and write it in the 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │  ┌─────────────┐   ┌─────────────┐   ┌─────────────┐   ┌─────────────┐  │
-│  │   maxims/   │   │ decisions/  │   │  tools/     │   │ knowledge/  │  │
-│  │  未来指导    │ ← │  过去经验    │   │  工作定义    │   │  外部输入    │  │
+│  │   maxims/   │   │ decisions/  │   │ pipelines/  │   │ knowledge/  │  │
+│  │  future guide│ ←│ past lessons│   │ workflows   │   │ external in │  │
 │  └─────────────┘   └─────────────┘   └─────────────┘   └─────────────┘  │
 └─────────────────────────────────────────────────────────────────┘
 

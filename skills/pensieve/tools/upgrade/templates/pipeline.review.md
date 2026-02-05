@@ -1,196 +1,196 @@
 ---
 name: review
 description: |
-  代码审查 pipeline。基于 Linus Torvalds 好品味哲学、John Ousterhout 设计原则、Google Code Review 标准。
+  Code review pipeline. Based on Linus Torvalds' taste philosophy, John Ousterhout's design principles, and Google Code Review standards.
 
   Use this pipeline when:
-  - 用户请求代码审查
-  - 用户说"review"、"审查"、"检查代码"
-  - 需要评估代码质量或设计决策
+  - The user requests a code review
+  - The user says "review", "code review", or "check my code"
+  - You need to assess code quality or design decisions
 
   Examples:
   <example>
-  用户: "帮我 review 这段代码"
-  -> 触发此 pipeline
+  User: "Review this code for me"
+  -> trigger this pipeline
   </example>
   <example>
-  用户: "检查一下这个 PR"
-  -> 触发此 pipeline
+  User: "Check this PR"
+  -> trigger this pipeline
   </example>
 
-signals: ["review", "审查", "检查代码", "代码质量", "code review"]
+signals: ["review", "code review", "check code", "code quality"]
 stages: [tasks]
 gate: auto
 ---
 
 # Code Review Pipeline
 
-基于三大来源的代码审查流程。
+Code review flow based on three core sources.
 
-**核心铁律**：
-1. 消除特殊情况永远优于增加条件判断
-2. **Never break userspace** - 用户可见行为不变是神圣不可侵犯的
-3. 快速暴露问题，不要用 fallback 掩盖上游 bug
-4. 复杂性是万恶之源
+**Core rules**:
+1. Eliminating special cases beats adding conditionals
+2. **Never break userspace** — user‑visible behavior must not change
+3. Expose problems early; do not hide upstream bugs with fallbacks
+4. Complexity is the root of all evil
 
-**知识参考**：`<SYSTEM_SKILL_ROOT>/knowledge/taste-review/content.md`
+**Knowledge reference**: `<SYSTEM_SKILL_ROOT>/knowledge/taste-review/content.md`
 
 ---
 
-## Phase 0: 前置思考
+## Phase 0: Pre‑Thinking
 
-在开始分析前，先问自己四个问题：
+Before analyzing, ask these four questions:
 
-| 问题 | 判断 |
+| Question | Check |
 |------|------|
-| 这是真问题还是臆想？ | 拒绝过度设计，解决实际问题 |
-| 有更简单的方法吗？ | 永远寻找最简方案 |
-| 会破坏什么吗？ | Never break userspace |
-| 有完全不同的方案吗？ | Design It Twice |
+| Is this a real problem or imagined? | Reject over‑design; solve real issues |
+| Is there a simpler approach? | Always search for the simplest |
+| Will it break anything? | Never break userspace |
+| Is there a completely different approach? | Design it twice |
 
 ---
 
-## Phase 1: 思考维度
+## Phase 1: Review Dimensions
 
-选择相关维度进行分析：
+Pick relevant dimensions to analyze:
 
-### 数据结构分析
+### Data Structure Analysis
 > "Bad programmers worry about the code. Good programmers worry about data structures."
 
-- 核心数据是什么？关系如何？
-- 数据流向哪里？谁拥有它？
-- **能否通过改变数据结构来简化代码？**
+- What is the core data? How do parts relate?
+- Where does data flow? Who owns it?
+- **Can changing data structures simplify the code?**
 
-### 特殊情况识别
-> "好代码没有特殊情况"
+### Special‑Case Detection
+> "Good code has no special cases."
 
-- 找出所有 if/else 分支
-- 哪些是业务逻辑？哪些是糟糕设计的补丁？
-- **能否重新设计来消除这些分支？**
+- List all if/else branches
+- Which are real business logic vs bad‑design patches?
+- **Can you redesign to eliminate them?**
 
-### 复杂度审查
-> "如果实现需要超过3层缩进，重新设计它"
+### Complexity Review
+> "If you need more than 3 levels of indentation, redesign it."
 
-- 这个功能的本质是什么？（一句话说清）
-- 当前方案用了多少概念？能减半吗？
+- What is the essence of this feature? (one sentence)
+- How many concepts are used? Can you halve them?
 
-### 破坏性分析
+### Breakage Analysis
 > "Never break userspace"
 
-- 哪些现有功能可能受影响？
-- 用户可见行为是否保持不变？
+- Which existing behaviors might change?
+- Is user‑visible behavior preserved?
 
 ---
 
-## Phase 2: 8 步审查
+## Phase 2: 8‑Step Review
 
-### Step 1: 确定范围
+### Step 1: Define Scope
 
 ```markdown
-## Step 1: 审查范围
-- **类型**: [文件 / Git 提交 / 代码片段]
-- **代码量**: [X 行] [WARNING 如果 >200 行]
-- **主要变更**: [一句话]
+## Step 1: Review Scope
+- **Type**: [files / Git commits / code snippets]
+- **Size**: [X lines] [WARNING if >200 lines]
+- **Primary change**: [one sentence]
 ```
 
-### Step 2: 设计审查
+### Step 2: Design Review
 
-检查：代码归属、库选择、模块划分、Design It Twice
+Check: ownership, library choice, module boundaries, Design It Twice
 
 ```markdown
-## Step 2: 设计审查
-**结论**: [PASS / WARNING / CRITICAL]
-- 是否考虑过替代方案：[是/否]
+## Step 2: Design Review
+**Conclusion**: [PASS / WARNING / CRITICAL]
+- Considered alternatives: [Yes/No]
 ```
 
-### Step 3: 复杂性审查
+### Step 3: Complexity Review
 
-检查：变更放大、认知负荷、未知的未知、模块深度
+Check: change amplification, cognitive load, unknown unknowns, module depth
 
 ```markdown
-## Step 3: 复杂性审查
-**结论**: [PASS / WARNING / CRITICAL]
-- **变更放大**: [是/否]
-- **认知负荷**: [低/中/高]
-- **模块深度**: [深/正常/浅]
+## Step 3: Complexity Review
+**Conclusion**: [PASS / WARNING / CRITICAL]
+- **Change amplification**: [Yes/No]
+- **Cognitive load**: [Low/Medium/High]
+- **Module depth**: [Deep/Normal/Shallow]
 ```
 
-### Step 4: 代码结构审查
+### Step 4: Code Structure Review
 
-检查：嵌套层次（<=2好, =3警告, >3禁止）、函数长度（<50好, >100禁止）、局部变量（<=5好, >10禁止）
+Check: nesting depth (<=2 good, =3 warning, >3 critical), function length (<50 good, >100 critical), local variables (<=5 good, >10 warning)
 
 ```markdown
-## Step 4: 代码结构审查
-**结论**: [PASS / WARNING / CRITICAL]
-- **最深嵌套**: [X 层]
-- **最长函数**: [Y 行]
-- **特殊情况数**: [N 处]
+## Step 4: Code Structure Review
+**Conclusion**: [PASS / WARNING / CRITICAL]
+- **Max nesting**: [X levels]
+- **Longest function**: [Y lines]
+- **Special cases**: [N]
 ```
 
-### Step 5: 命名与注释审查
+### Step 5: Naming & Comments Review
 
-检查：名称精确性、注释是否解释"为什么"
+Check: naming precision, whether comments explain "why"
 
 ```markdown
-## Step 5: 命名与注释审查
-**结论**: [PASS / WARNING / CRITICAL]
+## Step 5: Naming & Comments Review
+**Conclusion**: [PASS / WARNING / CRITICAL]
 ```
 
-### Step 6: 异常处理审查
+### Step 6: Error Handling Review
 
-检查：防御性默认值、fallback 代码、异常聚合
+Check: defensive defaults, fallback code, exception aggregation
 
 ```markdown
-## Step 6: 异常处理审查
-**结论**: [PASS / WARNING / CRITICAL]
-- **防御性代码**: [有/无]
-- **Fallback 代码**: [有/无]
+## Step 6: Error Handling Review
+**Conclusion**: [PASS / WARNING / CRITICAL]
+- **Defensive code**: [Yes/No]
+- **Fallback code**: [Yes/No]
 ```
 
-### Step 7: 破坏性分析
+### Step 7: Breakage Analysis
 
-检查：受影响功能、用户可见行为变化
+Check: impacted functionality, user‑visible behavior changes
 
 ```markdown
-## Step 7: 破坏性分析
-**结论**: [PASS / WARNING / CRITICAL]
-- **用户可见行为变化**: [有/无]
+## Step 7: Breakage Analysis
+**Conclusion**: [PASS / WARNING / CRITICAL]
+- **User‑visible behavior changes**: [Yes/No]
 ```
 
-### Step 8: 测试审查
+### Step 8: Test Review
 
-检查：测试覆盖、测试有效性
+Check: test coverage and effectiveness
 
 ```markdown
-## Step 8: 测试审查
-**结论**: [PASS / WARNING / CRITICAL]
+## Step 8: Test Review
+**Conclusion**: [PASS / WARNING / CRITICAL]
 ```
 
 ---
 
-## Phase 3: 综合评定
+## Phase 3: Summary Evaluation
 
 ```markdown
-## 综合评定
+## Summary Evaluation
 
-### 品味评分
-[好品味 / 凑合 / 垃圾]
+### Taste Score
+[Good / OK / Bad]
 
-### 步骤汇总
-| 步骤 | 结论 |
+### Step Summary
+| Step | Conclusion |
 |------|------|
-| 设计 | [PASS/WARNING/CRITICAL] |
-| 复杂性 | [PASS/WARNING/CRITICAL] |
-| 代码结构 | [PASS/WARNING/CRITICAL] |
-| 命名注释 | [PASS/WARNING/CRITICAL] |
-| 异常处理 | [PASS/WARNING/CRITICAL] |
-| 破坏性 | [PASS/WARNING/CRITICAL] |
-| 测试 | [PASS/WARNING/CRITICAL] |
+| Design | [PASS/WARNING/CRITICAL] |
+| Complexity | [PASS/WARNING/CRITICAL] |
+| Code Structure | [PASS/WARNING/CRITICAL] |
+| Naming/Comments | [PASS/WARNING/CRITICAL] |
+| Error Handling | [PASS/WARNING/CRITICAL] |
+| Breakage | [PASS/WARNING/CRITICAL] |
+| Tests | [PASS/WARNING/CRITICAL] |
 
-### 致命问题
-[最严重的 1-3 个问题，引用代码位置]
+### Critical Issues
+[Top 1–3 most severe issues with code references]
 
-### 改进建议
-- 当前：[代码片段]
-- 建议：[重写代码片段]
+### Improvement Suggestions
+- Current: [code snippet]
+- Suggested: [rewritten snippet]
 ```

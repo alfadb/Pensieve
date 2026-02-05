@@ -27,19 +27,19 @@ fi
 README="$DATA_ROOT/README.md"
 if [[ ! -f "$README" ]]; then
   cat > "$README" << 'EOF'
-# .claude/pensieve（用户数据）
+# .claude/pensieve (User Data)
 
-这个目录是项目级的 Pensieve 用户数据区：
-- **永不**由插件更新覆盖
-- 适合提交到仓库（团队共享），也可以按需忽略
+This directory is the project‑level Pensieve user data area:
+- **NEVER** overwritten by plugin updates
+- Safe to commit for team sharing, or ignore as needed
 
-## 结构
+## Structure
 
-- `maxims/`：你的准则（建议维护 `custom.md`）
-- `decisions/`：决策记录（按 `<SYSTEM_SKILL_ROOT>/decisions/README.md` 的格式）
-- `knowledge/`：外部知识（按 `<SYSTEM_SKILL_ROOT>/knowledge/README.md` 的格式）
-- `loop/`：Loop 运行目录（每次 loop 一个子目录）
-- `pipelines/`：项目级自定义流程（安装时写入初始 pipeline）
+- `maxims/`: your maxims (keep `custom.md`)
+- `decisions/`: decision records (format: `<SYSTEM_SKILL_ROOT>/decisions/README.md`)
+- `knowledge/`: external knowledge (format: `<SYSTEM_SKILL_ROOT>/knowledge/README.md`)
+- `loop/`: loop runs (one folder per loop)
+- `pipelines/`: project‑level pipelines (seeded at install)
 EOF
 fi
 REVIEW_PIPELINE="$DATA_ROOT/pipelines/review.md"
@@ -47,5 +47,5 @@ if [[ ! -f "$REVIEW_PIPELINE" ]]; then
   cp "$TEMPLATES_ROOT/pipeline.review.md" "$REVIEW_PIPELINE"
 fi
 
-echo "✅ 初始化完成: $DATA_ROOT"
+echo "✅ Initialization complete: $DATA_ROOT"
 echo "  - maxims/custom.md: $([[ -f "$CUSTOM_MAXIMS" ]] && echo exists || echo created)"

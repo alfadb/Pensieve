@@ -1,94 +1,94 @@
-# Maxims（准则）
+# Maxims
 
-可普遍化的指导原则。不依赖具体项目，适用于所有情境。
+Universal guiding principles that apply across projects and contexts.
 
-## 目的
+## Purpose
 
-准则是**品德**，不是技术细节：
+Maxims are **character**, not technical details:
 
-- 跨项目：不依赖具体技术栈
-- 跨问题：能指导未知的未来问题
-- 超越性：抽象到可以应用于任何领域
+- Cross‑project: not tied to a specific stack
+- Cross‑problem: guide unknown future problems
+- Transcendent: abstract enough to apply broadly
 
-准则存在的理由是**减少决策成本**。当遇到新问题时，准则提供判断方向，不需要从零开始推理。
+Maxims exist to **reduce decision cost**. When facing new problems, they provide direction without re‑deriving from scratch.
 
-> **说明**：插件不内置任何准则文件。安装/迁移时会在项目级 `.claude/pensieve/maxims/` 生成初始准则，用户可自由修改。
+> **Note**: The plugin ships no maxim files. Install/migration seeds initial maxims in `.claude/pensieve/maxims/` that users can freely edit.
 
-## 沉淀判断
+## Capture Criteria
 
-### 编写自检
+### Self‑check
 
-全部回答"是"才可沉淀为准则：
+All must be "yes" to qualify as a maxim:
 
-1. **无关项目**：换一个项目，这条准则还适用吗？
-2. **无关语言**：换一种编程语言，这条准则还适用吗？
-3. **无关领域**：换一个技术领域，这条准则还适用吗？
-4. **指导未来**：遇到未知问题，这条准则能给出方向吗？
-5. **可言说**：能用一句话清晰表达吗？
+1. **Project‑agnostic**: Would this still apply in a different project?
+2. **Language‑agnostic**: Would this still apply in a different language?
+3. **Domain‑agnostic**: Would this still apply in a different technical domain?
+4. **Future‑guiding**: Would it guide decisions for unknown problems?
+5. **Sayable**: Can it be expressed clearly in one sentence?
 
-任一问题回答"否" → 应沉淀为 decision 而非 maxim。
+Any "no" → capture as a decision, not a maxim.
 
-### 编写哲学（维特根斯坦）
+### Writing Philosophy (Wittgenstein)
 
-- **语言的边界即思想的边界** — 准则必须精确，含混即无效
-- **对于不可言说的，必须保持沉默** — 不沉淀无法清晰表达的规则
-- **意义在于使用** — 准则的价值在于能否指导行动
+- **The limits of my language mean the limits of my world** — maxims must be precise
+- **Whereof one cannot speak, thereof one must be silent** — don’t capture what you cannot express clearly
+- **Meaning is use** — the value of a maxim is whether it guides action
 
-## 关系与演化
+## Relationships & Evolution
 
-| 方向 | 说明 |
-|------|------|
-| Decision → Maxim | 多次相似决策 → 提炼为准则 |
-| Maxim ↔ Knowledge | 准则可能源自外部最佳实践的内化 |
+| Direction | Description |
+|-----------|-------------|
+| Decision → Maxim | Repeated decisions → distilled into maxims |
+| Maxim ↔ Knowledge | Maxims can internalize external best practices |
 
-**顺序即优先级**：准则从上到下排序，代表判断的顺序。遇到冲突时，优先遵守排在前面的准则。
+**Order equals priority**: Maxims are ordered top‑to‑bottom; when they conflict, earlier ones win.
 
-## 编写指南
+## Writing Guide
 
-### 目录结构（项目级）
+### Directory Structure (Project Level)
 
 ```
 .claude/pensieve/maxims/custom.md
 ```
 
-### 文件格式
+### File Format
 
-每条准则包含：
-- **标题行**：准则名称 + 核心引语
-- **展开要点**：具体指导、经典案例、边界说明
-
-```markdown
-1. "准则名称" - 定位标签 "核心引语"
-
-经典案例：XXX
-具体指导要点
-具体指导要点
-边界说明
-```
-
-### 示例
+Each maxim includes:
+- **Title line**: maxim name + core quote
+- **Expanded points**: guidance, examples, boundaries
 
 ```markdown
-1. "好品味"(Good Taste) - 你的第一准则 "重写它让特殊情况消失，变成正常情况。"
+1. "Maxim Name" - Label "Core quote"
 
-经典案例：链表删除操作，10行带if判断优化为4行无条件分支
-消除边界情况永远优于增加条件判断
-好品味是一种直觉，需要经验积累
-
-2. "Never break userspace" - 你的铁律 "我们不破坏用户可见行为！"
-
-任何会意外导致用户可见行为改变的代码都是bug
-内核的职责是服务用户，而不是教育用户
+Classic example: XXX
+Guidance point
+Guidance point
+Boundary note
 ```
 
-## 注意事项
+### Example
 
-- 准则是**稀缺资源**，不应频繁添加
-- 添加新准则时，需要考虑插入的位置（位置代表优先级）
-- 准则一旦确立，轻易不改 — 如果频繁修改，说明抽象层级不够
+```markdown
+1. "Good Taste" — Your first maxim: "Rewrite it so the special case goes away and becomes the normal case."
+
+Classic example: linked‑list deletion — reduce 10 lines with ifs to 4 lines without conditionals
+Eliminate edge cases rather than adding conditionals
+Good taste is intuition built from experience
+
+2. "Never break userspace" — Your iron rule: "We do not break user‑visible behavior!"
+
+Any code that unexpectedly changes user‑visible behavior is a bug
+The kernel serves users, it does not educate them
+```
+
+## Notes
+
+- Maxims are **scarce** — do not add frequently
+- When adding, consider insertion position (it indicates priority)
+- Once established, maxims should rarely change — frequent edits imply weak abstraction
 
 ---
 
-## 准则文件
+## Maxim Files
 
-- 项目级自定义：`.claude/pensieve/maxims/custom.md`（插件不覆盖）
+- Project‑level custom: `.claude/pensieve/maxims/custom.md` (never overwritten)

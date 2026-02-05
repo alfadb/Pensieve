@@ -1,27 +1,27 @@
 #!/bin/bash
 # Pensieve Loop Controller - Stop Hook
-# 检查是否有待执行的 task，自动继续循环
+# Check pending tasks and auto-continue the loop
 
 set -euo pipefail
 
-# 依赖检查
+# Dependency check
 command -v jq >/dev/null 2>&1 || exit 0
 
-# 获取插件根目录
+# Resolve plugin root
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "$SCRIPT_DIR/.." && pwd)}"
 SYSTEM_SKILL_ROOT="$PLUGIN_ROOT/skills/pensieve"
 
-# 读取 Hook 输入
+# Read hook input
 HOOK_INPUT=$(cat)
 
-# 轻量日志（便于调试，多次触发会追加）
+# Lightweight logging (for debugging; appends across runs)
 # log() {
 #     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" >> "$LOG_FILE"
 # }
 log() { :; }  # no-op
 
-# 获取文件修改时间（秒），兼容 macOS / Linux
+# Get file mtime (seconds), macOS/Linux compatible
 get_mtime() {
     local file="$1"
     if stat -f %m "$file" >/dev/null 2>&1; then
@@ -33,7 +33,7 @@ get_mtime() {
     fi
 }
 
-# 获取当前 Claude 进程 PID（用于绑定 marker）
+# Get current Claude PID (for marker binding)
 get_claude_pid() {
     local pid="$$"
     while [[ "$pid" -gt 1 ]]; do
@@ -50,7 +50,7 @@ get_claude_pid() {
     return 1
 }
 
-# 获取当前会话的 Shell PID（用于兼容 / 调试）
+# Get current session shell PID (compat/debug)
 get_shell_pid() {
     local pid="$$"
     while [[ "$pid" -gt 1 ]]; do
@@ -72,10 +72,10 @@ CURRENT_CLAUDE_PID="$(get_claude_pid || true)"
 log "Hook triggered pid=$$ ppid=$PPID claude_pid=$CURRENT_CLAUDE_PID session_pid=$CURRENT_SESSION_PID"
 
 # ============================================
-# 检查是否有活跃的 Loop（通过标记文件）
+# Check active loops (via marker files)
 # ============================================
 
-# 扫描并处理所有 marker（同一会话）
+# Scan and collect all markers for this session
 MARKERS=()
 
 for marker in /tmp/pensieve-loop-*; do
@@ -85,10 +85,10 @@ for marker in /tmp/pensieve-loop-*; do
     [[ -n "$local_claude_pid" ]] || continue
     [[ -n "$CURRENT_CLAUDE_PID" ]] || continue
 
-    # 只处理当前会话的 marker
+    # Only handle markers for current session
     [[ "$local_claude_pid" == "$CURRENT_CLAUDE_PID" ]] || continue
 
-    # 容错：若 claude_pid 已不存活，清理 marker
+    # Cleanup: remove marker if claude_pid is no longer alive
     if ! kill -0 "$local_claude_pid" 2>/dev/null; then
         rm -f "$marker"
         log "stale marker removed: $marker claude_pid=$local_claude_pid"
@@ -103,14 +103,14 @@ if [[ "${#MARKERS[@]}" -eq 0 ]]; then
     exit 0
 fi
 
-# 以 mtime 升序遍历（更早的 loop 优先）
+# Sort by mtime ascending (older loops first)
 sort_markers_by_mtime() {
     for m in "$@"; do
         printf "%s %s\n" "$(get_mtime "$m")" "$m"
     done | sort -n | awk '{print $2}'
 }
 
-# 初始化全局变量（每个 marker 会覆盖）
+# Initialize globals (overwritten per marker)
 MARKER_FILE=""
 TASK_LIST_ID=""
 LOOP_DIR=""
@@ -141,14 +141,14 @@ update_marker_tasks_planned() {
 }
 
 # ============================================
-# 辅助函数
+# Helpers
 # ============================================
 
 read_goal() {
     if [[ -f "$META_FILE" ]]; then
-        awk '/^## 概述/{flag=1; next} /^## /{flag=0} flag' "$META_FILE" | head -10
+        awk '/^## Overview/{flag=1; next} /^## /{flag=0} flag' "$META_FILE" | head -10
     else
-        echo "(未设置目标)"
+        echo "(goal not set)"
     fi
 }
 
@@ -160,13 +160,13 @@ read_pipeline() {
     fi
 }
 
-# 忽略 Phase 1 的占位 task（只用于拿 taskListId，避免被 loop 执行）
+# Ignore Phase 1 placeholder task (only for taskListId)
 is_ignored_task() {
     local task_file="$1"
     local id subject
     id=$(jq -r '.id // ""' "$task_file" 2>/dev/null)
     subject=$(jq -r '.subject // ""' "$task_file" 2>/dev/null)
-    [[ "$id" == "1" && "$subject" == "初始化 loop" ]]
+    [[ "$id" == "1" && "$subject" == "Initialize loop" ]]
 }
 
 is_task_blocked() {
@@ -235,8 +235,8 @@ check_all_completed_with_stats() {
     local in_progress="$3"
 
     # total==0:
-    # - tasks_planned=false → 仍处于 setup（仅有占位 task）→ 不结束
-    # - tasks_planned=true  → 任务已完成且已被系统清理 → 视为结束
+    # - tasks_planned=false → still in setup (only placeholder task) → do not end
+    # - tasks_planned=true  → tasks finished and cleaned by system → treat as done
     if [[ "$total" -eq 0 ]]; then
         [[ "$MARKER_TASKS_PLANNED" == "true" ]]
     else
@@ -252,7 +252,7 @@ mark_in_progress() {
 }
 
 # ============================================
-# 强化信息生成
+# Reinforcement message
 # ============================================
 
 generate_reinforcement() {
@@ -277,19 +277,19 @@ generate_reinforcement() {
     user_data_root="$project_root/.claude/pensieve"
 
     cat << EOF
-只调用 Task，不要自己执行：
+Only call Task — do not execute yourself:
 
 Task(subagent_type: "general-purpose", prompt: "Read $agent_prompt and execute task_id=$task_id")
 
-系统能力（随插件更新）：$SYSTEM_SKILL_ROOT
-项目级用户数据（永不覆盖）：$user_data_root
+System capability (updated via plugin): $SYSTEM_SKILL_ROOT
+Project user data (never overwritten): $user_data_root
 
-遇到方向性偏差时：
-1. 优先阅读系统能力目录下的 pipelines/maxims/knowledge 寻找答案
-2. 将问题和答案记录到 $context_file 的"事后 Context"部分
-3. 继续推进
+If you detect direction drift:
+1. Read system pipelines/maxims/knowledge first
+2. Record questions + answers in "$context_file" under "Post Context"
+3. Continue
 
-Task 内容：
+Task content:
 - subject: $task_subject
 - description: $task_description
 EOF
@@ -300,13 +300,13 @@ should_skip_subagent() {
     local subject description
     subject=$(jq -r '.subject // ""' "$task_file")
     description=$(jq -r '.description // ""' "$task_file")
-    [[ "$subject" == "自优化" ]] && return 0
-    echo "$description" | grep -q "不调用 agent" && return 0
+    [[ "$subject" == "Self‑Improve" ]] && return 0
+    echo "$description" | grep -q "do not call agent" && return 0
     return 1
 }
 
 # ============================================
-# 主逻辑
+# Main
 # ============================================
 
 main() {
@@ -332,11 +332,11 @@ main() {
                 rm -f "$MARKER_FILE"
 
                 jq -n \
-                    --arg msg "✅ Loop 完成 | 是否自优化？" \
+                    --arg msg "✅ Loop done | Self‑improve?" \
                     --arg path "$self_improve_path" \
                     '{
                         "decision": "block",
-                        "reason": ("所有任务已完成（任务数据已被系统清理）。是否执行自优化？\n\nPipeline 路径：\n- " + $path + "\n\n如需自优化，请按该 pipeline 执行；不执行也可以。Loop 已停止。"),
+                        "reason": ("All tasks are complete (task data was cleaned by the system). Run self‑improve?\n\nPipeline path:\n- " + $path + "\n\nIf yes, follow that pipeline; if no, that’s fine. Loop has stopped."),
                         "systemMessage": $msg
                     }'
                 exit 0
@@ -360,15 +360,15 @@ main() {
             local self_improve_path
             self_improve_path="$SYSTEM_SKILL_ROOT/tools/self-improve/_self-improve.md"
 
-            # 删除 marker，确保 Stop Hook 不再继续
+            # Remove marker so Stop Hook won't continue
             rm -f "$MARKER_FILE"
 
             jq -n \
-                --arg msg "✅ Loop 完成 | 是否自优化？" \
+                --arg msg "✅ Loop done | Self‑improve?" \
                 --arg path "$self_improve_path" \
                 '{
                     "decision": "block",
-                    "reason": ("所有任务已完成。是否执行自优化？\n\nPipeline 路径：\n- " + $path + "\n\n如需自优化，请按该 pipeline 执行；不执行也可以。Loop 已停止。"),
+                    "reason": ("All tasks are complete. Run self‑improve?\n\nPipeline path:\n- " + $path + "\n\nIf yes, follow that pipeline; if no, that’s fine. Loop has stopped."),
                     "systemMessage": $msg
                 }'
             exit 0
@@ -388,9 +388,9 @@ main() {
                     --arg description "$task_description" \
                     '{
                         "decision": "block",
-                        "reason": "该任务要求主窗口执行，不调用 subagent。请直接按任务要求执行（例如读取 _self-improve.md 完成自优化），完成后再更新 Task 状态。",
+                        "reason": "This task must be executed in the main window (no subagent). Follow the task instructions directly (e.g., read _self-improve.md), then update Task status.",
                         "systemMessage": $msg,
-                        "additionalContext": ("Task 内容：\n- subject: " + $subject + "\n- description: " + $description)
+                        "additionalContext": ("Task content:\n- subject: " + $subject + "\n- description: " + $description)
                     }'
                 exit 0
             fi

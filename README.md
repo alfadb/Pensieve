@@ -15,7 +15,7 @@
 [![GitHub Stars](https://img.shields.io/github/stars/mamajiaa/pensieve-claude-plugin?color=ffcb47&labelColor=black&style=flat-square)](https://github.com/mamajiaa/pensieve-claude-plugin/stargazers)
 [![License](https://img.shields.io/badge/license-MIT-white?labelColor=black&style=flat-square)](LICENSE)
 
-[中文文档](README.zh-cn.md)
+[Chinese README](README.zh-cn.md)
 
 </div>
 
@@ -127,7 +127,7 @@ Or run the plugin initializer (seeds initial maxims + pipeline, does not overwri
 
 Say `loop` to verify installation.
 
-See **[Installation Guide](docs/installation.md)** for details, **[Update Guide](docs/update.md)** for updates, and **[Uninstall](docs/installation.md#卸载)** for removal.
+See **[Installation Guide](docs/installation.md)** for details, **[Update Guide](docs/update.md)** for updates, and **[Uninstall](docs/installation.md#uninstall)** for removal.
 
 ### For LLM Agents
 
