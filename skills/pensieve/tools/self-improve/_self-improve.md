@@ -39,7 +39,29 @@ Determine what's worth preserving, categorize it correctly, and write it in the 
 
 ---
 
-## Phase 2: Categorize
+## Phase 2: Audit Existing Pensieve (Optional)
+
+**Goal**: Find improvement opportunities in current project Pensieve data
+
+**Actions**:
+1. Ask the user if they want a Pensieve audit:
+   - "Want me to review your current `.claude/pensieve/` contents for improvements?"
+2. If yes:
+   - Read each category README:
+     - `<SYSTEM_SKILL_ROOT>/maxims/README.md`
+     - `<SYSTEM_SKILL_ROOT>/decisions/README.md`
+     - `<SYSTEM_SKILL_ROOT>/pipelines/README.md`
+     - `<SYSTEM_SKILL_ROOT>/knowledge/README.md`
+   - Review the corresponding project files under `.claude/pensieve/`
+   - Flag format violations, missing fields, outdated content, or mis‑categorized items
+   - Provide a concise review report with suggested fixes
+3. **Do not edit anything without explicit user approval**
+
+If the user declines, skip this phase and continue.
+
+---
+
+## Phase 3: Categorize
 
 **Goal**: Determine the correct knowledge type
 
@@ -68,7 +90,7 @@ Determine what's worth preserving, categorize it correctly, and write it in the 
 
 ---
 
-## Phase 3: Read Target README
+## Phase 4: Read Target README
 
 **Goal**: Understand the exact format and criteria for the chosen category
 
@@ -90,7 +112,7 @@ Determine what's worth preserving, categorize it correctly, and write it in the 
 
 ---
 
-## Phase 4: Draft Content
+## Phase 5: Draft Content
 
 **Goal**: Write content following the README format exactly
 
@@ -120,7 +142,7 @@ Determine what's worth preserving, categorize it correctly, and write it in the 
 
 ---
 
-## Phase 5: Write
+## Phase 6: Write
 
 **Goal**: Persist the knowledge
 
