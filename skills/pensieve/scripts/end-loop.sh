@@ -43,7 +43,7 @@ end_loop_by_marker() {
     echo "结束 Loop: $task_id"
     echo "  目录: $loop_dir"
 
-    # 删除 marker 文件（后台进程会自动检测并退出）
+    # 删除 marker 文件（Stop Hook 将不会继续）
     rm -f "$marker"
     echo "  已清理"
     echo ""

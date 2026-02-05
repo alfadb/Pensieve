@@ -138,7 +138,7 @@ description: 执行单个开发任务，完成后返回
 
 ## Context
 
-读取本目录下的 `_context.md` 了解任务背景。
+读取本目录下的 \`_context.md\` 了解任务背景。
 
 ## 准则
 
@@ -157,16 +157,16 @@ description: 执行单个开发任务，完成后返回
 
 ## 当前任务
 
-通过 `TaskGet` 读取（task_id 由调用时传入）。
+通过 \`TaskGet\` 读取（task_id 由调用时传入）。
 
 ## 执行流程
 
-1. 读取 `_context.md` 了解背景
+1. 读取 \`_context.md\` 了解背景
 2. 读取准则文件了解约束
-3. `TaskGet` 获取任务详情
-4. `TaskUpdate` → in_progress
+3. \`TaskGet\` 获取任务详情
+4. \`TaskUpdate\` → in_progress
 5. 执行任务
-6. `TaskUpdate` → completed
+6. \`TaskUpdate\` → completed
 7. 返回
 
 ## 完成标准

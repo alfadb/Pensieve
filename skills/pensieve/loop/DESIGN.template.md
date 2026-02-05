@@ -89,7 +89,7 @@
 讨论：状态同步机制
 
 方案对比：
-1. PID 绑定 - 用后台进程维护映射
+1. marker 绑定 - init-loop.sh 写入 /tmp/pensieve-loop-<taskListId>，Stop Hook 读取
 2. .active 文件 - 简单的 JSON 文件
 
 用户倾向：方案 2，理由是"越简单越好"

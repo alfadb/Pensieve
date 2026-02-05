@@ -27,13 +27,15 @@ TaskCreate subject="初始化 loop" description="1. 初始化 loop 目录 2. 为
 3) 用脚本获取 taskListId（更符合 AI 直觉，避免猜 ID）：
 
 ```bash
-${CLAUDE_PLUGIN_ROOT}/skills/pensieve/scripts/find-task-list-id.sh "初始化 loop"
+bash ${CLAUDE_PLUGIN_ROOT}/skills/pensieve/scripts/find-task-list-id.sh "初始化 loop"
 ```
 
 4) 用输出的 UUID 初始化 loop（不要带尖括号）：
 
 ```bash
-${CLAUDE_PLUGIN_ROOT}/skills/pensieve/scripts/init-loop.sh <taskListId> $1
+bash ${CLAUDE_PLUGIN_ROOT}/skills/pensieve/scripts/init-loop.sh <taskListId> <slug>
 ```
+
+**slug 参数**：如果用户提供了参数则使用 `$1`，否则根据任务内容生成一个简短的英文标识（如 `snake-game`、`login-feature`）。
 
 5) 在 `LOOP_DIR` 下创建并填充 `_context.md`，确认无误后再继续生成 tasks 并执行（参考 `skills/pensieve/pipelines/_loop.md`）。
