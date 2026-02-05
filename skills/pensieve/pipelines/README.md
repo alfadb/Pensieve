@@ -8,6 +8,14 @@ Executable workflows that define a full loop from input to validation.
 
 Pipelines exist to **build verifiable execution loops**.
 
+**Pipelines orchestrate flow — they do not aggregate information.**  
+All background information should live elsewhere and be **referenced**:
+
+- **Knowledge**: external references, checklists, best practices
+- **Maxims**: universal principles and values
+- **Decisions**: context‑specific choices and rationale
+- **External skills/tools**: heavy instructions or specialized workflows
+
 A pipeline is not a checklist; it's a closed‑loop system that matches how LLMs work:
 
 ```
@@ -121,8 +129,8 @@ Role: You are [doing what]...
 
 ## Core Principles
 
-- **Principle 1**: explanation
-- **Principle 2**: explanation
+- **Principle 1**: short, operational
+- **Principle 2**: short, operational
 
 ---
 
@@ -161,7 +169,8 @@ Role: You are [doing what]...
 |---------|------|
 | `description` | In frontmatter; include trigger words |
 | Role line | Starts with "You are..." and defines Claude's role |
-| Core Principles | 3–5 principles at the top |
+| Core Principles | 1–3 short operational rules |
+| No knowledge dump | Long background belongs in Knowledge/Maxims/Decisions/Skills |
 | Phases (not Steps) | Each phase separated by `---` |
 | **Goal** | Every phase must have a goal |
 | **Actions** | Numbered, concrete steps |
@@ -206,7 +215,7 @@ You are conducting a systematic code review, balancing thoroughness with pragmat
 
 **Actions**:
 1. Load review knowledge: `knowledge/taste-review/`
-2. Check each file against criteria
+2. Apply the checklist from knowledge (no extra theory here)
 3. Record findings with severity: PASS / WARNING / CRITICAL
 
 **CRITICAL**: Every WARNING/CRITICAL must cite specific line numbers.
