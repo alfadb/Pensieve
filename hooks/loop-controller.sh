@@ -21,7 +21,24 @@ HOOK_INPUT=$(cat)
 # }
 log() { :; }  # no-op
 
-# 获取当前会话的 Shell PID（用于匹配 marker）
+# 获取当前 Claude 进程 PID（用于绑定 marker）
+get_claude_pid() {
+    local pid="$$"
+    while [[ "$pid" -gt 1 ]]; do
+        local comm
+        comm=$(ps -o comm= -p "$pid" 2>/dev/null | sed 's/^[[:space:]]*//')
+        comm=$(basename "$comm")
+        if [[ "$comm" == "claude" ]]; then
+            echo "$pid"
+            return 0
+        fi
+        pid=$(ps -o ppid= -p "$pid" 2>/dev/null | tr -d ' ')
+        [[ -z "$pid" ]] && break
+    done
+    return 1
+}
+
+# 获取当前会话的 Shell PID（用于兼容 / 调试）
 get_shell_pid() {
     local pid="$$"
     while [[ "$pid" -gt 1 ]]; do
@@ -39,7 +56,8 @@ get_shell_pid() {
 }
 
 CURRENT_SESSION_PID="$(get_shell_pid || true)"
-log "Hook triggered pid=$$ ppid=$PPID session_pid=$CURRENT_SESSION_PID"
+CURRENT_CLAUDE_PID="$(get_claude_pid || true)"
+log "Hook triggered pid=$$ ppid=$PPID claude_pid=$CURRENT_CLAUDE_PID session_pid=$CURRENT_SESSION_PID"
 
 # ============================================
 # 检查是否有活跃的 Loop（通过标记文件）
@@ -56,22 +74,19 @@ for marker in /tmp/pensieve-loop-*; do
     # 解析标记文件
     local_task_id=$(jq -r '.task_list_id' "$marker" 2>/dev/null) || continue
     local_loop_dir=$(jq -r '.loop_dir' "$marker" 2>/dev/null) || continue
+    local_claude_pid=$(jq -r '.claude_pid // empty' "$marker" 2>/dev/null) || true
     local_session_pid=$(jq -r '.session_pid // empty' "$marker" 2>/dev/null) || true
-    log "marker=$(basename "$marker") task_list_id=$local_task_id loop_dir=$local_loop_dir session_pid=$local_session_pid"
+    log "marker=$(basename "$marker") task_list_id=$local_task_id loop_dir=$local_loop_dir claude_pid=$local_claude_pid session_pid=$local_session_pid"
 
-    # 只处理与当前会话匹配的 marker
-    if [[ -n "$CURRENT_SESSION_PID" ]]; then
-        [[ "$local_session_pid" == "$CURRENT_SESSION_PID" ]] || continue
-    else
-        # 无法识别当前会话时，仅允许旧 marker（无 session_pid）继续
-        [[ -z "$local_session_pid" ]] || continue
-    fi
+    # 只处理与当前 Claude 进程匹配的 marker；不做兼容（缺少 claude_pid 的 marker 直接忽略）
+    [[ -n "$local_claude_pid" ]] || continue
+    [[ -n "$CURRENT_CLAUDE_PID" ]] || continue
+    [[ "$local_claude_pid" == "$CURRENT_CLAUDE_PID" ]] || continue
 
-    # 检查标记文件对应的进程是否还活着
-    local_pid=$(jq -r '.pid' "$marker" 2>/dev/null) || continue
-    if ! kill -0 "$local_pid" 2>/dev/null; then
+    # 容错：若 claude_pid 已不存活，清理 marker
+    if ! kill -0 "$local_claude_pid" 2>/dev/null; then
         rm -f "$marker"
-        log "stale marker removed: $marker pid=$local_pid"
+        log "stale marker removed: $marker claude_pid=$local_claude_pid"
         continue
     fi
 
@@ -119,6 +134,15 @@ read_pipeline() {
     fi
 }
 
+# 忽略 Phase 1 的占位 task（只用于拿 taskListId，避免被 loop 执行）
+is_ignored_task() {
+    local task_file="$1"
+    local id subject
+    id=$(jq -r '.id // ""' "$task_file" 2>/dev/null)
+    subject=$(jq -r '.subject // ""' "$task_file" 2>/dev/null)
+    [[ "$id" == "1" && "$subject" == "初始化 loop" ]]
+}
+
 is_task_blocked() {
     local task_file="$1"
     local blocked_by
@@ -142,6 +166,7 @@ get_next_task() {
     for task_file in "$TASKS_DIR"/*.json; do
         [[ -f "$task_file" ]] || continue
         [[ "$(basename "$task_file")" == ".DS_Store" ]] && continue
+        is_ignored_task "$task_file" && continue
 
         local status
         status=$(jq -r '.status' "$task_file" 2>/dev/null)
@@ -162,6 +187,7 @@ count_tasks() {
     for task_file in "$TASKS_DIR"/*.json; do
         [[ -f "$task_file" ]] || continue
         [[ "$(basename "$task_file")" == ".DS_Store" ]] && continue
+        is_ignored_task "$task_file" && continue
 
         ((total++)) || true
         local status
@@ -183,14 +209,8 @@ check_all_completed() {
     local total completed pending in_progress
     read -r total completed pending in_progress <<< "$stats"
 
-    if [[ "$total" -eq 0 ]]; then
-        # 目录为空时，检查是否曾经开始过任务
-        local tasks_started
-        tasks_started=$(jq -r '.tasks_started // false' "$MARKER_FILE" 2>/dev/null)
-        [[ "$tasks_started" == "true" ]]
-    else
-        [[ "$pending" -eq 0 && "$in_progress" -eq 0 ]]
-    fi
+    # total==0: 仍处于 setup（仅有占位 task）→ 不结束
+    [[ "$total" -gt 0 && "$pending" -eq 0 && "$in_progress" -eq 0 ]]
 }
 
 mark_in_progress() {
@@ -198,14 +218,6 @@ mark_in_progress() {
     local tmp_file="${task_file}.tmp"
     jq '.status = "in_progress"' "$task_file" > "$tmp_file"
     mv "$tmp_file" "$task_file"
-
-    # 首次执行时标记 tasks_started
-    local started
-    started=$(jq -r '.tasks_started // false' "$MARKER_FILE" 2>/dev/null)
-    if [[ "$started" != "true" ]]; then
-        jq '.tasks_started = true' "$MARKER_FILE" > "${MARKER_FILE}.tmp"
-        mv "${MARKER_FILE}.tmp" "$MARKER_FILE"
-    fi
 }
 
 # ============================================
@@ -251,23 +263,9 @@ EOF
 # ============================================
 
 main() {
-    # 检查是否已开始执行任务，未开始则放行
-    local tasks_started
-    tasks_started=$(jq -r '.tasks_started // false' "$MARKER_FILE" 2>/dev/null)
-    if [[ "$tasks_started" != "true" ]]; then
-        exit 0
-    fi
-
     if check_all_completed; then
-        # 先读取 pid，再删除文件
-        local bind_pid
-        bind_pid=$(jq -r '.pid' "$MARKER_FILE" 2>/dev/null) || true
         # 删除标记文件
         rm -f "$MARKER_FILE"
-        # 终止绑定进程
-        if [[ -n "$bind_pid" ]] && kill -0 "$bind_pid" 2>/dev/null; then
-            kill "$bind_pid" 2>/dev/null || true
-        fi
         exit 0
     fi
 

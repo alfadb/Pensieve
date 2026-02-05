@@ -108,6 +108,12 @@ Pensieve follows the **official Claude Code plugin structure**:
 
 ```bash
 claude plugin marketplace add mamajiaa/pensieve-claude-plugin#zh
+claude plugin install pensieve@pensieve-claude-plugin --scope user
+```
+
+If you want to share in a team repo, install at project scope instead:
+
+```bash
 claude plugin install pensieve@pensieve-claude-plugin --scope project
 ```
 
@@ -147,7 +153,7 @@ If you're an LLM agent, help the user:
    ```
 2. Install the plugin:
    ```bash
-   claude plugin install pensieve@pensieve-claude-plugin --scope project
+   claude plugin install pensieve@pensieve-claude-plugin --scope user
    ```
 3. Add to `CLAUDE.md`: `## Pensieve\nLoad pensieve skill IMMEDIATELY. To improve Pensieve, use _self-improve.md.`
 4. Initialize `.claude/pensieve/` (project user data)
@@ -174,7 +180,7 @@ Phase 0: Simple task check
          ↓ Complex tasks go to loop
 Phase 1: Create placeholder task + init-loop.sh
          ↓
-Phase 2: bind-loop.sh runs in background (activates Stop Hook)
+Phase 2: init-loop.sh writes marker (Stop Hook activates automatically)
          ↓
 Phase 3: Fill _context.md (interaction history, final consensus, understanding & assumptions)
          ↓

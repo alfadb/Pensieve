@@ -30,6 +30,34 @@ ensure_user_data_root() {
 }
 
 # ============================================
+# Claude Code 进程识别（用于 Loop marker 绑定）
+# ============================================
+
+# 打印当前进程树中最近的 `claude` 进程 PID（stdout），找不到则返回非 0
+find_claude_pid() {
+    local pid="$$"
+    while [[ "$pid" -gt 1 ]]; do
+        local comm
+        comm=$(ps -o comm= -p "$pid" 2>/dev/null | sed 's/^[[:space:]]*//')
+        comm=$(basename "$comm")
+        if [[ "$comm" == "claude" ]]; then
+            echo "$pid"
+            return 0
+        fi
+        pid=$(ps -o ppid= -p "$pid" 2>/dev/null | tr -d ' ')
+        [[ -z "$pid" ]] && break
+    done
+    return 1
+}
+
+# 打印启动本次 `claude` 的 shell PID（stdout），找不到则返回非 0
+find_claude_session_pid() {
+    local claude_pid
+    claude_pid="$(find_claude_pid)" || return 1
+    ps -o ppid= -p "$claude_pid" 2>/dev/null | tr -d ' '
+}
+
+# ============================================
 # _meta.md 读取
 # ============================================
 

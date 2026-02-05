@@ -22,6 +22,32 @@ if [[ ! -d "$SYSTEM_SKILL_ROOT" ]]; then
     exit 0
 fi
 
+# 清理无效的 loop marker（避免 /tmp 堆积）
+get_claude_pid() {
+    local pid="$$"
+    while [[ "$pid" -gt 1 ]]; do
+        local comm
+        comm=$(ps -o comm= -p "$pid" 2>/dev/null | sed 's/^[[:space:]]*//')
+        comm=$(basename "$comm")
+        if [[ "$comm" == "claude" ]]; then
+            echo "$pid"
+            return 0
+        fi
+        pid=$(ps -o ppid= -p "$pid" 2>/dev/null | tr -d ' ')
+        [[ -z "$pid" ]] && break
+    done
+    return 1
+}
+
+for marker in /tmp/pensieve-loop-*; do
+    [[ -f "$marker" ]] || continue
+    marker_claude_pid=$(jq -r '.claude_pid // empty' "$marker" 2>/dev/null) || true
+    [[ -n "$marker_claude_pid" ]] || continue
+    if ! kill -0 "$marker_claude_pid" 2>/dev/null; then
+        rm -f "$marker" 2>/dev/null || true
+    fi
+done
+
 # 构建 context 内容
 CONTEXT="# Pensieve 可用资源"
 CONTEXT+=$'\n\n'

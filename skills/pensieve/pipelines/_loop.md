@@ -1,8 +1,8 @@
-# Loop Pipeline
-
 ---
 description: 自动循环执行任务。当用户说"用 loop"、"loop 执行"、"使用 loop 模式"时触发。
 ---
+
+# Loop Pipeline
 
 You are orchestrating an automated task execution loop. Break down complex work into discrete tasks, then execute them via subagents while the Stop Hook handles continuation.
 
@@ -48,7 +48,7 @@ You are orchestrating an automated task execution loop. Break down complex work 
 **Actions**:
 1. Create placeholder task to obtain task list ID:
    ```
-   TaskCreate subject="初始化 loop" description="1. 初始化 loop 目录 2. 为任务构建上下文 3. 后台观测任务进度"
+   TaskCreate subject="初始化 loop" description="1. 初始化 loop 目录 2. 为任务构建上下文 3. 生成并执行任务"
    # Returns { taskListId: "abc-123-uuid", taskId: "1" }
    ```
    ⚠️ **必须使用返回的真实 taskListId**（如 `5e600100-9157-4888-...`），不是 "default"。
@@ -73,28 +73,11 @@ You are orchestrating an automated task execution loop. Break down complex work 
 
 ## Phase 2: Activate Stop Hook
 
-**Goal**: Start background binding so Stop Hook can detect active loop
+**Goal**: Ensure Stop Hook can detect active loop
 
-**Actions**:
-1. 用 Phase 1 的 `TASK_LIST_ID` 和 `LOOP_DIR` 启动后台绑定：
+从 `0.3.2` 起，`init-loop.sh` 会自动写入 loop marker：`/tmp/pensieve-loop-<taskListId>`，Stop Hook 会据此接管。
 
-   ✅ **正确**（两个参数 + 后台运行）：
-   ```
-   Bash(
-     command: "<SYSTEM_SKILL_ROOT>/scripts/bind-loop.sh ${TASK_LIST_ID} ${LOOP_DIR}",
-     run_in_background: true
-   )
-   ```
-
-   ❌ **错误 1**（缺少 LOOP_DIR）：
-   ```
-   Bash(command: "<SYSTEM_SKILL_ROOT>/scripts/bind-loop.sh ${TASK_LIST_ID}")
-   ```
-
-   ❌ **错误 2**（没有 run_in_background，会阻塞 30+ 秒）：
-   ```
-   Bash(command: "<SYSTEM_SKILL_ROOT>/scripts/bind-loop.sh ${TASK_LIST_ID} ${LOOP_DIR}")
-   ```
+**Important**：无需再启动 `bind-loop.sh`（不再需要后台常驻进程 / `run_in_background: true`）。
 
 ---
 
@@ -238,5 +221,4 @@ Agent prompt 模板（`_agent-prompt.md`）由 init-loop.sh 生成，包含：
 
 - `loop/README.md` — Detailed documentation
 - `<SYSTEM_SKILL_ROOT>/scripts/init-loop.sh` — Initialize loop directory
-- `<SYSTEM_SKILL_ROOT>/scripts/bind-loop.sh` — Background binding (activates Stop Hook)
 - `<SYSTEM_SKILL_ROOT>/scripts/end-loop.sh` — End loop manually

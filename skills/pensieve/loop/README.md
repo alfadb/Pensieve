@@ -15,7 +15,7 @@
 ### Step 1: 创建占位任务
 
 ```
-TaskCreate subject="初始化 loop" description="1. 初始化 loop 目录 2. 为任务构建上下文 3. 后台观测任务进度"
+TaskCreate subject="初始化 loop" description="1. 初始化 loop 目录 2. 为任务构建上下文 3. 生成并执行任务"
 # 返回 { taskListId: "abc-123-uuid", taskId: "1" }
 ```
 
@@ -27,7 +27,7 @@ TaskCreate subject="初始化 loop" description="1. 初始化 loop 目录 2. 为
 <SYSTEM_SKILL_ROOT>/scripts/init-loop.sh abc-123-uuid login-feature
 ```
 
-> 注意：init-loop.sh 运行很快，这一步建议前台运行以便拿到 `LOOP_DIR` 输出；后台常驻的是下一步的 bind-loop。
+> 注意：init-loop.sh 运行很快，这一步建议前台运行以便拿到 `LOOP_DIR` 输出；从 `0.3.2` 起不再需要后台常驻 bind-loop（Stop Hook 通过 `/tmp/pensieve-loop-<taskListId>` 自动接管）。
 
 ### Step 3: 填充 context（主窗口负责）
 

@@ -48,7 +48,6 @@ Pensieve/                        # 仓库（插件部分）
 | 脚本 | 用途 |
 |------|------|
 | `skills/pensieve/scripts/init-loop.sh <taskListId> <slug>` | 初始化 loop 目录 |
-| `skills/pensieve/scripts/bind-loop.sh <taskListId> <loop_dir>` | 绑定已有 loop 目录 |
 | `skills/pensieve/scripts/end-loop.sh <taskListId>` | 结束指定 loop |
 
 ## 文档解耦原则

@@ -108,6 +108,12 @@ Pensieve 现在采用**官方插件结构**：
 
 ```bash
 claude plugin marketplace add mamajiaa/pensieve-claude-plugin#zh
+claude plugin install pensieve@pensieve-claude-plugin --scope user
+```
+
+如果你希望团队共享，把 scope 改为 `project`：
+
+```bash
 claude plugin install pensieve@pensieve-claude-plugin --scope project
 ```
 
@@ -147,7 +153,7 @@ mkdir -p .claude/pensieve/{maxims,decisions,knowledge,loop}
    ```
 2. 安装插件：
    ```bash
-   claude plugin install pensieve@pensieve-claude-plugin --scope project
+   claude plugin install pensieve@pensieve-claude-plugin --scope user
    ```
 3. 在 `CLAUDE.md` 中添加：`## Pensieve\nLoad pensieve skill IMMEDIATELY. To improve Pensieve, use _self-improve.md.`
 4. 初始化项目级用户数据：`.claude/pensieve/`
@@ -174,7 +180,7 @@ Phase 0: 简单任务判断
          ↓ 复杂任务走 loop
 Phase 1: 创建占位任务 + init-loop.sh
          ↓
-Phase 2: bind-loop.sh 后台运行（激活 Stop Hook）
+Phase 2: init-loop.sh 写入 marker（Stop Hook 自动接管）
          ↓
 Phase 3: 填充 _context.md（交互历史、最终共识、理解与假设）
          ↓

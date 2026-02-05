@@ -20,10 +20,16 @@ claude plugin marketplace add mamajiaa/pensieve-claude-plugin#zh
 安装插件（建议 project 级共享给团队）：
 
 ```bash
-claude plugin install pensieve@pensieve-claude-plugin --scope project
+claude plugin install pensieve@pensieve-claude-plugin --scope user
 ```
 
 > 说明：`pensieve-claude-plugin` 来自本仓库 `.claude-plugin/marketplace.json` 的 `name` 字段。
+
+如果你希望 project 级共享给团队，把 scope 改为 `project`：
+
+```bash
+claude plugin install pensieve@pensieve-claude-plugin --scope project
+```
 
 ### 2. 配置 CLAUDE.md
 
@@ -85,7 +91,7 @@ claude plugin install pensieve@pensieve-claude-plugin --scope user
 
 ## 卸载
 
-1. 卸载插件：`claude plugin uninstall pensieve --scope project`（或用 `/plugin` UI）
+1. 卸载插件：`claude plugin uninstall pensieve@pensieve-claude-plugin --scope user`（或用 `/plugin` UI）
 2. （可选）删除项目级用户数据：`rm -rf .claude/pensieve`
 
 ---

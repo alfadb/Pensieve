@@ -6,10 +6,12 @@
 
 ```bash
 claude plugin marketplace update pensieve-claude-plugin
-claude plugin update pensieve
+claude plugin update pensieve@pensieve-claude-plugin --scope user
 ```
 
 然后重启 Claude Code 应用更新。
+
+> 如果你是 project scope 安装，把 `--scope user` 改为 `--scope project`。
 
 如果你通过 `.claude/settings.json` 的 URL 方式安装：重启 Claude Code 即可获取更新。
 

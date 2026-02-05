@@ -17,7 +17,7 @@ This repo is **Pensieve**, a Claude Code knowledge/automation system with two pa
   - `decisions/` — decision format docs
   - `knowledge/` — system knowledge used by pipelines
   - `loop/` — Loop documentation + templates (loop run outputs go to project data)
-  - `scripts/` — loop helpers (`init-loop.sh`, `bind-loop.sh`, `end-loop.sh`)
+  - `scripts/` — loop helpers (`init-loop.sh`, `end-loop.sh`) + marker (`/tmp/pensieve-loop-<taskListId>`)
 
 ## User Data (Project-owned)
 

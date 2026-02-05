@@ -40,6 +40,7 @@ fi
 TASK_LIST_ID="$1"
 SLUG="$2"
 FORCE="${3:-}"
+MARKER_FILE="/tmp/pensieve-loop-$TASK_LIST_ID"
 
 DATE=$(date +%Y-%m-%d)
 TIMESTAMP=$(date -Iseconds)
@@ -85,6 +86,41 @@ if [[ -d "$LOOP_DIR" ]]; then
 fi
 
 mkdir -p "$LOOP_DIR"
+
+# ============================================
+# 写入 Loop marker（让 Stop hook 自动接管，无需后台常驻进程）
+# ============================================
+
+CLAUDE_PID="$(find_claude_pid || true)"
+SESSION_PID="$(find_claude_session_pid || true)"
+
+if command -v jq >/dev/null 2>&1; then
+    jq -n \
+        --arg task_list_id "$TASK_LIST_ID" \
+        --arg loop_dir "$LOOP_DIR" \
+        --arg started_at "$TIMESTAMP" \
+        --arg claude_pid "$CLAUDE_PID" \
+        --arg session_pid "$SESSION_PID" \
+        '{
+          task_list_id: $task_list_id,
+          loop_dir: $loop_dir,
+          started_at: $started_at,
+          claude_pid: (if $claude_pid == "" then null else ($claude_pid | tonumber) end),
+          session_pid: (if $session_pid == "" then null else ($session_pid | tonumber) end)
+        }' > "$MARKER_FILE"
+else
+    cat > "$MARKER_FILE" << EOF
+{
+  "task_list_id": "$TASK_LIST_ID",
+  "loop_dir": "$LOOP_DIR",
+  "started_at": "$TIMESTAMP",
+  "claude_pid": "${CLAUDE_PID:-}",
+  "session_pid": "${SESSION_PID:-}"
+}
+EOF
+fi
+
+echo "已创建: $MARKER_FILE"
 
 # ============================================
 # 生成 _agent-prompt.md
@@ -162,7 +198,6 @@ echo "LOOP_DIR=$LOOP_DIR"
 echo ""
 echo "下一步:"
 echo "1) 创建并填充 $LOOP_DIR/_context.md（建议先 Read 再 Edit/Write，或直接 Write 创建新文件）"
-echo "2) 启动 bind-loop.sh（必须后台运行，避免阻塞）"
+echo "2) 回到 Loop Pipeline，继续生成 tasks 并执行"
 echo ""
-echo "建议（主窗口）直接执行："
-echo "Bash(command: \"$SKILL_ROOT/scripts/bind-loop.sh $TASK_LIST_ID $LOOP_DIR\", run_in_background: true)"
+echo "提示：Stop Hook 会根据 $MARKER_FILE 自动接管，无需再手动启动后台绑定进程。"
