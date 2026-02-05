@@ -72,7 +72,7 @@ Pensieve 是一个 Claude Code 插件，把经验变成可复用的优势：
 如果你只做一件事，那就安装插件并初始化项目记忆：
 
 1. 安装插件
-2. 在 `CLAUDE.md` 或 `AGENTS.md` 加一条路由说明
+2. 在 `CLAUDE.md` 加一条路由说明
 3. 创建 `.claude/pensieve/`
 4. 重启 Claude Code
 
@@ -102,7 +102,7 @@ claude plugin install pensieve@Pensieve --scope user
 claude plugin install pensieve@Pensieve --scope project
 ```
 
-#### 2. 配置 `CLAUDE.md`（或 `AGENTS.md`，二选一）
+#### 2. 配置 `CLAUDE.md`
 
 ```markdown
 ## Pensieve
@@ -135,7 +135,7 @@ mkdir -p .claude/pensieve/{maxims,decisions,knowledge,pipelines,loop}
 
 1. 添加 marketplace（固定到 `zh` 分支）
 2. 安装插件
-3. 在 `CLAUDE.md`（或 `AGENTS.md`）中添加简短路由指引 + 自改进要求
+3. 在 `CLAUDE.md` 中添加简短路由指引 + 自改进要求
 4. 初始化 `.claude/pensieve/`
 5. 提醒用户重启 Claude Code
 6. 告诉用户只需掌握几个基础命令：`/loop`、`/selfimprove`、`/pipeline`、`/upgrade`

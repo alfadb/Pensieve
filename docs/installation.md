@@ -35,7 +35,7 @@ claude plugin install pensieve@Pensieve --scope project
 
 > **给大模型的指令**：如果你是执行安装的智能体，请**自动创建或更新**该文件，保持简短、明确，不要覆盖用户已有内容。
 
-在项目根目录创建或补充以下内容（`AGENTS.md` 与 `CLAUDE.md` 作用等价，**二选一即可**）：
+在项目根目录创建或补充以下内容（仅支持 `CLAUDE.md`）：
 
 ```markdown
 ## Pensieve

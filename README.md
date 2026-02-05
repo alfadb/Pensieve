@@ -72,7 +72,7 @@ Pensieve is a Claude Code plugin that turns experience into leverage:
 If you only do one thing, install the plugin and initialize project memory:
 
 1. Install the plugin
-2. Add a short routing note to `CLAUDE.md` or `AGENTS.md`
+2. Add a short routing note to `CLAUDE.md`
 3. Create `.claude/pensieve/`
 4. Restart Claude Code
 
@@ -102,7 +102,7 @@ If you want to share in a team repo, install at project scope instead:
 claude plugin install pensieve@pensieve-claude-plugin --scope project
 ```
 
-#### 2. Add to `CLAUDE.md` (or `AGENTS.md` — choose one)
+#### 2. Add to `CLAUDE.md`
 
 ```markdown
 ## Pensieve
@@ -135,7 +135,7 @@ If you're an LLM agent, help the user:
 
 1. Add marketplace pinned to `zh`
 2. Install the plugin
-3. Add routing instructions to `CLAUDE.md` or `AGENTS.md`
+3. Add routing instructions to `CLAUDE.md`
 4. Initialize `.claude/pensieve/`
 5. Remind the user to restart Claude Code
 
