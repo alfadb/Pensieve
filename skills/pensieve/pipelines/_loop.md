@@ -157,11 +157,7 @@ You are orchestrating an automated task execution loop. Break down complex work 
 
 1. 拆分任务，确保每个 task 符合上述粒度标准
 2. 创建 tasks，增量构建（每个 task 在前一个基础上推进）
-3. **末尾加自优化 task**：
-   ```
-   TaskCreate subject="自优化" description="由主窗口执行，不调用 agent。读取 _self-improve.md 执行闭环学习。"
-   ```
-4. **Present task list to user for confirmation**
+3. **Present task list to user for confirmation**
 
 ---
 
@@ -194,7 +190,8 @@ Agent prompt 模板（`_agent-prompt.md`）由 init-loop.sh 生成，包含：
 **Goal**: End loop and self-improve based on execution experience
 
 **Actions**:
-1. End the loop（`<taskListId>` 是 Phase 1 获取的 ID）:
+1. 当所有任务完成时，Stop Hook 会提示主窗口是否执行自优化，并给出 `_self-improve.md` 的路径；无论是否执行，Loop 都会停止。
+2. 如需手动提前结束 loop（`<taskListId>` 是 Phase 1 获取的 ID）:
 
    ✅ **正确**：
    ```bash
@@ -205,11 +202,6 @@ Agent prompt 模板（`_agent-prompt.md`）由 init-loop.sh 生成，包含：
    ```bash
    bash <SYSTEM_SKILL_ROOT>/scripts/end-loop.sh
    ```
-
-2. Route to `_self-improve.md`:
-   - Compare before/after context
-   - Ask user if anything should be captured
-   - Execute capture if confirmed
 
 ---
 

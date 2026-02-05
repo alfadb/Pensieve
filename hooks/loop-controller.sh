@@ -303,8 +303,21 @@ main() {
         fi
 
         if check_all_completed; then
+            local self_improve_path
+            self_improve_path="$SYSTEM_SKILL_ROOT/pipelines/_self-improve.md"
+
+            # 删除 marker，确保 Stop Hook 不再继续
             rm -f "$MARKER_FILE"
-            continue
+
+            jq -n \
+                --arg msg "✅ Loop 完成 | 是否自优化？" \
+                --arg path "$self_improve_path" \
+                '{
+                    "decision": "block",
+                    "reason": ("所有任务已完成。是否执行自优化？\n\nPipeline 路径：\n- " + $path + "\n\n如需自优化，请按该 pipeline 执行；不执行也可以。Loop 已停止。"),
+                    "systemMessage": $msg
+                }'
+            exit 0
         fi
 
         local next_task
