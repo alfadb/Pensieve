@@ -138,6 +138,7 @@ mkdir -p .claude/pensieve/{maxims,decisions,knowledge,pipelines,loop}
 3. 在 `CLAUDE.md`（或 `AGENTS.md`）中添加简短路由指引 + 自改进要求
 4. 初始化 `.claude/pensieve/`
 5. 提醒用户重启 Claude Code
+6. 告诉用户只需掌握几个基础命令：`/loop`、`/selfimprove`、`/pipeline`、`/upgrade`
 
 ---
 
