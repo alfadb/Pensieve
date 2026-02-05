@@ -39,7 +39,29 @@ description: 知识沉淀流程。当 loop 完成、用户说"沉淀"、"记录�
 
 ---
 
-## Phase 2: 分类
+## Phase 2: 现有 Pensieve 体检（可选）
+
+**目标**：找出当前项目 Pensieve 的优化点
+
+**行动**：
+1. 询问用户是否需要体检：
+   - “要不要我检查一下当前 `.claude/pensieve/` 的内容是否有优化空间？”
+2. 若用户同意：
+   - 先阅读各目录 README：
+     - `<SYSTEM_SKILL_ROOT>/maxims/README.md`
+     - `<SYSTEM_SKILL_ROOT>/decisions/README.md`
+     - `<SYSTEM_SKILL_ROOT>/pipelines/README.md`
+     - `<SYSTEM_SKILL_ROOT>/knowledge/README.md`
+   - 检查 `.claude/pensieve/` 下对应文件
+   - 标注格式不符合、缺字段、过期内容或分类不当
+   - 输出简洁的 review 报告并给出修正建议
+3. **未经用户明确批准，不做任何修改**
+
+用户拒绝则跳过本阶段，继续下一步。
+
+---
+
+## Phase 3: 分类
 
 **目标**：确定正确的知识类型
 
@@ -68,7 +90,7 @@ description: 知识沉淀流程。当 loop 完成、用户说"沉淀"、"记录�
 
 ---
 
-## Phase 3: 阅读目标 README
+## Phase 4: 阅读目标 README
 
 **目标**：掌握该类别的格式与标准
 
@@ -90,7 +112,7 @@ description: 知识沉淀流程。当 loop 完成、用户说"沉淀"、"记录�
 
 ---
 
-## Phase 4: 起草内容
+## Phase 5: 起草内容
 
 **目标**：严格按 README 格式写草稿
 
@@ -120,7 +142,7 @@ description: 知识沉淀流程。当 loop 完成、用户说"沉淀"、"记录�
 
 ---
 
-## Phase 5: 写入
+## Phase 6: 写入
 
 **目标**：落盘沉淀
 
