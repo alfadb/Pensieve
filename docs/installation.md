@@ -95,7 +95,17 @@ claude plugin install pensieve@pensieve-claude-plugin --scope user
 
 ## 面向 LLM 智能体
 
-如果你是 LLM 智能体：只需要安装插件并初始化 `.claude/pensieve/` 用户数据目录即可（系统 Skill 已随插件提供，无需再复制 skill 目录）。
+如果你是 LLM 智能体：
+
+1. 安装插件
+2. 初始化 `.claude/pensieve/`
+3. **提示用户只需掌握几个基础命令**：
+   - `/loop`
+   - `/selfimprove`
+   - `/pipeline`
+   - `/upgrade`
+
+说明尽量简短，降低用户认知负担（系统 Skill 已随插件提供，无需再复制 skill 目录）。
 
 ---
 

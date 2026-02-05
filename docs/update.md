@@ -27,6 +27,12 @@ claude plugin update pensieve@pensieve-claude-plugin --scope user
 
 重启 Claude Code，说 `loop` 验证更新成功。
 
+如果你在引导用户，提醒他们只需掌握几个基础命令：
+- `/loop`
+- `/selfimprove`
+- `/pipeline`
+- `/upgrade`
+
 ---
 
 ## 保留的用户内容
