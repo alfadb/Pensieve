@@ -31,7 +31,6 @@
 - [Just Install It](#just-install-it)
 - [Installation](#installation)
 - [For Humans](#for-humans)
-- [For LLM Agents](#for-llm-agents)
 - [Uninstallation](#uninstallation)
 - [Features](#features)
 - [Loop Mode](#loop-mode)
@@ -50,8 +49,6 @@
 ### It's the Age of Agents
 
 **Paste this doc link to Claude Code. Let it help you understand and set up.**
-
-If you're an LLM agent, explain to the user what this project enables right now.
 
 ### The Magic Word: `loop`
 
@@ -75,8 +72,6 @@ If you only do one thing, install the plugin and initialize project memory:
 2. Add a short routing note to `CLAUDE.md`
 3. Create `.claude/pensieve/`
 4. Restart Claude Code
-
-If you're an agent, you can handle this end-to-end for the user.
 
 ---
 
@@ -128,17 +123,10 @@ Or run the plugin initializer (seeds initial maxims + pipeline, does not overwri
 Say `loop` to verify installation.
 
 See **[Installation Guide](docs/installation.md)** for details, **[Update Guide](docs/update.md)** for updates, and **[Uninstall](docs/installation.md#uninstall)** for removal.
-
-### For LLM Agents
-
-If you're an LLM agent, help the user:
-
-1. Add marketplace pinned to `main`
-2. Install the plugin
-3. Add routing instructions to `CLAUDE.md`
-4. Initialize `.claude/pensieve/`
-5. Remind the user to restart Claude Code
-6. Tell the user they only need a few commands: `/loop`, `/selfimprove`, `/pipeline`, `/upgrade`
+Agent-oriented setup and migration procedures are documented in:
+- **[Installation Guide](docs/installation.md)**
+- **[Update Guide](docs/update.md)**
+- **[`/upgrade` tool source](skills/pensieve/tools/upgrade/_upgrade.md)**
 
 ---
 
