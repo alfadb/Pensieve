@@ -1,11 +1,11 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "metadata": {
-    "name": "Pensieve",
+    "name": "kingkongshot-marketplace",
     "version": "0.2.1",
     "description": "Pensieve marketplace (zh branch) for installing the plugin from GitHub with a pinned ref"
   },
-  "name": "Pensieve",
+  "name": "kingkongshot-marketplace",
   "version": "0.2.1",
   "description": "Pensieve marketplace (zh branch) for installing the plugin from GitHub with a pinned ref",
   "owner": {

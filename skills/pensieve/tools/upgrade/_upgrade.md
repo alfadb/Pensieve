@@ -4,7 +4,9 @@
 description: Guide user data upgrade to project-level `.claude/pensieve/` structure
 ---
 
-You are the Upgrade Tool. Your job is to **explain the ideal user data directory structure** and guide how to migrate data from the old structure to the new one. You do not decide user content; you only define paths and rules.
+You are the Upgrade Tool. Your job is to explain the ideal user data directory structure and guide migration from old layouts to the new one. You do not decide user content; you only define paths and rules.
+
+Hard rule: clean up old plugin naming first, then migrate user data. Do not keep old and new naming in parallel.
 
 ## Target Structure (Project-Level, Never Overwritten by Plugin)
 
@@ -19,90 +21,126 @@ You are the Upgrade Tool. Your job is to **explain the ideal user data directory
 
 ## Migration Principles
 
-- **System capability lives inside the plugin**: contents under `<SYSTEM_SKILL_ROOT>/` are updated via plugin updates; do not move or overwrite.
-- **Old system files are no longer needed**: system-built files in old locations can be removed after migration (only delete old copies in the project; never touch plugin internals).
-- **User data is project-level**: migrate only user‑authored content into `.claude/pensieve/`.
-- **Do not overwrite existing user data**: if target files exist, keep them; add suffixes or ask for confirmation.
-- **Preserve structure**: keep subdirectory hierarchy and filenames as much as possible.
-- **Seed initial content from templates**: initial maxims and pipeline templates are stored in the plugin and copied during upgrade/init.
-- **If versions diverge**: when user files differ from system versions, **read both versions first**, then read the README in that directory, and merge/migrate **according to the README’s rules**.
+- Clean old plugin identifiers first: remove old install references and old keys in `settings.json` before data migration.
+- Old references to clean:
+  - `pensieve@Pensieve`
+  - `pensieve@pensieve-claude-plugin`
+- New single reference:
+  - `pensieve@kingkongshot-marketplace`
+- System capability stays inside the plugin: content under `<SYSTEM_SKILL_ROOT>/` is plugin-managed; do not move or overwrite it.
+- Old system files are no longer needed: remove old project copies after migration (never touch plugin internals).
+- User data is project-level: migrate only user-authored content into `.claude/pensieve/`.
+- Do not overwrite user data: if target files exist, keep them; suffix or merge as needed.
+- Preserve structure: keep subdirectory hierarchy and filenames as much as possible.
+- Seed initial content from templates: initial maxims and pipeline templates are copied from plugin templates.
+- If versions diverge: read both versions first, then follow directory README rules for merge/migration.
 
-## Common Old Locations for “User Data”
+## Common Old Locations for User Data
 
 May exist in:
 
-- `skills/pensieve/` or its subdirectories inside the project repo
-- User‑placed `maxims/`, `decisions/`, `knowledge/`, `pipelines/`, `loop/` folders
+- `skills/pensieve/` or its subdirectories in the project repo
+- user-created `maxims/`, `decisions/`, `knowledge/`, `pipelines/`, `loop/` folders
 
 ### What to migrate
 
-- **User‑authored files** (non‑system):
+- User-authored files (non-system):
   - `maxims/custom.md` or other files without `_` prefix
   - `decisions/*.md`
   - `knowledge/*`
   - `pipelines/*.md`
   - `loop/*`
 
-> Older versions shipped `maxims/_linus.md` and `pipelines/review.md` inside the plugin. If you still use them, copy their content into:
-> - `.claude/pensieve/maxims/custom.md` (maxims)
-> - `.claude/pensieve/pipelines/review.md` (pipeline)
-> Then delete the old copies to avoid future overwrite.
+> Older versions shipped `maxims/_linus.md` and `pipelines/review.md` inside plugin/project copies. If still used, copy content into:
+> - `.claude/pensieve/maxims/custom.md`
+> - `.claude/pensieve/pipelines/review.md`
+> Then delete old copies to avoid confusion.
 
-### Template Locations (Plugin)
+### Template locations (plugin)
 
 - `<SYSTEM_SKILL_ROOT>/tools/upgrade/templates/maxims.initial.md`
 - `<SYSTEM_SKILL_ROOT>/tools/upgrade/templates/pipeline.review.md`
 
 ### What NOT to migrate
 
-- **System files** (usually prefixed with `_`):
+- System files (usually `_`-prefixed):
   - `pipelines/_*.md`
   - `maxims/_*.md`
-  - system knowledge (plugin‑managed)
-  - system README/templates/scripts from old locations
+  - plugin-managed system knowledge
+  - system README/templates/scripts in old copied locations
 
 ## Clean Up Old System Files (Project Only)
 
-After migration, delete old system copies inside the project to avoid confusion (**project copies only**):
+After migration, delete old system copies inside the project to avoid confusion:
 
-- `<project>/skills/pensieve/` (old versions placed system capabilities in repo)
-- `<project>/.claude/skills/pensieve/` (old versions placed skill in project)
-- System README and `_*.md` prompts in old locations
+- `<project>/skills/pensieve/`
+- `<project>/.claude/skills/pensieve/`
+- old system `README.md` and `_*.md` prompt files
 
-> If unsure whether a file is an old system copy, back it up before deleting.
+If unsure whether something is a system copy, back it up before deleting.
+
+## Clean Up Old Plugin Naming (Must Run First)
+
+Before migrating user data, check these files:
+
+- user scope: `~/.claude/settings.json`
+- project scope: `<project>/.claude/settings.json`
+
+In `enabledPlugins`:
+
+- remove `pensieve@Pensieve`
+- remove `pensieve@pensieve-claude-plugin`
+- keep/add `pensieve@kingkongshot-marketplace: true`
+
+If multiple keys exist, do not keep compatibility keys. Leave only the new key.
 
 ## Migration Steps (Best done by an LLM)
 
-1. Scan old locations for user content (using “What to migrate” rules)
-2. Create target directories:
+1. Scan and check:
+   - `~/.claude/settings.json`
+   - `<project>/.claude/settings.json`
+2. Clean old `enabledPlugins` keys and keep/add only the new key.
+3. Clean old install references:
+   - uninstall `pensieve@Pensieve` if present
+   - uninstall `pensieve@pensieve-claude-plugin` if present
+4. Scan old locations for user content (using the rules above).
+5. Create target directories:
    - `mkdir -p .claude/pensieve/{maxims,decisions,knowledge,pipelines,loop}`
-3. **Merge maxims**:
-   - If `.claude/pensieve/maxims/custom.md` is missing → copy from template
-   - If it exists and old maxims exist → append with a “migrated content” marker
-4. **Migrate the preset pipeline (must compare content)**:
-   - If `.claude/pensieve/pipelines/review.md` is missing → copy from template
-   - If it exists → **read and compare**:
-     - Same content → skip
-     - Different → create `review.migrated.md`, and add a merge note at the top of `review.md` or append the diff
-5. Move/copy user files to target directories (preserve relative structure)
-6. On conflicts (same filename):
-   - **Do not skip**; always read and decide whether to merge
-   - Same content → skip
-   - Different → append to existing file with a “migrated content” marker, or create `*.migrated.md` and prompt for merge
-7. Clean up old system files (see list above)
-8. Output a migration report (old path → new path)
+6. Merge maxims:
+   - if `.claude/pensieve/maxims/custom.md` is missing, copy from template
+   - if both exist, append old content with a migration marker
+7. Migrate preset pipeline (must compare content):
+   - if `.claude/pensieve/pipelines/review.md` is missing, copy from template
+   - if it exists, compare content:
+     - same: skip
+     - different: create `review.migrated.md` and add merge notes
+8. Move/copy user files to target directories while preserving relative structure.
+9. Resolve filename conflicts by comparing content first:
+   - same: skip
+   - different: append with migration marker or create `*.migrated.md`
+10. Clean old system copies listed above.
+11. Output a migration report (old path -> new path).
 
-## Plugin Update Commands (Two Steps)
+## Plugin Cleanup and Update Commands (In Order)
 
-After migration, run in this order:
+Run in this order (adjust scope as needed):
 
 ```bash
-claude plugin marketplace update pensieve-claude-plugin
-claude plugin update pensieve@pensieve-claude-plugin --scope user
+# Remove old install references (ignore if not installed)
+claude plugin uninstall pensieve@Pensieve --scope user || true
+claude plugin uninstall pensieve@pensieve-claude-plugin --scope user || true
+
+# If project-scope install exists, clean it too
+claude plugin uninstall pensieve@Pensieve --scope project || true
+claude plugin uninstall pensieve@pensieve-claude-plugin --scope project || true
+
+# Refresh marketplace and update new plugin reference
+claude plugin marketplace update kingkongshot/Pensieve
+claude plugin update pensieve@kingkongshot-marketplace --scope user
 ```
 
 ## Constraints
 
-- Do not delete system files
-- Do not modify plugin system content
-- Only operate on user data
+- Do not delete plugin internal system files.
+- Do not modify plugin-managed system content.
+- You may edit `settings.json` only for Pensieve-related `enabledPlugins` keys.

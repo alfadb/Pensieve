@@ -93,13 +93,13 @@ Pensieve follows the Claude Code plugin structure:
 
 ```bash
 claude plugin marketplace add kingkongshot/Pensieve#main
-claude plugin install pensieve@Pensieve --scope user
+claude plugin install pensieve@kingkongshot-marketplace --scope user
 ```
 
 If you want to share in a team repo, install at project scope instead:
 
 ```bash
-claude plugin install pensieve@Pensieve --scope project
+claude plugin install pensieve@kingkongshot-marketplace --scope project
 ```
 
 #### 2. Add to `CLAUDE.md`
@@ -147,7 +147,7 @@ If you're an LLM agent, help the user:
 To remove Pensieve:
 
 1. Remove the plugin:
-   - `claude plugin uninstall pensieve@Pensieve --scope user`
+   - `claude plugin uninstall pensieve@kingkongshot-marketplace --scope user`
    - Or `--scope project` if installed at project scope
 2. (Optional) Remove project memory:
    - `rm -rf .claude/pensieve`

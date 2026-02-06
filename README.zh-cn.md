@@ -93,13 +93,13 @@ Pensieve 采用 Claude Code 插件结构：
 
 ```bash
 claude plugin marketplace add kingkongshot/Pensieve#zh
-claude plugin install pensieve@Pensieve --scope user
+claude plugin install pensieve@kingkongshot-marketplace --scope user
 ```
 
 如果你希望团队共享，把 scope 改为 `project`：
 
 ```bash
-claude plugin install pensieve@Pensieve --scope project
+claude plugin install pensieve@kingkongshot-marketplace --scope project
 ```
 
 #### 2. 配置 `CLAUDE.md`
@@ -146,7 +146,7 @@ mkdir -p .claude/pensieve/{maxims,decisions,knowledge,pipelines,loop}
 
 要移除 Pensieve：
 
-1. 卸载插件：`claude plugin uninstall pensieve@Pensieve --scope user`（若为项目级安装则用 `--scope project`）
+1. 卸载插件：`claude plugin uninstall pensieve@kingkongshot-marketplace --scope user`（若为项目级安装则用 `--scope project`）
 2.（可选）删除项目记忆：`rm -rf .claude/pensieve`
 3. 重启 Claude Code
 
