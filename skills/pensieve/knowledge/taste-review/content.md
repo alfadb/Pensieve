@@ -1,21 +1,21 @@
-# Taste Review 知识库
+# Taste Review Knowledge Base
 
-代码审查的核心哲学、危险信号和经典示例。
+Core philosophy, warning signs, and classic examples for code review.
 
-## 来源
+## Sources
 
 - Linus Torvalds TED Talk + Linux Kernel Coding Style
-- John Ousterhout "A Philosophy of Software Design"
+- John Ousterhout — "A Philosophy of Software Design"
 - Google Engineering Practices
 
-## 附属资源
+## Supporting Resources
 
-`source/` 目录用于存放项目相关的参考文档。根据项目使用的语言，可从官方仓库拉取对应的风格指南：
+The `source/` directory can hold project‑specific references. Pull language‑specific style guides from the official repository:
 
 **Google Style Guides**: https://github.com/google/styleguide
 
-| 语言 | 文件 |
-|------|------|
+| Language | File |
+|----------|------|
 | C++ | `cppguide.html` |
 | Java | `javaguide.html` |
 | Python | `pyguide.md` |
@@ -24,161 +24,161 @@
 | Shell | `shellguide.md` |
 | C# | `csharp-style.md` |
 
-示例：项目使用 Python 和 TypeScript，可拉取对应文档：
+Example: if the project uses Python and TypeScript, you can pull the guides:
 ```bash
 mkdir -p source/google-style-guides
 curl -o source/google-style-guides/pyguide.md https://raw.githubusercontent.com/google/styleguide/gh-pages/pyguide.md
 curl -o source/google-style-guides/tsguide.html https://raw.githubusercontent.com/google/styleguide/gh-pages/tsguide.html
 ```
 
-## 摘要
+## Summary
 
-基于三大来源的代码审查参考资料：Linus 的好品味哲学、Ousterhout 的复杂性管理、Google 的代码健康标准。
+Code review references from three sources: Linus’ taste philosophy, Ousterhout’s complexity management, and Google’s code health standards.
 
-## 适用场景
+## When to Use
 
-- 代码审查时需要理论依据
-- 需要引用经典语录说明问题
-- 需要好/坏代码对比示例
+- You need theoretical grounding for code review
+- You need classic quotes to explain issues
+- You need good/bad code comparisons
 
 ---
 
-## 核心哲学
+## Core Philosophy
 
-### Linus Torvalds: 好品味
+### Linus Torvalds: Good Taste
 
 > "Sometimes you can see a problem in a different way and rewrite it so that the special case goes away and becomes the normal case."
 
-**核心原则**：
-1. **消除特殊情况**：边界情况应该通过设计消除，而不是通过条件判断处理
-2. **数据结构优先**：好程序员担心数据结构，糟糕程序员担心代码
-3. **嵌套限制**：超过 3 层嵌套说明代码需要重构
-4. **函数短小**：函数应该短小精悍，只做一件事
-5. **局部变量限制**：局部变量不应超过 5-10 个，否则需要拆分函数
-6. **Never break userspace**：用户可见行为不变是神圣不可侵犯的铁律
-7. **快速暴露问题**：不要写 fallback/兼容/回退代码，让上游数据问题在测试中暴露
+**Core principles**:
+1. **Eliminate special cases**: design away edge cases rather than patch with conditionals
+2. **Data structures first**: good programmers worry about data structures; bad ones worry about code
+3. **Nesting limits**: more than 3 levels suggests refactoring
+4. **Short functions**: do one thing well
+5. **Local variable limits**: more than 5–10 locals suggests splitting
+6. **Never break userspace**: user‑visible behavior must not change
+7. **Expose problems early**: avoid fallbacks/compat code; let upstream issues show in tests
 
-### John Ousterhout: 复杂性管理
+### John Ousterhout: Managing Complexity
 
 > "Complexity is anything related to the structure of a software system that makes it hard to understand and modify."
 
-**15 条设计原则**：
+**15 design principles**:
 
-| # | 原则 | 说明 |
-|---|------|------|
-| 1 | 复杂性是逐步增加的 | 必须处理小事情，小问题会累积成大问题 |
-| 2 | 能跑的代码是不够的 | Working code isn't enough |
-| 3 | 持续小额投资改善设计 | Make continual small investments |
-| 4 | 模块应该深 | 简单接口 + 强大功能 |
-| 5 | 接口设计应简化常见用法 | 最常见的用法应该最简单 |
-| 6 | 简单接口比简单实现重要 | 宁可复杂实现，不要复杂接口 |
-| 7 | 通用模块更深 | General-purpose modules are deeper |
-| 8 | 通用和专用代码分开 | Separate general-purpose and special-purpose |
-| 9 | 不同层应有不同抽象 | Different layers, different abstractions |
-| 10 | 复杂性下沉 | Pull complexity downward |
-| 11 | 通过定义消除错误 | Define errors out of existence |
-| 12 | **设计两次** | 重要设计至少考虑两个方案再选择 |
-| 13 | 注释描述代码中不明显的 | Comments for non-obvious things |
-| 14 | 为阅读而设计 | Design for reading, not writing |
-| 15 | 增量是抽象而非功能 | Increments should be abstractions, not features |
+| # | Principle | Notes |
+|---|----------|------|
+| 1 | Complexity grows gradually | Small issues accumulate into big ones |
+| 2 | Working code isn't enough | Quality matters |
+| 3 | Make continual small investments | Improve design incrementally |
+| 4 | Modules should be deep | Simple interface + powerful functionality |
+| 5 | Simplify common use cases | Make the common case easy |
+| 6 | Interface simplicity > implementation simplicity | Prefer complex internals over complex APIs |
+| 7 | General‑purpose modules are deeper | Reusability increases depth |
+| 8 | Separate general vs special‑purpose code | Avoid mixing |
+| 9 | Different layers need different abstractions | Layered clarity |
+| 10 | Pull complexity downward | Keep higher levels simple |
+| 11 | Define errors out of existence | Design to eliminate error cases |
+| 12 | **Design it twice** | Consider at least two approaches |
+| 13 | Comment non‑obvious things | Don't restate code |
+| 14 | Design for reading | Optimize for readers, not writers |
+| 15 | Increments should be abstractions | Not just new features |
 
-**复杂性三大症状**：
-1. **变更放大**：简单变更需要多处修改
-2. **认知负荷**：开发者需要了解太多才能完成任务
-3. **未知的未知**：不清楚哪些代码需要修改
+**Three symptoms of complexity**:
+1. **Change amplification**: simple change touches many places
+2. **Cognitive load**: too much to understand to make a change
+3. **Unknown unknowns**: unclear where changes must be made
 
-**模块深度**：
-- **深模块**：简单接口 + 强大功能
-- **浅模块**：复杂接口 + 有限功能
+**Module depth**:
+- **Deep modules**: simple interface + powerful functionality
+- **Shallow modules**: complex interface + limited functionality
 
-### Google Code Review: 代码健康
+### Google Code Review: Code Health
 
 > "A CL that improves the overall code health of the system should not be delayed for perfection."
 
-**审查顺序**：设计 → 功能 → 复杂性 → 测试 → 命名 → 注释 → 风格 → 文档
+**Review order**: Design → Functionality → Complexity → Tests → Naming → Comments → Style → Docs
 
-**Small CLs 原则**：
-- 100 行是合理的 CL 大小
-- 1000 行通常太大
-- 一个 CL 应该是 **one self-contained change**
-
----
-
-## 危险信号清单
-
-### Ousterhout 14 条危险信号
-
-| # | 危险信号 | 描述 | 严重性 |
-|---|----------|------|--------|
-| 1 | 浅模块 | 接口复杂性 = 实现复杂性 | CRITICAL |
-| 2 | 信息泄露 | 设计决策暴露在多个模块中 | CRITICAL |
-| 3 | 时间分解 | 代码结构基于操作顺序而非信息隐藏 | WARNING |
-| 4 | 过度暴露 | 常用功能需要了解罕用细节 | WARNING |
-| 5 | Pass-Through 方法 | 几乎只转发参数到另一个方法 | WARNING |
-| 6 | 代码重复 | 非平凡代码被反复复制 | CRITICAL |
-| 7 | 特殊/通用混合 | 专用代码和通用代码未分离 | WARNING |
-| 8 | 联合方法 | 两个方法强耦合，无法独立理解 | WARNING |
-| 9 | 注释重复代码 | 注释只是复述代码 | WARNING |
-| 10 | 实现污染接口 | 接口注释描述了不需要的实现细节 | WARNING |
-| 11 | 含糊的名称 | 名称不够精确，无法传达有用信息 | WARNING |
-| 12 | 难以命名 | 很难想出精确直观的名称 | WARNING |
-| 13 | 难以描述 | 完整文档需要很长 | CRITICAL |
-| 14 | 非显而易见的代码 | 行为或含义不容易理解 | CRITICAL |
-
-### 代码结构危险信号
-
-| 信号 | 阈值 | 严重性 |
-|------|------|--------|
-| 嵌套层次 | > 3 层 | CRITICAL |
-| 函数长度 | > 100 行 | CRITICAL |
-| 局部变量 | > 10 个 | WARNING |
-| 无集中清理 | 多个退出点各自清理 | WARNING |
-
-### 异常处理危险信号
-
-| 信号 | 描述 | 严重性 |
-|------|------|--------|
-| 防御性默认值 | `?? 0` 或 `|| defaultValue` | WARNING |
-| 过多异常 | try-catch 比业务逻辑还多 | CRITICAL |
-| Fallback 代码 | 掩盖上游问题 | WARNING |
+**Small CLs**:
+- 100 lines is usually reasonable
+- 1000 lines is usually too large
+- A CL should be **one self‑contained change**
 
 ---
 
-## 经典语录
+## Warning Sign Checklist
+
+### Ousterhout's 14 Warning Signs
+
+| # | Warning sign | Description | Severity |
+|---|--------------|-------------|----------|
+| 1 | Shallow module | Interface complexity = implementation complexity | CRITICAL |
+| 2 | Information leakage | Design decisions exposed across modules | CRITICAL |
+| 3 | Temporal decomposition | Structure follows time order rather than information hiding | WARNING |
+| 4 | Overexposure | Common tasks require rare details | WARNING |
+| 5 | Pass‑through method | Almost just forwards parameters | WARNING |
+| 6 | Code duplication | Non‑trivial code copied repeatedly | CRITICAL |
+| 7 | Special/general mix | Specialized and general code not separated | WARNING |
+| 8 | Conjoined methods | Two methods tightly coupled | WARNING |
+| 9 | Comment repeats code | Comments restate code | WARNING |
+| 10 | Implementation leaked in interface | Interface comments mention irrelevant internals | WARNING |
+| 11 | Vague names | Names are imprecise or unhelpful | WARNING |
+| 12 | Hard to name | Hard to find a precise, intuitive name | WARNING |
+| 13 | Hard to describe | Full documentation is lengthy | CRITICAL |
+| 14 | Non‑obvious code | Behavior/meaning is hard to infer | CRITICAL |
+
+### Code Structure Warning Signs
+
+| Signal | Threshold | Severity |
+|--------|-----------|----------|
+| Nesting depth | > 3 levels | CRITICAL |
+| Function length | > 100 lines | CRITICAL |
+| Local variables | > 10 | WARNING |
+| No centralized cleanup | Multiple exits with separate cleanup | WARNING |
+
+### Error Handling Warning Signs
+
+| Signal | Description | Severity |
+|--------|-------------|----------|
+| Defensive defaults | `?? 0` or `|| defaultValue` | WARNING |
+| Too many exceptions | try‑catch outweighs business logic | CRITICAL |
+| Fallback code | Masks upstream problems | WARNING |
+
+---
+
+## Classic Quotes
 
 ### Linus Torvalds
 
-| 场景 | 语录 |
-|------|------|
-| 防御性代码 | "Bad programmers worry about the code. Good programmers worry about data structures." |
-| 深层嵌套 | "If you need more than 3 levels of indentation, you're screwed anyway." |
-| 过度设计 | "Theory and practice sometimes clash. Theory loses. Every single time." |
-| 特殊情况 | "Sometimes you can see a problem in a different way and rewrite it so that the special case goes away." |
+| Context | Quote |
+|---------|-------|
+| Defensive code | "Bad programmers worry about the code. Good programmers worry about data structures." |
+| Deep nesting | "If you need more than 3 levels of indentation, you're screwed anyway." |
+| Over‑design | "Theory and practice sometimes clash. Theory loses. Every single time." |
+| Special cases | "Sometimes you can see a problem in a different way and rewrite it so that the special case goes away." |
 
 ### John Ousterhout
 
-| 场景 | 语录 |
-|------|------|
-| 浅模块 | "Shallow modules don't help much in the battle against complexity." |
-| 过多异常 | "The best way to eliminate exception handling complexity is to define your APIs so that there are no exceptions to handle." |
-| Classitis | "Classes are good, so more classes are better - this is a mistake." |
-| 设计 | "Design it twice. You'll end up with a much better result." |
+| Context | Quote |
+|---------|-------|
+| Shallow modules | "Shallow modules don't help much in the battle against complexity." |
+| Too many exceptions | "The best way to eliminate exception handling complexity is to define your APIs so that there are no exceptions to handle." |
+| Classitis | "Classes are good, so more classes are better — this is a mistake." |
+| Design | "Design it twice. You'll end up with a much better result." |
 
 ### Google Code Review
 
-| 场景 | 语录 |
-|------|------|
-| 评估变更 | "A CL that improves the overall code health of the system should not be delayed for perfection." |
-| 过度工程 | "Encourage developers to solve the problem they know needs to be solved now, not the problem they speculate might need to be solved in the future." |
-| 大 CL | "100 lines is usually a reasonable size for a CL, and 1000 lines is usually too large." |
+| Context | Quote |
+|---------|-------|
+| Evaluate changes | "A CL that improves the overall code health of the system should not be delayed for perfection." |
+| Over‑engineering | "Encourage developers to solve the problem they know needs to be solved now, not the problem they speculate might need to be solved in the future." |
+| Large CLs | "100 lines is usually a reasonable size for a CL, and 1000 lines is usually too large." |
 
 ---
 
-## 经典示例
+## Classic Examples
 
-### 1. Linus 经典：链表删除
+### 1. Linus Classic: Linked‑List Deletion
 
-**糟糕品味（10行）**：
+**Bad taste (10 lines)**:
 ```c
 void remove_list_entry(List *list, Entry *entry) {
     Entry *prev = NULL;
@@ -188,14 +188,14 @@ void remove_list_entry(List *list, Entry *entry) {
         walk = walk->next;
     }
     if (prev == NULL) {
-        list->head = entry->next;  // 特殊情况：删除头节点
+        list->head = entry->next;  // special case: deleting head
     } else {
         prev->next = entry->next;
     }
 }
 ```
 
-**好品味（4行）**：
+**Good taste (4 lines)**:
 ```c
 void remove_list_entry(List *list, Entry *entry) {
     Entry **indirect = &list->head;
@@ -205,50 +205,50 @@ void remove_list_entry(List *list, Entry *entry) {
 }
 ```
 
-**要点**：使用间接指针，让"删除头节点"和"删除普通节点"变成同一个操作。特殊情况消失了。
+**Key point**: Use an indirect pointer so "delete head" and "delete middle" are the same operation. Special cases disappear.
 
-### 2. 深模块 vs 浅模块
+### 2. Deep vs Shallow Modules
 
-**深模块（Unix I/O）**：
+**Deep module (Unix I/O)**:
 ```c
 int fd = open("/path/to/file", O_RDONLY);
 char buf[1024];
 ssize_t n = read(fd, buf, sizeof(buf));
 close(fd);
 ```
-5 个基本调用处理所有 I/O，隐藏了文件系统、缓冲、权限等复杂性。
+Five basic calls handle all I/O, hiding filesystem, buffering, permissions, etc.
 
-**浅模块（Java 文件 I/O）**：
+**Shallow module (Java file I/O)**:
 ```java
 FileInputStream fileStream = new FileInputStream(fileName);
 BufferedInputStream bufferedStream = new BufferedInputStream(fileStream);
 ObjectInputStream objectStream = new ObjectInputStream(bufferedStream);
 ```
-需要了解 3 个类才能读取文件，接口复杂性 = 实现复杂性。
+You must understand 3 classes to read a file; interface complexity = implementation complexity.
 
-### 3. 防御性代码 vs 快速失败
+### 3. Defensive Code vs Fail Fast
 
-**糟糕**：
+**Bad**:
 ```typescript
 function processUser(user: User | null) {
     const name = user?.name ?? "Unknown";
     const email = user?.email ?? "";
-    sendEmail(email, `Hello ${name}`);  // 发送到空地址？
+    sendEmail(email, `Hello ${name}`);  // send to empty address?
 }
 ```
 
-**好**：
+**Good**:
 ```typescript
 function processUser(user: User) {
     sendEmail(user.email, `Hello ${user.name}`);
 }
 ```
 
-**要点**：不接受 null，让类型系统保证。如果上游传了 null，在测试阶段就会崩溃。
+**Key point**: Don't accept null; let the type system enforce. If upstream passes null, tests should fail.
 
-### 4. goto 集中清理
+### 4. goto Centralized Cleanup
 
-**糟糕（分散清理）**：
+**Bad (scattered cleanup)**:
 ```c
 int bad_init(void) {
     struct foo *foo = kmalloc(sizeof(*foo), GFP_KERNEL);
@@ -256,11 +256,11 @@ int bad_init(void) {
         return -ENOMEM;
     foo->bar = kmalloc(sizeof(*foo->bar), GFP_KERNEL);
     if (!foo->bar) {
-        kfree(foo);  // 清理 1
+        kfree(foo);  // cleanup 1
         return -ENOMEM;
     }
     if (some_error) {
-        kfree(foo->bar);  // 清理 2
+        kfree(foo->bar);  // cleanup 2
         kfree(foo);
         return -EINVAL;
     }
@@ -268,7 +268,7 @@ int bad_init(void) {
 }
 ```
 
-**好（集中清理）**：
+**Good (centralized cleanup)**:
 ```c
 int good_init(void) {
     int result = 0;
@@ -287,34 +287,34 @@ out:
 }
 ```
 
-### 5. 不同层不同抽象
+### 5. Different Layers, Different Abstractions
 
-**糟糕（Pass-Through）**：
+**Bad (pass‑through)**:
 ```typescript
 // UI Layer
 async function handleFileUploadButton() { await uploadFile(file); }
-// Service Layer - 只是透传！
+// Service Layer - just pass-through!
 async function uploadFile(file: File) { await saveFile(file); }
-// Data Layer - 还是透传！
+// Data Layer - still pass-through!
 async function saveFile(file: File) { await fs.writeFile(file.path, file.data); }
 ```
 
-**好（每层不同抽象）**：
+**Good (distinct abstractions)**:
 ```typescript
-// UI Layer - 用户交互
-async function handleFileUploadButton() { /* 进度、错误展示 */ }
-// Service Layer - 业务逻辑
-async function storeDocument(file: File) { /* 验证、压缩、加密、索引 */ }
-// Storage Layer - 持久化
-async function save(data: Buffer) { /* 生成 ID、写入后端 */ }
+// UI Layer - user interaction
+async function handleFileUploadButton() { /* progress, error display */ }
+// Service Layer - business logic
+async function storeDocument(file: File) { /* validate, compress, encrypt, index */ }
+// Storage Layer - persistence
+async function save(data: Buffer) { /* generate ID, write backend */ }
 ```
 
 ---
 
-## 评分标准
+## Scoring Criteria
 
-| 等级 | 条件 |
-|------|------|
-| **好品味** | 所有检查项通过或最多 1 个 WARNING；函数 < 50 行，嵌套 <= 2 层 |
-| **凑合** | 2-3 个 WARNING，无 CRITICAL；函数 50-100 行，嵌套 = 3 层 |
-| **垃圾** | 任意 CRITICAL 或 >= 4 个 WARNING；函数 > 100 行或嵌套 > 3 层 |
+| Level | Criteria |
+|-------|----------|
+| **Good taste** | All checks pass or at most 1 WARNING; functions < 50 lines, nesting <= 2 |
+| **OK** | 2–3 WARNINGs, no CRITICAL; functions 50–100 lines, nesting = 3 |
+| **Bad** | Any CRITICAL or >= 4 WARNINGs; functions > 100 lines or nesting > 3 |

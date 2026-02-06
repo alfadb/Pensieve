@@ -1,25 +1,50 @@
 #!/bin/bash
-# 根据 task subject 在 ~/.claude/tasks 中查找 taskListId
-# 用法: find-task-list-id.sh [subject]
-# 默认 subject: 初始化 loop
+# Find taskListId by task subject in ~/.claude/tasks
+# Usage: find-task-list-id.sh [subject]
+# Default subject: Initialize loop
 
 set -euo pipefail
 
-SUBJECT="${1:-初始化 loop}"
+SUBJECT="${1:-Initialize loop}"
 TASKS_BASE="$HOME/.claude/tasks"
+PYTHON_BIN="${PYTHON_BIN:-$(command -v python3 || command -v python || true)}"
 
 if [[ ! -d "$TASKS_BASE" ]]; then
-    echo "错误: 任务目录不存在: $TASKS_BASE" >&2
+    echo "Error: task directory does not exist: $TASKS_BASE" >&2
     exit 1
 fi
 
 matches=()
 
+dir_has_subject() {
+    local dir="$1"
+    local subject="$2"
+
+    [[ -n "$PYTHON_BIN" ]] || return 1
+
+    "$PYTHON_BIN" - "$dir" "$subject" <<'PY'
+import glob
+import json
+import sys
+
+directory, subject = sys.argv[1], sys.argv[2]
+for path in glob.glob(f"{directory}/*.json"):
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except Exception:
+        continue
+    if isinstance(data, dict) and data.get("subject") == subject:
+        sys.exit(0)
+sys.exit(1)
+PY
+}
+
 for dir in "$TASKS_BASE"/*; do
     [[ -d "$dir" ]] || continue
 
-    if command -v jq >/dev/null 2>&1; then
-        if jq -e --arg subj "$SUBJECT" '.subject == $subj' "$dir"/*.json >/dev/null 2>&1; then
+    if [[ -n "$PYTHON_BIN" ]]; then
+        if dir_has_subject "$dir" "$SUBJECT"; then
             matches+=("$dir")
         fi
     else
@@ -30,10 +55,10 @@ for dir in "$TASKS_BASE"/*; do
 done
 
 if [[ "${#matches[@]}" -eq 0 ]]; then
-    echo "错误: 未找到 subject=\"$SUBJECT\" 的 taskListId" >&2
+    echo "Error: no taskListId found for subject=\"$SUBJECT\"" >&2
     exit 1
 fi
 
-# 选最近修改的目录
+# Pick the most recently modified directory
 latest_dir=$(ls -dt "${matches[@]}" | head -1)
 basename "$latest_dir"

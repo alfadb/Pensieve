@@ -1,103 +1,103 @@
-# Requirements 模板
+# Requirements Template
 
-**执行者**：主窗口
+**Owner**: Main Window
 
-**用途**：长项目的锚点，防止走着走着忘了为什么出发。
+**Purpose**: An anchor for long projects so you don't forget the original intent.
 
-**何时写**：
-- 预估 6+ 个 tasks
-- 跨多天执行
-- 涉及多个模块联动
-
----
-
-## 写作要求
-
-- 在 `.claude/pensieve/loop/{date}-{slug}/requirements.md` 创建
-- 先写初版，不要一开始就问问题
-- 用户确认后，将路径记录到 `_context.md`
+**When to write**:
+- Estimated 6+ tasks
+- Multi‑day execution
+- Multiple modules involved
 
 ---
 
-## 文档格式
+## Writing Rules
+
+- Create at `.claude/pensieve/loop/{date}-{slug}/requirements.md`
+- Write a first draft before asking questions
+- After user confirmation, record the path in `_context.md`
+
+---
+
+## Document Format
 
 ```markdown
-# 需求锚点
+# Requirements Anchor
 
-## 上下文引用
+## Context References
 
-| 类型 | 路径 | 关键内容 |
+| Type | Path | Key Excerpt |
 |------|------|----------|
-| decision | `decisions/xxx.md` | "引用原文" |
-| maxim | `maxims/linus.md` | "好的品味" |
-| 对话 | _context.md#需求澄清 | 用户说："..." |
-| skill | `skills/xxx/SKILL.md` | 相关能力 |
+| decision | `decisions/xxx.md` | "Quoted text" |
+| maxim | `maxims/linus.md` | "Good taste" |
+| conversation | _context.md#requirements-clarification | User said: "..." |
+| skill | `skills/xxx/SKILL.md` | Relevant capability |
 
-## 核心问题
+## Core Problem
 
-[一句话，我们要解决什么问题]
+[One sentence: what problem are we solving?]
 
-## 成功标准
+## Success Criteria
 
-- [ ] [可验证的完成条件 1]
-- [ ] [可验证的完成条件 2]
+- [ ] [Verifiable completion criterion 1]
+- [ ] [Verifiable completion criterion 2]
 - [ ] ...
 
-## 边界
+## Boundaries
 
-### 做什么
-- [明确在范围内的事项]
+### In Scope
+- [Clearly in scope]
 
-### 不做什么
-- [明确排除的事项，防止 scope creep]
+### Out of Scope
+- [Explicit exclusions to prevent scope creep]
 
-## 约束
+## Constraints
 
-- [技术约束]
-- [时间约束]
-- [资源约束]
+- [Technical constraints]
+- [Time constraints]
+- [Resource constraints]
 ```
 
 ---
 
-## 上下文记录
+## Context Logging
 
-**必须记录到 `_context.md`**：
-- 需求澄清过程中的关键对话
-- 用户的原始表述 vs 最终理解
-- 任何需求变更及原因
+**Must be recorded in `_context.md`**:
+- Key conversations during requirement clarification
+- User's original wording vs final understanding
+- Any requirement changes and their reasons
 
-**示例**：
+**Example**:
 ```markdown
-## 关键对话
+## Key Conversation
 
-### 需求澄清 (2026-01-23)
+### Requirements Clarification (2026-01-23)
 
-用户原话："我想让多个终端能共享状态"
+User: "I want multiple terminals to share state."
 
-追问用户体验：
-Q: 你期望的使用场景是什么？
-A: 我在终端 A 开始了一个任务，想去终端 B 继续
+Follow‑ups:
+Q: What scenario do you expect?
+A: I started a task in terminal A and want to continue in terminal B.
 
-Q: 需要两个终端同时处理不同的 task 吗？
-A: 不需要，同一时刻只有一个在跑
+Q: Do you need two terminals running different tasks at the same time?
+A: No, only one at a time.
 
-Q: 最终你想看到什么？
-A: 新开一个终端，能接着之前的进度继续
+Q: What is the desired outcome?
+A: Open a new terminal and continue where I left off.
 
-澄清后的用户体验：
-- 用户在终端 A 开始 loop
-- 用户可以关掉终端 A，在终端 B 继续
-- 进度不丢失，从上次停止的地方继续
+Clarified experience:
+- Start a loop in terminal A
+- Close terminal A, continue in terminal B
+- Progress is preserved from last stop
 ```
 
 ---
 
-## 常见陷阱
+## Common Pitfalls
 
-| 陷阱 | 应对 |
-|------|------|
-| 需求太模糊 | 成功标准必须可验证 |
-| 边界不清 | "不做什么"必须明确写出 |
-| 忘记更新 | 需求变化时立即更新锚点 |
-| 写成 PRD | 这是锚点不是文档，保持简短 |
+| Pitfall | Response |
+|---------|----------|
+| Requirements too vague | Success criteria must be verifiable |
+| Unclear boundaries | "Out of scope" must be explicit |
+| Forgot to update | Update the anchor when requirements change |
+| Writing a PRD | This is an anchor, not a full doc — keep it short |

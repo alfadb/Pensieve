@@ -1,110 +1,110 @@
-# Design 模板
+# Design Template
 
-**执行者**：主窗口
+**Owner**: Main Window
 
-**用途**：需要权衡多个方案时，记录选择和理由。
+**Purpose**: When multiple options exist, record the choice and rationale.
 
-**何时写**：
-- 实现方式不显而易见
-- 有多个可行方案需要权衡
-- 决策会影响后续开发
-
----
-
-## 写作要求
-
-- 在 `.claude/pensieve/loop/{date}-{slug}/design.md` 创建
-- 设计过程中进行必要的代码探索
-- 用户确认后，将路径记录到 `_context.md`
-
-## 必须包含
-
-- **上下文引用**：设计依据的信息来源
-- **方案概述**：怎么做
-- **决策理由**：为什么这样做
-- **备选方案**：考虑过但放弃的方案
-- **风险**：可能出问题的地方
+**When to write**:
+- Implementation is not obvious
+- Multiple viable options require trade‑offs
+- The decision will impact later work
 
 ---
 
-## 文档格式
+## Writing Rules
+
+- Create at `.claude/pensieve/loop/{date}-{slug}/design.md`
+- Do necessary code exploration during design
+- After user confirmation, record the path in `_context.md`
+
+## Must Include
+
+- **Context references**: sources that justify the design
+- **Approach overview**: what we will do
+- **Decision rationale**: why this approach
+- **Alternatives**: options considered but rejected
+- **Risks**: what could go wrong
+
+---
+
+## Document Format
 
 ```markdown
-# 设计
+# Design
 
-## 上下文引用
+## Context References
 
-| 类型 | 路径 | 关键内容 |
+| Type | Path | Key Excerpt |
 |------|------|----------|
-| requirement | `.claude/pensieve/loop/{date}-{slug}/requirements.md` | 核心问题：... |
-| decision | `decisions/2026-01-20-xxx.md` | "引用原文" |
-| maxim | `maxims/linus.md` | "好的品味" |
-| 对话 | _context.md#需求澄清 | 用户说："..." |
-| skill | `skills/xxx/SKILL.md` | 相关能力 |
+| requirement | `.claude/pensieve/loop/{date}-{slug}/requirements.md` | Core problem: ... |
+| decision | `decisions/2026-01-20-xxx.md` | "Quoted text" |
+| maxim | `maxims/linus.md` | "Good taste" |
+| conversation | _context.md#requirements-clarification | User said: "..." |
+| skill | `skills/xxx/SKILL.md` | Relevant capability |
 
-## 方案概述
+## Approach Overview
 
-[概要描述怎么做，不要太细节]
+[High‑level description; avoid too much detail]
 
-## 决策理由
+## Decision Rationale
 
-| 决策点 | 选择 | 理由 | 依据 |
+| Decision Point | Choice | Rationale | Evidence |
 |--------|------|------|------|
-| [问题1] | [方案] | [为什么] | 引用上下文 |
-| [问题2] | [方案] | [为什么] | 引用上下文 |
+| [Issue 1] | [Choice] | [Why] | Context reference |
+| [Issue 2] | [Choice] | [Why] | Context reference |
 
-## 备选方案
+## Alternatives
 
-### 方案 A: [名称]
-- 描述：[怎么做]
-- 放弃原因：[为什么不选]
+### Option A: [Name]
+- Description: [How]
+- Rejection reason: [Why not]
 
-### 方案 B: [名称]
-- 描述：[怎么做]
-- 放弃原因：[为什么不选]
+### Option B: [Name]
+- Description: [How]
+- Rejection reason: [Why not]
 
-## 风险
+## Risks
 
-| 风险 | 影响 | 应对 |
+| Risk | Impact | Mitigation |
 |------|------|------|
-| [风险1] | [后果] | [措施] |
-| [风险2] | [后果] | [措施] |
+| [Risk 1] | [Impact] | [Mitigation] |
+| [Risk 2] | [Impact] | [Mitigation] |
 ```
 
 ---
 
-## 上下文记录
+## Context Logging
 
-**必须记录到 `_context.md`**：
-- 关键设计决策及讨论过程
-- 用户对方案的反馈
-- 设计变更及原因
+**Must be recorded in `_context.md`**:
+- Key design decisions and discussion
+- User feedback on options
+- Design changes and reasons
 
-**示例**：
+**Example**:
 ```markdown
-## 关键对话
+## Key Conversation
 
-### 设计决策 (2026-01-23)
+### Design Decision (2026-01-23)
 
-讨论：状态同步机制
+Discussion: state synchronization
 
-方案对比：
-1. marker 绑定 - init-loop.sh 写入 /tmp/pensieve-loop-<taskListId>，Stop Hook 读取
-2. .active 文件 - 简单的 JSON 文件
+Options:
+1. Marker binding — init-loop.sh writes /tmp/pensieve-loop-<taskListId>, Stop Hook reads
+2. .active file — simple JSON file
 
-用户倾向：方案 2，理由是"越简单越好"
+User preference: Option 2, because "simpler is better"
 
-最终选择：.active 文件方案
+Final choice: .active file
 ```
 
 ---
 
-## 常见陷阱
+## Common Pitfalls
 
-| 陷阱 | 应对 |
-|------|------|
-| 只写方案不写理由 | "为什么"比"怎么做"更重要 |
-| 没有备选方案 | 至少想过一个替代方案 |
-| 忽略风险 | 诚实面对可能出问题的地方 |
-| 写太细 | 这是设计不是实现，保持概要 |
-| 脱离需求 | 每个设计决策应追溯到需求 |
+| Pitfall | Response |
+|---------|----------|
+| Only describe the approach, not the rationale | "Why" matters more than "how" |
+| No alternatives | Consider at least one alternative |
+| Ignoring risks | Be honest about what can go wrong |
+| Too detailed | This is design, not implementation — stay high‑level |
+| Detached from requirements | Every decision should trace back to requirements |

@@ -1,9 +1,9 @@
 #!/bin/bash
-# Pensieve 共享函数库
+# Pensieve shared library
 #
-# 约定：
-# - 系统能力位于插件内部：<plugin>/skills/pensieve
-# - 用户数据位于项目级：<project>/.claude/pensieve
+# Conventions:
+# - System capability lives inside the plugin: <plugin>/skills/pensieve
+# - User data lives at project level: <project>/.claude/pensieve
 
 plugin_root_from_script() {
     local script_dir="$1"
@@ -18,7 +18,7 @@ plugin_root_from_script() {
         dir="$(cd "$dir/.." && pwd)"
     done
 
-    # fallback: 尝试从路径中回退到 skills/pensieve
+    # fallback: walk back from skills/pensieve
     local skill_root
     skill_root="$(cd "$script_dir/../../.." && pwd)"  # .../skills/pensieve
     cd "$skill_root/../.." && pwd                     # ... (plugin root)
@@ -41,11 +41,55 @@ ensure_user_data_root() {
     echo "$dr"
 }
 
+python_bin() {
+    command -v python3 || command -v python
+}
+
+json_get_value() {
+    local file="$1"
+    local key="$2"
+    local default_value="${3:-}"
+    local py
+    py="$(python_bin)" || {
+        echo "$default_value"
+        return 0
+    }
+
+    "$py" - "$file" "$key" "$default_value" <<'PY'
+import json
+import sys
+
+file_path, key, default_value = sys.argv[1], sys.argv[2], sys.argv[3]
+try:
+    with open(file_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+except Exception:
+    print(default_value)
+    sys.exit(0)
+
+if not isinstance(data, dict):
+    print(default_value)
+    sys.exit(0)
+
+value = data.get(key)
+if value is None:
+    print(default_value)
+elif isinstance(value, bool):
+    print("true" if value else "false")
+elif isinstance(value, (int, float)):
+    print(value)
+elif isinstance(value, str):
+    print(value)
+else:
+    print(default_value)
+PY
+}
+
 # ============================================
-# Claude Code 进程识别（用于 Loop marker 绑定）
+# Claude Code process detection (for Loop marker binding)
 # ============================================
 
-# 打印当前进程树中最近的 `claude` 进程 PID（stdout），找不到则返回非 0
+# Print nearest `claude` PID in current process tree (stdout), non‑zero if not found
 find_claude_pid() {
     local pid="$$"
     while [[ "$pid" -gt 1 ]]; do
@@ -62,7 +106,7 @@ find_claude_pid() {
     return 1
 }
 
-# 打印启动本次 `claude` 的 shell PID（stdout），找不到则返回非 0
+# Print the shell PID that launched this `claude` (stdout), non‑zero if not found
 find_claude_session_pid() {
     local claude_pid
     claude_pid="$(find_claude_pid)" || return 1
@@ -70,12 +114,12 @@ find_claude_session_pid() {
 }
 
 # ============================================
-# _meta.md 读取
+# _meta.md reading
 # ============================================
 
-# 从 _meta.md 读取 task_list_id 字段
-# 参数: $1 = _meta.md 文件路径
-# 返回: task_list_id 值或空字符串
+# Read task_list_id from _meta.md
+# arg: $1 = _meta.md path
+# returns: task_list_id or empty string
 read_task_list_id_from_meta() {
     local meta_file="$1"
     [[ ! -f "$meta_file" ]] && echo "" && return 0
@@ -84,12 +128,12 @@ read_task_list_id_from_meta() {
 }
 
 # ============================================
-# Loop 目录扫描
+# Loop directory scan
 # ============================================
 
-# 扫描找到有 pending task 的 loop 目录
-# 参数: $1 = loop 基础目录
-# 返回: loop 目录路径（stdout），或返回非零退出码
+# Find loop dir with pending tasks
+# arg: $1 = loop base dir
+# returns: loop dir path (stdout) or non‑zero
 find_active_loop() {
     local loop_base_dir="$1"
 
@@ -106,11 +150,11 @@ find_active_loop() {
         local tasks_dir="$HOME/.claude/tasks/$task_list_id"
         [[ ! -d "$tasks_dir" ]] && continue
 
-        # 检查是否有 pending 或 in_progress task
+        # Check for pending or in_progress tasks
         for task_file in "$tasks_dir"/*.json; do
             [[ -f "$task_file" ]] || continue
             local status
-            status=$(jq -r '.status' "$task_file" 2>/dev/null)
+            status=$(json_get_value "$task_file" "status" "")
             if [[ "$status" == "pending" || "$status" == "in_progress" ]]; then
                 echo "${loop_dir%/}"
                 return 0
@@ -121,9 +165,9 @@ find_active_loop() {
     return 1
 }
 
-# 扫描找到指定 loop 名称的目录
-# 参数: $1 = loop 基础目录, $2 = loop 名称（如 2026-01-24-feature）
-# 返回: loop 目录路径或空
+# Find loop directory by name
+# arg: $1 = loop base dir, $2 = loop name (e.g., 2026-01-24-feature)
+# returns: loop dir path or empty
 find_loop_by_name() {
     local loop_base_dir="$1"
     local loop_name="$2"

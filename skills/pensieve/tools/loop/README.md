@@ -1,118 +1,118 @@
-# Loop（执行层）
+# Loop (Execution Layer)
 
-结合 Claude Code Task 系统和本地追踪目录，实现自动循环执行。
+Combines the Claude Code Task system with a local tracking directory to auto‑loop execution.
 
-## 职责划分
+## Role Division
 
-| 角色 | 职责 |
-|------|------|
-| **主窗口** | 规划：初始化 → 填充 context → 生成 tasks → 调用 task-executor |
-| **task-executor** | 执行 tasks：读 context → 按需加载知识库 → 执行 → 按需沉淀 |
-| **Stop Hook** | 自动循环：检查 pending task → 注入强化信息 → 继续执行 |
+| Role | Responsibility |
+|------|----------------|
+| **Main Window** | Planning: init → fill context → generate tasks → call task-executor |
+| **task-executor** | Execute tasks: read context → load knowledge as needed → execute → capture learnings if needed |
+| **Stop Hook** | Auto-loop: check pending tasks → inject reinforcement → continue |
 
-## 启动流程（主窗口执行）
+## Startup Flow (Main Window)
 
-### 步骤 1：创建占位任务
+### Step 1: Create placeholder task
 
 ```
-TaskCreate subject="初始化 loop" description="1. 初始化 loop 目录 2. 为任务构建上下文 3. 生成并执行任务"
-# 返回 { taskListId: "abc-123-uuid", taskId: "1" }
+TaskCreate subject="Initialize loop" description="1. Initialize loop directory 2. Build task context 3. Generate and execute tasks"
+# Returns { taskListId: "abc-123-uuid", taskId: "1" }
 ```
 
-### 步骤 2：获取 taskListId（更符合 AI 直觉）
+### Step 2: Get taskListId (AI‑friendly)
 
 ```bash
-<SYSTEM_SKILL_ROOT>/tools/loop/scripts/find-task-list-id.sh "初始化 loop"
+<SYSTEM_SKILL_ROOT>/tools/loop/scripts/find-task-list-id.sh "Initialize loop"
 ```
 
-### 步骤 3：初始化 loop 目录
+### Step 3: Initialize loop directory
 
 ```bash
 <SYSTEM_SKILL_ROOT>/tools/loop/scripts/init-loop.sh <taskListId> <slug>
-# 例如：
+# Example:
 <SYSTEM_SKILL_ROOT>/tools/loop/scripts/init-loop.sh abc-123-uuid login-feature
 ```
 
-> 注意：init-loop.sh 运行很快，这一步建议前台运行以便拿到 `LOOP_DIR` 输出；从 `0.3.2` 起不再需要后台常驻 bind-loop（Stop Hook 通过 `/tmp/pensieve-loop-<taskListId>` 自动接管）。
+> Note: init-loop.sh runs quickly. Run it in the foreground so you can read the `LOOP_DIR` output. Since `0.3.2`, you no longer need a background bind-loop (Stop Hook auto‑detects via `/tmp/pensieve-loop-<taskListId>`).
 
-### 步骤 4：填充 context（主窗口负责）
+### Step 4: Fill context (Main Window)
 
-在 loop 目录（`.claude/pensieve/loop/{date}-{slug}/`）下：
+In the loop directory (`.claude/pensieve/loop/{date}-{slug}/`):
 
-1. **创建并填充 `_context.md`**（见下方格式；为避免“已存在文件需先 Read 才能 Write”的限制，init-loop.sh 不再生成模板文件）
-2. **按需创建文档**
-   - `requirements.md` — 需求定义（预估 6+ tasks 时）
-   - `design.md` — 方案设计（有多个方案需权衡时）
-   - `plan.md` — 代码探索结果（需了解现有代码时）
+1. **Create and fill `_context.md`** (see format below; to avoid "Read before Write" friction, init-loop.sh no longer creates a template file)
+2. **Create documents as needed**
+   - `requirements.md` — requirements (estimate 6+ tasks)
+   - `design.md` — design choices (multiple options to weigh)
+   - `plan.md` — code exploration notes (need code understanding)
 
-### _context.md 格式
+### _context.md format
 
 ```markdown
-# 对话上下文
+# Conversation Context
 
-## 事前 Context
+## Pre-Context
 
-### 交互历史
-[记录进入 loop 前的对话过程]
+### Interaction History
+[Record the conversation before entering loop]
 
-| 轮次 | 模型尝试 | 用户反馈 |
-|------|----------|----------|
-| 1 | 提出方案 A | 否决，要求更简单 |
-| 2 | 改用方案 B | 同意，进入 loop |
+| Turn | Model Attempt | User Feedback |
+|------|--------------|---------------|
+| 1 | Proposed plan A | Rejected, asked simpler |
+| 2 | Proposed plan B | Approved, entered loop |
 
-### 最终共识
-[进入 loop 时双方达成的理解]
-- 目标：XXX
-- 范围：YYY
-- 约束：ZZZ
+### Final Consensus
+[Shared understanding at loop entry]
+- Goal: XXX
+- Scope: YYY
+- Constraints: ZZZ
 
-### 理解与假设
-[模型对任务的预判]
-- 预计涉及的模块
-- 预计的实现方式
-- 预计的难点
+### Understanding & Assumptions
+[Model’s expectations]
+- Expected modules involved
+- Expected implementation approach
+- Expected difficulties
 
-### 文档引用
-| 类型 | 路径 |
+### Document References
+| Type | Path |
 |------|------|
-| requirements | 无需 / 路径 |
-| design | 无需 / 路径 |
-| plan | 无需 / 路径 |
+| requirements | none / path |
+| design | none / path |
+| plan | none / path |
 
 ---
 
-## 事后 Context
+## Post-Context
 
-> 如果执行过程与计划一致，此部分留空或标记"无偏差"。
+> If execution matches the plan, leave blank or note "no deviation".
 
-### 理解偏差
-[事前假设 vs 实际情况]
-- 开始前理解：XXX
-- 开发中发现：YYY
-- 调整：ZZZ
+### Deviations
+[Pre‑assumptions vs reality]
+- Before: XXX
+- Found: YYY
+- Adjustment: ZZZ
 
-### 干预记录
-[执行过程中的人工干预]
+### Interventions
+[Manual interventions during execution]
 ```
 
-### 步骤 5：生成 tasks（主窗口负责）
+### Step 5: Generate tasks (Main Window)
 
-根据 context 生成 tasks：
+Generate tasks based on context:
 
-| 工作量 | tasks 数 |
-|--------|----------|
-| 改几行 | 1 |
-| 改一个模块 | 2-3 |
-| 改多个模块 | 4-6 |
+| Workload | Task count |
+|----------|------------|
+| A few lines | 1 |
+| One module | 2–3 |
+| Multiple modules | 4–6 |
 
-每个 task 包含：
-- subject（命令式，如"实现用户登录"）
-- description（来源 + 做什么 + 完成条件）
-- activeForm（进行时，如"实现用户登录中"）
+Each task includes:
+- subject (imperative, e.g., "Implement user login")
+- description (source + action + completion criteria)
+- activeForm (progressive, e.g., "Implementing user login")
 
-### 步骤 6：执行 tasks
+### Step 6: Execute tasks
 
-对每个 task 调用 agent：
+Call an agent for each task:
 
 ```
 Task agent=task-executor prompt="
@@ -123,109 +123,109 @@ user_data_root: .claude/pensieve
 "
 ```
 
-Agent 执行完一个 task 返回。Stop Hook 检测到 pending task 会强化注入，主窗口继续调用 agent 执行下一个。
+The agent returns after one task. Stop Hook detects pending tasks, injects reinforcement, and the main window continues with the next task.
 
-## 两套存储的分工
+## Two Storage Systems
 
-| 存储 | 内容 | 用途 |
-|------|------|------|
-| `~/.claude/tasks/<uuid>/` | 任务状态（JSON） | Claude Code 原生 |
-| `.claude/pensieve/loop/{date}-{slug}/` | 元数据 + 文档 | 项目级追踪执行，沉淀改进（不被插件覆盖） |
+| Storage | Content | Purpose |
+|---------|---------|---------|
+| `~/.claude/tasks/<uuid>/` | Task state (JSON) | Claude Code native |
+| `.claude/pensieve/loop/{date}-{slug}/` | Metadata + docs | Project‑level tracking and learnings (never overwritten) |
 
-## 目录结构
+## Directory Structure
 
 ```
-~/.claude/tasks/<uuid>/          # Claude Code Task（任务状态）
+~/.claude/tasks/<uuid>/          # Claude Code Tasks (status)
     ├── 1.json
     ├── 2.json
     └── ...
 
-.claude/pensieve/loop/           # 项目级追踪（元数据 + 沉淀）
-    └── 2026-01-23-login/        # 每个 loop 独立目录
-        ├── _meta.md             # 元数据（目标、pipeline）
-        ├── _context.md          # 对话上下文、干预记录
-        ├── requirements.md      # 需求文档（如有）
-        └── design.md            # 设计文档（如有）
+.claude/pensieve/loop/           # Project tracking (metadata + learnings)
+    └── 2026-01-23-login/        # One directory per loop
+        ├── _meta.md             # Metadata (goal, pipeline)
+        ├── _context.md          # Conversation context, interventions
+        ├── requirements.md      # Requirements (if any)
+        └── design.md            # Design notes (if any)
 ```
 
-## 自动循环机制
+## Auto-Loop Mechanism
 
-Stop Hook 在每次 Claude 停止时触发：
+Stop Hook runs whenever Claude stops:
 
 ```
-Agent 执行 → 停止
+Agent runs → stops
     ↓
-loop-controller.sh 检查
+loop-controller.sh checks
     ↓
-├── 有 pending task → block + 注入强化信息 → 继续执行
-└── 全部完成 → 正常结束
+├── pending task → block + inject reinforcement → continue
+└── all complete → normal stop
 ```
 
-> 多会话支持：marker 里记录了当前会话的 `claude_pid`，Stop Hook 只会匹配当前会话的 marker。
+> Multi-session support: markers store the current session `claude_pid`, so Stop Hook only matches the current session.
 
-## 强化信息
+## Reinforcement Message
 
-每次继续执行时注入：
+Injected on each continuation:
 
 ```markdown
-## Loop 继续
+## Loop Continue
 
 **Pipeline**: develop
-**进度**: [2/5] completed
-**当前任务**: #3 实现用户登录
+**Progress**: [2/5] completed
+**Current task**: #3 Implement user login
 
 ---
 
-## Task 内容
-{任务描述}
+## Task Content
+{task description}
 
 ---
 
-**执行要求**:
-1. 完成任务
-2. TaskUpdate 标记 completed
-3. 如有干预，记录到 _context.md
+**Execution requirements**:
+1. Complete the task
+2. TaskUpdate → completed
+3. If intervention occurs, record in _context.md
 ```
 
-## 阶段判断
+## Phase Selection
 
-| 任务特征 | 阶段组合 |
-|----------|----------|
-| 明确、小范围 | tasks |
-| 需要了解代码 | plan → tasks |
-| 需要技术设计 | plan → design → tasks |
-| 需求不明确 | plan → requirements → design → tasks |
+| Task characteristics | Phase combination |
+|---------------------|-------------------|
+| Clear, small scope | tasks |
+| Need code understanding | plan → tasks |
+| Need technical design | plan → design → tasks |
+| Unclear requirements | plan → requirements → design → tasks |
 
-## 闭环学习机制（主窗口负责）
+## Closed-Loop Learning (Main Window)
 
-Agent 返回后，主窗口执行自改进：
+After the agent returns, run self‑improve:
 
 ```
-事前假设 → 执行验证 → 事后偏差 → 沉淀改进
+Pre‑assumptions → execution → post‑deviations → capture learnings
 ```
 
-### 流程
+### Flow
 
-1. 读取 `tools/self-improve/_self-improve.md`
-2. 对比 `_context.md` 事前/事后部分
-3. 填写事后 Context（偏差记录）
-4. 如有实质偏差，询问用户是否沉淀
-5. 用户同意后，按 README 格式写入
+1. Read `tools/self-improve/_self-improve.md`
+2. Compare `_context.md` pre/post sections
+3. Fill Post‑Context (deviations)
+4. If meaningful deviation exists, ask user to capture
+5. Upon consent, write using README format
 
-### 事后 Context 示例
+### Post-Context Example
 
-| 事前理解 | 实际发现 | 调整 |
-|----------|----------|------|
-| 两处代码完全相同 | RPWindow 多了图标和样式 | 增加 variant 属性 |
-| 9 个组件各自独立 | 辅助组件无复用价值 | 只拆分 3 个窗口组件 |
+| Pre‑assumption | Actual finding | Adjustment |
+|---------------|----------------|------------|
+| Two code paths are identical | RPWindow adds icon + styles | Add variant prop |
+| 9 components independent | Helper components not reusable | Split into 3 window components |
 
-### 沉淀判断
+### What counts as a deviation
 
-**实质偏差**（值得沉淀）：
-- 架构假设错误
-- 边界情况遗漏
-- 工具/框架限制未预判
+**Meaningful** (worth capturing):
+- Architecture assumption was wrong
+- Edge cases missed
+- Tool/framework limits discovered late
 
-**非实质偏差**（不沉淀）：
-- typo、小调整
-- 一次性的特殊情况
+**Not meaningful** (do not capture):
+- Typos, small adjustments
+- One‑off special cases

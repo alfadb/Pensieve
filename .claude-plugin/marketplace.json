@@ -3,18 +3,18 @@
   "metadata": {
     "name": "kingkongshot-marketplace",
     "version": "0.2.1",
-    "description": "Pensieve 市场（zh 分支），用于从 GitHub 固定引用安装插件"
+    "description": "Pensieve marketplace (zh branch) for installing the plugin from GitHub with a pinned ref"
   },
   "name": "kingkongshot-marketplace",
   "version": "0.2.1",
-  "description": "Pensieve 市场（zh 分支），用于从 GitHub 固定引用安装插件",
+  "description": "Pensieve marketplace (zh branch) for installing the plugin from GitHub with a pinned ref",
   "owner": {
     "name": "kingkongshot"
   },
   "plugins": [
     {
       "name": "pensieve",
-      "description": "Pensieve：Claude Code 的 loop 自动化 + 记忆沉淀（系统提示词在插件内，用户数据在 .claude/pensieve）",
+      "description": "Pensieve: loop automation + memory capture for Claude Code (system prompts in plugin, user data in .claude/pensieve)",
       "version": "0.4.26",
       "author": {
         "name": "kingkongshot"

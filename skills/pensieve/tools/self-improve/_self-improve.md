@@ -1,7 +1,7 @@
 # 自改进 Pipeline
 
 ---
-description: 知识沉淀流程。当 loop 完成、用户说"沉淀"、"记录下来"、"保存经验"时触发。
+description: Knowledge capture workflow. Trigger when loop completes or user says "capture", "record", or "save".
 ---
 
 你在帮助把经验与模式沉淀到 Pensieve 的知识系统中。
@@ -39,7 +39,29 @@ description: 知识沉淀流程。当 loop 完成、用户说"沉淀"、"记录�
 
 ---
 
-## Phase 2: 现有 Pensieve 体检（可选）
+## Phase 2: Audit Existing Pensieve (Optional)
+
+**Goal**: Find improvement opportunities in current project Pensieve data
+
+**Actions**:
+1. Ask the user if they want a Pensieve audit:
+   - "Want me to review your current `.claude/pensieve/` contents for improvements?"
+2. If yes:
+   - Read each category README:
+     - `<SYSTEM_SKILL_ROOT>/maxims/README.md`
+     - `<SYSTEM_SKILL_ROOT>/decisions/README.md`
+     - `<SYSTEM_SKILL_ROOT>/pipelines/README.md`
+     - `<SYSTEM_SKILL_ROOT>/knowledge/README.md`
+   - Review the corresponding project files under `.claude/pensieve/`
+   - Flag format violations, missing fields, outdated content, or mis‑categorized items
+   - Provide a concise review report with suggested fixes
+3. **Do not edit anything without explicit user approval**
+
+If the user declines, skip this phase and continue.
+
+---
+
+## Phase 3: Categorize
 
 **目标**：找出当前项目 Pensieve 的优化点
 
@@ -77,20 +99,20 @@ description: 知识沉淀流程。当 loop 完成、用户说"沉淀"、"记录�
 
 2. **向用户呈现分类建议**：
    ```markdown
-   ## 沉淀建议
+   ## Capture Recommendation
 
-   [内容描述] → 建议沉淀为 **[类型]**
+   [Content summary] → Recommend **[type]**
 
-   理由：[基于 README 标准的解释]
+   Reason: [Explanation based on README criteria]
 
-   是否同意？
+   Do you agree?
    ```
 
 **关键**：未获得用户确认不得继续。
 
 ---
 
-## Phase 4: 阅读目标 README
+## Phase 4: Read Target README
 
 **目标**：掌握该类别的格式与标准
 
@@ -112,37 +134,37 @@ description: 知识沉淀流程。当 loop 完成、用户说"沉淀"、"记录�
 
 ---
 
-## Phase 5: 起草内容
+## Phase 5: Draft Content
 
 **目标**：严格按 README 格式写草稿
 
 **行动**：
 1. 按 README 规范写草稿
 
-2. 选择目标位置：
-   - **pipeline** → `.claude/pensieve/pipelines/{name}.md`（项目级用户数据）
-   - **maxim** → `.claude/pensieve/maxims/{name}.md`（项目级用户数据）
-   - **decision** → `.claude/pensieve/decisions/{date}-{conclusion}.md`（项目级用户数据）
-   - **knowledge** → `.claude/pensieve/knowledge/{name}/content.md`（项目级用户数据）
+2. Choose the target location:
+   - **pipeline** → `.claude/pensieve/pipelines/{name}.md` (project user data)
+   - **maxim** → `.claude/pensieve/maxims/{name}.md` (project user data)
+   - **decision** → `.claude/pensieve/decisions/{date}-{conclusion}.md` (project user data)
+   - **knowledge** → `.claude/pensieve/knowledge/{name}/content.md` (project user data)
 
 3. **向用户展示草稿**：
    ```markdown
-   ## 草稿预览
+   ## Draft Preview
 
-   文件：`{target_path}`
+   File: `{target_path}`
 
    ---
    [draft content]
    ---
 
-   确认写入？
+   Write it?
    ```
 
 **关键**：未获得用户批准不得写入。
 
 ---
 
-## Phase 6: 写入
+## Phase 6: Write
 
 **目标**：落盘沉淀
 
@@ -161,7 +183,7 @@ description: 知识沉淀流程。当 loop 完成、用户说"沉淀"、"记录�
 ┌─────────────────────────────────────────────────────────────────┐
 │  ┌─────────────┐   ┌─────────────┐   ┌─────────────┐   ┌─────────────┐  │
 │  │   maxims/   │   │ decisions/  │   │ pipelines/  │   │ knowledge/  │  │
-│  │   未来指导   │ ← │   过去经验   │   │   工作流程   │   │   外部输入   │  │
+│  │  future guide│ ←│ past lessons│   │ workflows   │   │ external in │  │
 │  └─────────────┘   └─────────────┘   └─────────────┘   └─────────────┘  │
 └─────────────────────────────────────────────────────────────────┘
 

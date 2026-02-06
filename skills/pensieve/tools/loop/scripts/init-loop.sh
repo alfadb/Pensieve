@@ -1,12 +1,12 @@
 #!/bin/bash
-# Pensieve Loop 初始化工具
-# 创建 loop 目录结构并关联 task_list_id
+# Pensieve Loop initializer
+# Creates loop directory structure and associates task_list_id
 #
-# 用法:
+# Usage:
 #   init-loop.sh <task_list_id> <slug>
-#   init-loop.sh <task_list_id> <slug> --force   # 覆盖已存在的目录
+#   init-loop.sh <task_list_id> <slug> --force   # overwrite existing directory
 #
-# 例如:
+# Example:
 #   init-loop.sh abc-123-uuid login-feature
 
 set -euo pipefail
@@ -16,25 +16,25 @@ TOOL_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 source "$SCRIPT_DIR/_lib.sh"
 
-# 插件根目录（系统能力）
+# Plugin root (system capability)
 PLUGIN_ROOT="$(plugin_root_from_script "$SCRIPT_DIR")"
 SYSTEM_SKILL_ROOT="$PLUGIN_ROOT/skills/pensieve"
 TOOLS_ROOT="$SYSTEM_SKILL_ROOT/tools"
 LOOP_TOOL_ROOT="$TOOLS_ROOT/loop"
 
-# 用户数据（loop 产物）在项目级，不随插件更新覆盖
+# User data (loop artifacts) live at project level and are never overwritten by plugin updates
 DATA_ROOT="$(ensure_user_data_root)"
 LOOP_BASE_DIR="$DATA_ROOT/loop"
 CLAUDE_TASKS_BASE="$HOME/.claude/tasks"
 
 # ============================================
-# 参数解析
+# Argument parsing
 # ============================================
 
 if [[ $# -lt 2 ]]; then
-    echo "用法: $0 <task_list_id> <slug>"
+    echo "Usage: $0 <task_list_id> <slug>"
     echo ""
-    echo "例如:"
+    echo "Example:"
     echo "  $0 abc-123-uuid login-feature"
     exit 1
 fi
@@ -48,33 +48,33 @@ DATE=$(date +%Y-%m-%d)
 TIMESTAMP=$(date -Iseconds)
 
 # ============================================
-# taskListId 容错（避免误用 "default"）
+# taskListId sanity check (avoid using "default")
 # ============================================
 
 if [[ "$TASK_LIST_ID" == "default" ]]; then
-    echo "错误: taskListId 不能是 \"default\""
+    echo "Error: taskListId cannot be \"default\""
     echo ""
-    echo "请使用真实的 taskListId："
-    echo "- 优先从 TaskCreate 的返回中复制"
-    echo "- 如果没有看到 taskListId，说明你可能没有调用 TaskCreate 工具（只是输出了文本）；请重新调用 TaskCreate 并展开工具输出"
-    echo "- 或使用: $LOOP_TOOL_ROOT/scripts/find-task-list-id.sh \"初始化 loop\""
+    echo "Please use a real taskListId:"
+    echo "- Copy it from the TaskCreate tool output"
+    echo "- If you didn't see taskListId, you may have printed TaskCreate as text; call the tool and expand the output"
+    echo "- Or use: $LOOP_TOOL_ROOT/scripts/find-task-list-id.sh \"Initialize loop\""
     exit 1
 fi
 
-# 验证 task 目录存在
+# Verify task directory exists
 TASKS_DIR="$CLAUDE_TASKS_BASE/$TASK_LIST_ID"
 if [[ ! -d "$TASKS_DIR" ]]; then
-    echo "错误: Task 目录不存在: $TASKS_DIR"
+    echo "Error: Task directory does not exist: $TASKS_DIR"
     echo ""
-    echo "请确保使用真实的 taskListId："
-    echo "- 优先从 TaskCreate 的返回中复制"
-    echo "- 如果没有看到 taskListId，请展开工具输出（例如 ctrl+o）查看返回的 JSON"
-    echo "- 或使用: $LOOP_TOOL_ROOT/scripts/find-task-list-id.sh \"初始化 loop\""
+    echo "Please ensure you are using a real taskListId:"
+    echo "- Copy it from the TaskCreate tool output"
+    echo "- If you didn't see taskListId, expand the tool output (e.g., ctrl+o) and copy the JSON value"
+    echo "- Or use: $LOOP_TOOL_ROOT/scripts/find-task-list-id.sh \"Initialize loop\""
     exit 1
 fi
 
 # ============================================
-# 创建 Loop 目录
+# Create loop directory
 # ============================================
 
 LOOP_NAME="${DATE}-${SLUG}"
@@ -82,37 +82,50 @@ LOOP_DIR="$LOOP_BASE_DIR/$LOOP_NAME"
 
 if [[ -d "$LOOP_DIR" ]]; then
     if [[ "$FORCE" != "--force" ]]; then
-        echo "错误: Loop 目录已存在: $LOOP_DIR"
-        echo "使用 --force 参数覆盖"
+        echo "Error: Loop directory already exists: $LOOP_DIR"
+        echo "Use --force to overwrite"
         exit 1
     fi
-    echo "警告: 覆盖已存在的目录: $LOOP_DIR"
+    echo "Warning: overwriting existing directory: $LOOP_DIR"
 fi
 
 mkdir -p "$LOOP_DIR"
 
 # ============================================
-# 写入 Loop marker（让 Stop hook 自动接管，无需后台常驻进程）
+# Write loop marker (Stop Hook will take over; no background process required)
 # ============================================
 
 CLAUDE_PID="$(find_claude_pid || true)"
 SESSION_PID="$(find_claude_session_pid || true)"
 
-if command -v jq >/dev/null 2>&1; then
-    jq -n \
-        --arg task_list_id "$TASK_LIST_ID" \
-        --arg loop_dir "$LOOP_DIR" \
-        --arg started_at "$TIMESTAMP" \
-        --arg claude_pid "$CLAUDE_PID" \
-        --arg session_pid "$SESSION_PID" \
-        '{
-          task_list_id: $task_list_id,
-          loop_dir: $loop_dir,
-          started_at: $started_at,
-          tasks_planned: false,
-          claude_pid: (if $claude_pid == "" then null else ($claude_pid | tonumber) end),
-          session_pid: (if $session_pid == "" then null else ($session_pid | tonumber) end)
-        }' > "$MARKER_FILE"
+if PYTHON_BIN="$(python_bin)"; then
+    PENSIEVE_TASK_LIST_ID="$TASK_LIST_ID" \
+    PENSIEVE_LOOP_DIR="$LOOP_DIR" \
+    PENSIEVE_STARTED_AT="$TIMESTAMP" \
+    PENSIEVE_CLAUDE_PID="${CLAUDE_PID:-}" \
+    PENSIEVE_SESSION_PID="${SESSION_PID:-}" \
+    "$PYTHON_BIN" - "$MARKER_FILE" <<'PY'
+import json
+import os
+import sys
+
+marker_path = sys.argv[1]
+claude_pid_raw = os.environ.get("PENSIEVE_CLAUDE_PID", "").strip()
+session_pid_raw = os.environ.get("PENSIEVE_SESSION_PID", "").strip()
+
+payload = {
+    "task_list_id": os.environ.get("PENSIEVE_TASK_LIST_ID", ""),
+    "loop_dir": os.environ.get("PENSIEVE_LOOP_DIR", ""),
+    "started_at": os.environ.get("PENSIEVE_STARTED_AT", ""),
+    "tasks_planned": False,
+    "claude_pid": int(claude_pid_raw) if claude_pid_raw else None,
+    "session_pid": int(session_pid_raw) if session_pid_raw else None,
+}
+
+with open(marker_path, "w", encoding="utf-8") as f:
+    json.dump(payload, f, ensure_ascii=False, indent=2)
+    f.write("\n")
+PY
 else
     cat > "$MARKER_FILE" << EOF
 {
@@ -126,75 +139,75 @@ else
 EOF
 fi
 
-echo "已创建: $MARKER_FILE"
+echo "Created: $MARKER_FILE"
 
 # ============================================
-# 生成 _agent-prompt.md
+# Generate _agent-prompt.md
 # ============================================
 
 cat > "$LOOP_DIR/_agent-prompt.md" << EOF
 ---
 name: expert-developer
-description: 执行单个开发任务，完成后返回
+description: Execute a single dev task, then return
 ---
 
-你是 Linus Torvalds，Linux 内核的创造者和首席架构师，你已经维护 Linux 内核超过30年，审核过数百万行代码，建立了世界上最成功的开源项目。现在我们正在开创一个新项目，以你独特的视角来分析代码，确保项目从一开始就建立在坚实的技术基础上。
+You are Linus Torvalds — creator and chief architect of the Linux kernel. You have maintained Linux for 30+ years, reviewed millions of lines of code, and built the world's most successful open‑source project. Apply your perspective to ensure this project starts on a solid technical foundation.
 
 ## Context
 
-读取本目录下的 \`_context.md\` 了解任务背景。
+Read \`_context.md\` in this directory to understand the task context.
 
-## 准则
+## Maxims
 
-项目级准则（插件不内置，用户可修改）：
-- \`$DATA_ROOT/maxims/custom.md\`（若不存在可忽略）
-- \`$DATA_ROOT/maxims/\` 下的其他准则文件（如有）
+Project‑level maxims (not shipped by the plugin, user‑editable):
+- \`$DATA_ROOT/maxims/custom.md\` (ignore if missing)
+- Any other maxim files under \`$DATA_ROOT/maxims/\`
 
-## 当前任务
+## Current Task
 
-通过 \`TaskGet\` 读取（task_id 由调用时传入）。
+Read via \`TaskGet\` (task_id provided by the caller).
 
-## 执行流程
+## Execution Flow
 
-1. 读取 \`_context.md\` 了解背景
-2. 读取准则文件了解约束
-3. \`TaskGet\` 获取任务详情
+1. Read \`_context.md\`
+2. Read maxims for constraints
+3. \`TaskGet\` to fetch task details
 4. \`TaskUpdate\` → in_progress
-5. 执行任务
+5. Execute the task
 6. \`TaskUpdate\` → completed
-7. 返回
+7. Return
 
-## 完成标准
+## Completion Criteria
 
-任务完成前必须验证：
-- 编译通过（无编译错误）
-- Lint 通过（无 lint 错误）
+Before marking complete, verify:
+- Build passes (no compiler errors)
+- Lint passes (no lint errors)
 
-如果验证失败，修复后再标记 completed。
+If validation fails, fix and re‑validate before marking completed.
 
-## 约束
+## Constraints
 
-- 只做任务描述的事，不做额外工作
-- 不循环，执行完当前 task 就返回
-- 不和用户交互，所有信息来自 context 和 task
+- Only do what's in the task description; no extra work
+- Do not loop; return after this task
+- No user interaction; all info comes from context and task
 EOF
 
-echo "已创建: $LOOP_DIR/_agent-prompt.md"
+echo "Created: $LOOP_DIR/_agent-prompt.md"
 
 # ============================================
-# 输出结果
+# Output summary
 # ============================================
 
 echo ""
-echo "Loop 初始化完成"
-echo "目录: $LOOP_DIR"
+echo "Loop initialized"
+echo "Directory: $LOOP_DIR"
 echo "Task: $TASKS_DIR"
 echo ""
 echo "TASK_LIST_ID=$TASK_LIST_ID"
 echo "LOOP_DIR=$LOOP_DIR"
 echo ""
-echo "下一步:"
-echo "1) 创建并填充 $LOOP_DIR/_context.md（建议先 Read 再 Edit/Write，或直接 Write 创建新文件）"
-echo "2) 回到 Loop Pipeline，继续生成 tasks 并执行"
+echo "Next steps:"
+echo "1) Create and fill $LOOP_DIR/_context.md (recommend Read before Edit/Write, or Write to create a new file)"
+echo "2) Return to the Loop Pipeline, generate tasks, and execute"
 echo ""
-echo "提示：Stop Hook 会根据 $MARKER_FILE 自动接管，无需再手动启动后台绑定进程。"
+echo "Tip: Stop Hook will take over based on $MARKER_FILE. No background binding process is needed."

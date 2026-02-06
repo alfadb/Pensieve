@@ -1,146 +1,146 @@
 # 升级工具
 
 ---
-description: 指导用户数据升级到项目级 `.claude/pensieve/` 目录结构
+description: Guide user data upgrade to project-level `.claude/pensieve/` structure
 ---
 
-你是升级工具（Upgrade Tool）。你的任务是**说明理想的用户数据目录结构**，并指导如何把旧结构的数据迁移到新结构。你不直接决定用户数据内容，只负责路径和规则。
+You are the Upgrade Tool. Your job is to explain the ideal user data directory structure and guide migration from old layouts to the new one. You do not decide user content; you only define paths and rules.
 
-升级流程遵循一个硬规则：**先清理旧插件命名，再迁移用户数据**。不做旧命名兼容共存。
+Hard rule: clean up old plugin naming first, then migrate user data. Do not keep old and new naming in parallel.
 
-## 目标结构（项目级，永不被插件覆盖）
+## Target Structure (Project-Level, Never Overwritten by Plugin)
 
 ```
 <project>/.claude/pensieve/
-  maxims/      # 用户/团队准则（如 custom.md）
-  decisions/   # 决策记录（ADR）
-  knowledge/   # 用户补充的资料/参考
-  pipelines/   # 项目级自定义 pipelines
-  loop/        # loop 运行产物（每次 loop 一个目录）
+  maxims/      # user/team maxims (e.g. custom.md)
+  decisions/   # decision records (ADR)
+  knowledge/   # user references
+  pipelines/   # project-level pipelines
+  loop/        # loop artifacts (one dir per loop)
 ```
 
-## 迁移原则
+## Migration Principles
 
-- **先清理旧插件标识**：先清理旧安装引用和 `settings.json` 中旧 key，再执行后续迁移。
-- **旧插件引用只认定为待清理**：
+- Clean old plugin identifiers first: remove old install references and old keys in `settings.json` before data migration.
+- Old references to clean:
   - `pensieve@Pensieve`
   - `pensieve@pensieve-claude-plugin`
-- **新插件唯一引用**：`pensieve@kingkongshot-marketplace`
-- **系统能力在插件内部**：`<SYSTEM_SKILL_ROOT>/` 里的内容随插件更新，不要移动、不要覆盖。
-- **旧的系统文件不再需要**：旧目录中属于系统内置的文件无需保留。迁移完成后可删除旧系统文件以避免混淆（仅删除项目内的旧拷贝，不要动插件内部）。
-- **用户数据放项目级**：只迁移用户自己写的内容到 `.claude/pensieve/`。
-- **不覆盖已有用户数据**：目标位置已有同名文件时，保留原文件，新增时加后缀或提示用户确认。
-- **保留结构**：迁移时保持子目录层级与文件名尽量不变。
-- **初始内容从模板复制**：初始准则与 pipeline 模板存放在插件内，由升级/初始化时复制到项目级。
-- **版本不一致时**：若用户数据与系统版本不一致，**先分别阅读两份内容**，再阅读该目录下 README，并**严格按 README 规范完成合并/迁移**。
+- New single reference:
+  - `pensieve@kingkongshot-marketplace`
+- System capability stays inside the plugin: content under `<SYSTEM_SKILL_ROOT>/` is plugin-managed; do not move or overwrite it.
+- Old system files are no longer needed: remove old project copies after migration (never touch plugin internals).
+- User data is project-level: migrate only user-authored content into `.claude/pensieve/`.
+- Do not overwrite user data: if target files exist, keep them; suffix or merge as needed.
+- Preserve structure: keep subdirectory hierarchy and filenames as much as possible.
+- Seed initial content from templates: initial maxims and pipeline templates are copied from plugin templates.
+- If versions diverge: read both versions first, then follow directory README rules for merge/migration.
 
-## 识别“用户数据”的常见位置（旧结构）
+## Common Old Locations for User Data
 
-可能存在于：
+May exist in:
 
-- 项目仓库内的 `skills/pensieve/` 或其子目录
-- 用户手动放置的 `maxims/`、`decisions/`、`knowledge/`、`pipelines/`、`loop/`
+- `skills/pensieve/` or its subdirectories in the project repo
+- user-created `maxims/`, `decisions/`, `knowledge/`, `pipelines/`, `loop/` folders
 
-### 哪些应迁移
+### What to migrate
 
-- **用户自定义文件**（非系统内置）：
-  - `maxims/custom.md` 或其他非 `_` 前缀文件
+- User-authored files (non-system):
+  - `maxims/custom.md` or other files without `_` prefix
   - `decisions/*.md`
   - `knowledge/*`
   - `pipelines/*.md`
   - `loop/*`
 
-> 旧版本曾在插件内置 `maxims/_linus.md` 与 `pipelines/review.md`。如果你仍在使用它们，请将内容复制到：
-> - `.claude/pensieve/maxims/custom.md`（准则）
-> - `.claude/pensieve/pipelines/review.md`（pipeline）
-> 复制后即可删除旧文件，避免后续插件更新覆盖。
+> Older versions shipped `maxims/_linus.md` and `pipelines/review.md` inside plugin/project copies. If still used, copy content into:
+> - `.claude/pensieve/maxims/custom.md`
+> - `.claude/pensieve/pipelines/review.md`
+> Then delete old copies to avoid confusion.
 
-### 模板位置（插件内）
+### Template locations (plugin)
 
 - `<SYSTEM_SKILL_ROOT>/tools/upgrade/templates/maxims.initial.md`
 - `<SYSTEM_SKILL_ROOT>/tools/upgrade/templates/pipeline.review.md`
 
-### 哪些不迁移
+### What NOT to migrate
 
-- **系统内置文件**（通常以下划线 `_` 开头）：
+- System files (usually `_`-prefixed):
   - `pipelines/_*.md`
   - `maxims/_*.md`
-  - 系统知识库（插件内置）
-  - 旧结构中属于系统的 README/模板/脚本等
+  - plugin-managed system knowledge
+  - system README/templates/scripts in old copied locations
 
-## 清理旧系统文件（项目内）
+## Clean Up Old System Files (Project Only)
 
-升级完成后，删除旧结构中“系统拷贝”以避免混淆（**仅限项目内旧拷贝**）：
+After migration, delete old system copies inside the project to avoid confusion:
 
-- `<project>/skills/pensieve/`（旧版本把系统能力放进项目的情况）
-- `<project>/.claude/skills/pensieve/`（旧版本把 skill 放进项目的情况）
-- 旧系统目录中的 `README.md` 与 `_*.md`（下划线开头提示词）
+- `<project>/skills/pensieve/`
+- `<project>/.claude/skills/pensieve/`
+- old system `README.md` and `_*.md` prompt files
 
-> 若不确定是否为“旧系统拷贝”，先备份再删除。
+If unsure whether something is a system copy, back it up before deleting.
 
-## 清理旧插件命名（必须先做）
+## Clean Up Old Plugin Naming (Must Run First)
 
-在迁移用户数据前，先检查并清理以下配置文件：
+Before migrating user data, check these files:
 
-- 用户级：`~/.claude/settings.json`
-- 项目级：`<project>/.claude/settings.json`
+- user scope: `~/.claude/settings.json`
+- project scope: `<project>/.claude/settings.json`
 
-检查 `enabledPlugins`：
+In `enabledPlugins`:
 
-- 删除旧 key：`pensieve@Pensieve`
-- 删除旧 key：`pensieve@pensieve-claude-plugin`
-- 保留/补齐新 key：`pensieve@kingkongshot-marketplace: true`
+- remove `pensieve@Pensieve`
+- remove `pensieve@pensieve-claude-plugin`
+- keep/add `pensieve@kingkongshot-marketplace: true`
 
-如果同时存在多个 key，不要做兼容；应清理到只保留新 key。
+If multiple keys exist, do not keep compatibility keys. Leave only the new key.
 
-## 迁移步骤（建议给大模型执行）
+## Migration Steps (Best done by an LLM)
 
-1. 先扫描并检查：
+1. Scan and check:
    - `~/.claude/settings.json`
    - `<project>/.claude/settings.json`
-2. 清理 `enabledPlugins` 旧 key，仅保留/补齐新 key（见上节）
-3. 清理旧安装引用（不做兼容保留）：
-   - 卸载 `pensieve@Pensieve`（若存在）
-   - 卸载 `pensieve@pensieve-claude-plugin`（若存在）
-4. 扫描旧结构中用户自定义内容（按上面的“应迁移”规则）
-5. 创建目标目录：
+2. Clean old `enabledPlugins` keys and keep/add only the new key.
+3. Clean old install references:
+   - uninstall `pensieve@Pensieve` if present
+   - uninstall `pensieve@pensieve-claude-plugin` if present
+4. Scan old locations for user content (using the rules above).
+5. Create target directories:
    - `mkdir -p .claude/pensieve/{maxims,decisions,knowledge,pipelines,loop}`
-6. **合并准则**：
-   - 若 `.claude/pensieve/maxims/custom.md` 不存在 → 从模板复制
-   - 若存在且旧准则也存在 → 追加到末尾并标注“迁移内容”
-7. **迁移预设 pipeline（必须对内容做合并判断）**：
-   - 若 `.claude/pensieve/pipelines/review.md` 不存在 → 从模板复制
-   - 若存在 → **读取并对比内容**：
-     - 若内容等价 → 跳过
-     - 若内容不同 → 生成 `review.migrated.md`，并在 `review.md` 顶部写入合并说明或将差异追加到末尾
-8. 将用户文件移动/复制到目标目录（保持相对结构）
-9. 若有冲突（同名文件）：
-   - **不要直接跳过**，必须先读取并判断是否需要合并
-   - 内容相同 → 可跳过
-   - 内容不同 → 追加到现有文件并标注“迁移内容”，或生成 `*.migrated.md` 并提示合并
-10. 清理旧系统文件（见上方清单）
-11. 迁移完成后，输出迁移结果清单（旧路径 → 新路径）
+6. Merge maxims:
+   - if `.claude/pensieve/maxims/custom.md` is missing, copy from template
+   - if both exist, append old content with a migration marker
+7. Migrate preset pipeline (must compare content):
+   - if `.claude/pensieve/pipelines/review.md` is missing, copy from template
+   - if it exists, compare content:
+     - same: skip
+     - different: create `review.migrated.md` and add merge notes
+8. Move/copy user files to target directories while preserving relative structure.
+9. Resolve filename conflicts by comparing content first:
+   - same: skip
+   - different: append with migration marker or create `*.migrated.md`
+10. Clean old system copies listed above.
+11. Output a migration report (old path -> new path).
 
-## 插件清理与升级命令（按顺序）
+## Plugin Cleanup and Update Commands (In Order)
 
-迁移前后都可执行，建议按以下顺序执行：
+Run in this order (adjust scope as needed):
 
 ```bash
-# 清理旧安装引用（忽略不存在的情况）
+# Remove old install references (ignore if not installed)
 claude plugin uninstall pensieve@Pensieve --scope user || true
 claude plugin uninstall pensieve@pensieve-claude-plugin --scope user || true
 
-# 如为 project scope 安装，同步清理 project
+# If project-scope install exists, clean it too
 claude plugin uninstall pensieve@Pensieve --scope project || true
 claude plugin uninstall pensieve@pensieve-claude-plugin --scope project || true
 
-# 更新 marketplace 与新命名插件
+# Refresh marketplace and update new plugin reference
 claude plugin marketplace update kingkongshot/Pensieve
 claude plugin update pensieve@kingkongshot-marketplace --scope user
 ```
 
-## 约束
+## Constraints
 
-- 不要删除系统内置文件
-- 不要修改插件内部的系统内容
-- 可以修改 settings.json，但仅限 `enabledPlugins` 的 Pensieve 相关键
+- Do not delete plugin internal system files.
+- Do not modify plugin-managed system content.
+- You may edit `settings.json` only for Pensieve-related `enabledPlugins` keys.

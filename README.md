@@ -15,7 +15,7 @@
 [![GitHub Stars](https://img.shields.io/github/stars/kingkongshot/Pensieve?color=ffcb47&labelColor=black&style=flat-square)](https://github.com/kingkongshot/Pensieve/stargazers)
 [![License](https://img.shields.io/badge/license-MIT-white?labelColor=black&style=flat-square)](LICENSE)
 
-[English](https://github.com/kingkongshot/Pensieve/blob/main/README.md)
+[Chinese README](https://github.com/kingkongshot/Pensieve/blob/zh/README.md)
 
 </div>
 
@@ -24,22 +24,22 @@
 ## 目录
 
 - [Pensieve](#pensieve)
-- [直接跳过这份 README](#直接跳过这份-readme)
-- [这是智能体时代](#这是智能体时代)
-- [魔法词：`loop`](#魔法词loop)
-- [想读的人：Pensieve 是什么](#想读的人pensieve-是什么)
-- [直接安装即可](#直接安装即可)
-- [安装](#安装)
-- [面向用户](#面向用户)
-- [卸载](#卸载)
-- [特性](#特性)
-- [Loop 模式](#loop-模式)
-- [记忆系统](#记忆系统)
-- [配置](#配置)
-- [项目结构](#项目结构)
-- [设计哲学](#设计哲学)
-- [为什么叫 “Pensieve”？](#为什么叫-pensieve)
-- [社区](#社区)
+- [Just Skip Reading This Readme](#just-skip-reading-this-readme)
+- [It's the Age of Agents](#its-the-age-of-agents)
+- [The Magic Word: `loop`](#the-magic-word-loop)
+- [For Those Who Want to Read: What Pensieve Is](#for-those-who-want-to-read-what-pensieve-is)
+- [Just Install It](#just-install-it)
+- [Installation](#installation)
+- [For Humans](#for-humans)
+- [Uninstallation](#uninstallation)
+- [Features](#features)
+- [Loop Mode](#loop-mode)
+- [Memory System](#memory-system)
+- [Configuration](#configuration)
+- [Project Structure](#project-structure)
+- [Design Philosophy](#design-philosophy)
+- [Why "Pensieve"?](#why-pensieve)
+- [Community](#community)
 - [License](#license)
 
 ---
@@ -50,9 +50,7 @@
 
 **把这份文档链接粘贴给 Claude Code，让它帮你理解和设置。**
 
-### 魔法词：`loop`
-
-不想读这份文档？在提示里包含 `loop` 就行。
+### The Magic Word: `loop`
 
 Pensieve 会自动规划、拆解、执行并持续续跑直到完成。智能体会处理其余细节。
 
@@ -68,26 +66,28 @@ Pensieve 是一个 Claude Code 插件，把经验变成可复用的优势：
 
 如果你只做一件事，那就安装插件并初始化项目记忆：
 
-1. 安装插件
-2. 在 `CLAUDE.md` 加一条路由说明
-3. 创建 `.claude/pensieve/`
-4. 重启 Claude Code
+If you only do one thing, install the plugin and initialize project memory:
+
+1. Install the plugin
+2. Add a short routing note to `CLAUDE.md`
+3. Create `.claude/pensieve/`
+4. Restart Claude Code
 
 ---
 
 ## 安装
 
-Pensieve 采用 Claude Code 插件结构：
+Pensieve follows the Claude Code plugin structure:
 
 - **插件（系统能力）**：hooks + skills，随插件更新
 - **项目级用户数据**：`.claude/pensieve/`，插件不覆盖
 
 ### 面向用户
 
-#### 1.（推荐）通过 Marketplace 安装并固定到 `zh` 分支
+#### 1. (Recommended) Install via marketplace pinned to `main`
 
 ```bash
-claude plugin marketplace add kingkongshot/Pensieve#zh
+claude plugin marketplace add kingkongshot/Pensieve#main
 claude plugin install pensieve@kingkongshot-marketplace --scope user
 ```
 
@@ -97,7 +97,7 @@ claude plugin install pensieve@kingkongshot-marketplace --scope user
 claude plugin install pensieve@kingkongshot-marketplace --scope project
 ```
 
-#### 2. 配置 `CLAUDE.md`
+#### 2. Add to `CLAUDE.md`
 
 ```markdown
 ## Pensieve
@@ -122,11 +122,11 @@ mkdir -p .claude/pensieve/{maxims,decisions,knowledge,pipelines,loop}
 
 说 `loop` 验证安装成功。
 
-详见 **[安装指南](docs/installation.md)**、**[更新指南](docs/update.md)** 与 **[卸载](docs/installation.md#卸载)**。
-面向智能体的安装与迁移流程请看：
-- **[安装指南](docs/installation.md)**
-- **[更新指南](docs/update.md)**
-- **[`/upgrade` 工具源文件](skills/pensieve/tools/upgrade/_upgrade.md)**
+See **[Installation Guide](docs/installation.md)** for details, **[Update Guide](docs/update.md)** for updates, and **[Uninstall](docs/installation.md#uninstall)** for removal.
+Agent-oriented setup and migration procedures are documented in:
+- **[Installation Guide](docs/installation.md)**
+- **[Update Guide](docs/update.md)**
+- **[`/upgrade` tool source](skills/pensieve/tools/upgrade/_upgrade.md)**
 
 ---
 
@@ -134,9 +134,12 @@ mkdir -p .claude/pensieve/{maxims,decisions,knowledge,pipelines,loop}
 
 要移除 Pensieve：
 
-1. 卸载插件：`claude plugin uninstall pensieve@kingkongshot-marketplace --scope user`（若为项目级安装则用 `--scope project`）
-2.（可选）删除项目记忆：`rm -rf .claude/pensieve`
-3. 重启 Claude Code
+1. Remove the plugin:
+   - `claude plugin uninstall pensieve@kingkongshot-marketplace --scope user`
+   - Or `--scope project` if installed at project scope
+2. (Optional) Remove project memory:
+   - `rm -rf .claude/pensieve`
+3. Restart Claude Code
 
 ---
 
@@ -243,7 +246,7 @@ Decision 指导 → Pipeline 改进
 
 ## 项目结构
 
-Pensieve 是一个官方 Claude Code 插件：
+Pensieve is a Claude Code plugin:
 
 - **插件（系统能力）**：hooks + skills，位于插件目录
 - **项目级用户数据**：`.claude/pensieve/`（永不覆盖）

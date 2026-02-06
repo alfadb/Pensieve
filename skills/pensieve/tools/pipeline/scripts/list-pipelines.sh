@@ -7,8 +7,8 @@ project_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 pipeline_dir="$project_root/.claude/pensieve/pipelines"
 
 if [[ ! -d "$pipeline_dir" ]]; then
-  echo "当前项目没有 pipelines"
-  echo "创建目录: mkdir -p .claude/pensieve/pipelines"
+  echo "No project pipelines found"
+  echo "Create the directory: mkdir -p .claude/pensieve/pipelines"
   exit 0
 fi
 
@@ -16,8 +16,8 @@ shopt -s nullglob
 pipeline_files=("$pipeline_dir"/*.md)
 
 if [[ "${#pipeline_files[@]}" -eq 0 ]]; then
-  echo "当前项目没有 pipelines"
-  echo "创建目录: mkdir -p .claude/pensieve/pipelines"
+  echo "No project pipelines found"
+  echo "Create the directory: mkdir -p .claude/pensieve/pipelines"
   exit 0
 fi
 
@@ -32,7 +32,7 @@ for pipeline_file in "${pipeline_files[@]}"; do
   ' "$pipeline_file")"
 
   if [[ -z "$description" ]]; then
-    description="(无描述)"
+    description="(no description)"
   fi
 
   echo "| $pipeline_file | $description |"

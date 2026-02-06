@@ -1,35 +1,81 @@
 #!/bin/bash
-# Pensieve Loop 结束工具
-# 通过 task_list_id 终止指定的 loop
+# Pensieve Loop end tool
+# Stop a loop by task_list_id
 #
-# 用法:
-#   end-loop.sh <task_list_id>   # 结束指定 loop
-#   end-loop.sh --all            # 结束所有活跃的 loop
+# Usage:
+#   end-loop.sh <task_list_id>   # stop a specific loop
+#   end-loop.sh --all            # stop all active loops
 
 set -euo pipefail
 
+PYTHON_BIN="${PYTHON_BIN:-$(command -v python3 || command -v python || true)}"
+[[ -n "$PYTHON_BIN" ]] || {
+    echo "Error: python3 is required but not found" >&2
+    exit 1
+}
+
+json_get_value() {
+    local file="$1"
+    local key="$2"
+    local default_value="${3:-}"
+
+    [[ -n "$PYTHON_BIN" ]] || {
+        echo "$default_value"
+        return 0
+    }
+
+    "$PYTHON_BIN" - "$file" "$key" "$default_value" <<'PY'
+import json
+import sys
+
+file_path, key, default_value = sys.argv[1], sys.argv[2], sys.argv[3]
+try:
+    with open(file_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+except Exception:
+    print(default_value)
+    sys.exit(0)
+
+if not isinstance(data, dict):
+    print(default_value)
+    sys.exit(0)
+
+value = data.get(key)
+if value is None:
+    print(default_value)
+elif isinstance(value, bool):
+    print("true" if value else "false")
+elif isinstance(value, (int, float)):
+    print(value)
+elif isinstance(value, str):
+    print(value)
+else:
+    print(default_value)
+PY
+}
+
 # ============================================
-# 参数解析
+# Argument parsing
 # ============================================
 
 if [[ $# -lt 1 ]]; then
-    echo "❌ 错误: 缺少参数" >&2
+    echo "❌ Error: missing argument" >&2
     echo "" >&2
-    echo "用法:" >&2
-    echo "  $0 <task_list_id>   # 结束指定 loop" >&2
-    echo "  $0 --all            # 结束所有活跃的 loop" >&2
+    echo "Usage:" >&2
+    echo "  $0 <task_list_id>   # stop a specific loop" >&2
+    echo "  $0 --all            # stop all active loops" >&2
     echo "" >&2
-    echo "参数说明:" >&2
-    echo "  <task_list_id>  Phase 1 TaskCreate 返回的 taskListId" >&2
+    echo "Arguments:" >&2
+    echo "  <task_list_id>  taskListId returned by Phase 1 TaskCreate" >&2
     echo "" >&2
-    echo "正确示例:" >&2
+    echo "Examples:" >&2
     echo "  ./end-loop.sh abc-123-uuid" >&2
     echo "  ./end-loop.sh --all" >&2
     exit 1
 fi
 
 # ============================================
-# 结束单个 loop
+# End a single loop
 # ============================================
 
 end_loop_by_marker() {
@@ -37,24 +83,25 @@ end_loop_by_marker() {
     [[ -f "$marker" ]] || return 1
 
     local task_id loop_dir pid
-    task_id=$(jq -r '.task_list_id' "$marker" 2>/dev/null) || return 1
-    loop_dir=$(jq -r '.loop_dir' "$marker" 2>/dev/null) || return 1
+    task_id=$(json_get_value "$marker" "task_list_id" "") || return 1
+    loop_dir=$(json_get_value "$marker" "loop_dir" "") || return 1
+    [[ -n "$task_id" && -n "$loop_dir" ]] || return 1
 
-    echo "结束 Loop: $task_id"
-    echo "  目录: $loop_dir"
+    echo "Stopping Loop: $task_id"
+    echo "  Directory: $loop_dir"
 
-    # 删除 marker 文件（Stop Hook 将不会继续）
+    # Remove marker file (Stop Hook will not continue)
     rm -f "$marker"
-    echo "  已清理"
+    echo "  Cleaned"
     echo ""
 }
 
 # ============================================
-# 主逻辑
+# Main
 # ============================================
 
 if [[ "$1" == "--all" ]]; then
-    echo "结束所有活跃的 loop..."
+    echo "Stopping all active loops..."
     echo ""
 
     found=false
@@ -65,24 +112,25 @@ if [[ "$1" == "--all" ]]; then
     done
 
     if [[ "$found" == false ]]; then
-        echo "没有活跃的 loop"
+        echo "No active loops"
     fi
 else
     TASK_LIST_ID="$1"
     MARKER="/tmp/pensieve-loop-$TASK_LIST_ID"
 
     if [[ ! -f "$MARKER" ]]; then
-        echo "错误: 找不到 loop marker: $MARKER"
+        echo "Error: loop marker not found: $MARKER"
         echo ""
-        echo "活跃的 loop:"
+        echo "Active loops:"
         for marker in /tmp/pensieve-loop-*; do
             [[ -f "$marker" ]] || continue
-            task_id=$(jq -r '.task_list_id' "$marker" 2>/dev/null) || continue
+            task_id=$(json_get_value "$marker" "task_list_id" "") || continue
+            [[ -n "$task_id" ]] || continue
             echo "  - $task_id"
         done
         exit 1
     fi
 
     end_loop_by_marker "$MARKER"
-    echo "Loop 已结束"
+    echo "Loop ended"
 fi

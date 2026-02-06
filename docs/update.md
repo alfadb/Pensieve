@@ -1,31 +1,37 @@
-# 更新指南
+# Update Guide
 
-## 插件（URL 方式）
+## Plugin (Marketplace)
 
-如果你通过 Marketplace 安装：
+If you installed via Marketplace:
 
 ```bash
 claude plugin marketplace update kingkongshot/Pensieve
 claude plugin update pensieve@kingkongshot-marketplace --scope user
 ```
 
-然后重启 Claude Code 应用更新。
+Then restart Claude Code to apply updates.
 
-> 如果你是 project scope 安装，把 `--scope user` 改为 `--scope project`。
+> If you installed with project scope, replace `--scope user` with `--scope project`.
 
-如果你通过 `.claude/settings.json` 的 URL 方式安装：重启 Claude Code 即可获取更新。
-
----
-
-## 系统 Skill
-
-系统提示词（pipelines / scripts / 系统 knowledge）已经被打包在插件内部，随插件更新自动更新。
+If you installed via `.claude/settings.json` URL, restart Claude Code to get updates.
 
 ---
 
-## 更新后
+## System Skills
 
-重启 Claude Code，说 `loop` 验证更新成功。
+System prompts (tools/scripts/system knowledge) are packaged inside the plugin and update with the plugin.
+
+---
+
+## After Updating
+
+Restart Claude Code and say `loop` to verify the update.
+
+If you are guiding the user, remind them they only need a few commands:
+- `/loop`
+- `/selfimprove`
+- `/pipeline`
+- `/upgrade`
 
 如果你在引导用户，提醒他们只需掌握几个基础命令：
 - `/loop`
@@ -35,14 +41,14 @@ claude plugin update pensieve@kingkongshot-marketplace --scope user
 
 ---
 
-## 保留的用户内容
+## Preserved User Data
 
-用户数据位于项目级 `.claude/pensieve/`，插件更新不会覆盖：
+Project user data in `.claude/pensieve/` is never overwritten by plugin updates:
 
-| 目录 | 内容 |
+| Directory | Content |
 |------|------|
-| `.claude/pensieve/maxims/` | 自定义准则 |
-| `.claude/pensieve/decisions/` | 决策记录 |
-| `.claude/pensieve/knowledge/` | 自定义知识 |
-| `.claude/pensieve/pipelines/` | 项目级自定义流程 |
-| `.claude/pensieve/loop/` | 历史 loop 目录 |
+| `.claude/pensieve/maxims/` | Custom maxims |
+| `.claude/pensieve/decisions/` | Decisions |
+| `.claude/pensieve/knowledge/` | Custom knowledge |
+| `.claude/pensieve/pipelines/` | Project pipelines |
+| `.claude/pensieve/loop/` | Loop history |
