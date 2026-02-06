@@ -31,7 +31,6 @@
 - [直接安装即可](#直接安装即可)
 - [安装](#安装)
 - [面向用户](#面向用户)
-- [面向 LLM 智能体](#面向-llm-智能体)
 - [卸载](#卸载)
 - [特性](#特性)
 - [Loop 模式](#loop-模式)
@@ -50,8 +49,6 @@
 ### 这是智能体时代
 
 **把这份文档链接粘贴给 Claude Code，让它帮你理解和设置。**
-
-如果你是 LLM 智能体，向用户解释这个项目现在能做什么。
 
 ### 魔法词：`loop`
 
@@ -75,8 +72,6 @@ Pensieve 是一个 Claude Code 插件，把经验变成可复用的优势：
 2. 在 `CLAUDE.md` 加一条路由说明
 3. 创建 `.claude/pensieve/`
 4. 重启 Claude Code
-
-如果你是智能体，可以帮用户一次性完成这些步骤。
 
 ---
 
@@ -128,17 +123,10 @@ mkdir -p .claude/pensieve/{maxims,decisions,knowledge,pipelines,loop}
 说 `loop` 验证安装成功。
 
 详见 **[安装指南](docs/installation.md)**、**[更新指南](docs/update.md)** 与 **[卸载](docs/installation.md#卸载)**。
-
-### 面向 LLM 智能体
-
-如果你是 LLM 智能体，帮用户：
-
-1. 添加 marketplace（固定到 `zh` 分支）
-2. 安装插件
-3. 在 `CLAUDE.md` 中添加简短路由指引 + 自改进要求
-4. 初始化 `.claude/pensieve/`
-5. 提醒用户重启 Claude Code
-6. 告诉用户只需掌握几个基础命令：`/loop`、`/selfimprove`、`/pipeline`、`/upgrade`
+面向智能体的安装与迁移流程请看：
+- **[安装指南](docs/installation.md)**
+- **[更新指南](docs/update.md)**
+- **[`/upgrade` 工具源文件](skills/pensieve/tools/upgrade/_upgrade.md)**
 
 ---
 
