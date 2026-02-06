@@ -1,110 +1,110 @@
 #!/bin/bash
 # Pensieve Loop initializer
-# Creates loop directory structure and associates task_list_id
 #
-# Usage:
-#   init-loop.sh <task_list_id> <slug>
-#   init-loop.sh <task_list_id> <slug> --force   # overwrite existing directory
+# Modes:
+# 1) Prepare loop directory first (recommended):
+#    init-loop.sh <slug>
+#    init-loop.sh <slug> --force
 #
-# Example:
-#   init-loop.sh abc-123-uuid login-feature
+# 2) Bind task_list_id after tasks are created:
+#    init-loop.sh --bind <task_list_id> <loop_dir_or_name>
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TOOL_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-
 source "$SCRIPT_DIR/_lib.sh"
 
 # Plugin root (system capability)
 PLUGIN_ROOT="$(plugin_root_from_script "$SCRIPT_DIR")"
 SYSTEM_SKILL_ROOT="$PLUGIN_ROOT/skills/pensieve"
-TOOLS_ROOT="$SYSTEM_SKILL_ROOT/tools"
-LOOP_TOOL_ROOT="$TOOLS_ROOT/loop"
 
 # User data (loop artifacts) live at project level and are never overwritten by plugin updates
 DATA_ROOT="$(ensure_user_data_root)"
 LOOP_BASE_DIR="$DATA_ROOT/loop"
 CLAUDE_TASKS_BASE="$HOME/.claude/tasks"
 
-# ============================================
-# Argument parsing
-# ============================================
+usage() {
+    cat << EOF
+Usage:
+  $0 <slug> [--force]
+  $0 --bind <task_list_id> <loop_dir_or_name>
+EOF
+}
 
-if [[ $# -lt 2 ]]; then
-    echo "Usage: $0 <task_list_id> <slug>"
-    echo ""
-    echo "Example:"
-    echo "  $0 abc-123-uuid login-feature"
-    exit 1
-fi
+fail_task_list_id() {
+    local task_list_id="$1"
 
-TASK_LIST_ID="$1"
-SLUG="$2"
-FORCE="${3:-}"
-MARKER_FILE="/tmp/pensieve-loop-$TASK_LIST_ID"
-
-DATE=$(date +%Y-%m-%d)
-TIMESTAMP=$(date -Iseconds)
-
-# ============================================
-# taskListId sanity check (avoid using "default")
-# ============================================
-
-if [[ "$TASK_LIST_ID" == "default" ]]; then
-    echo "Error: taskListId cannot be \"default\""
-    echo ""
-    echo "Please use a real taskListId:"
-    echo "- Copy it from the TaskCreate tool output"
-    echo "- If you didn't see taskListId, you may have printed TaskCreate as text; call the tool and expand the output"
-    echo "- Or use: $LOOP_TOOL_ROOT/scripts/find-task-list-id.sh \"Initialize loop\""
-    exit 1
-fi
-
-# Verify task directory exists
-TASKS_DIR="$CLAUDE_TASKS_BASE/$TASK_LIST_ID"
-if [[ ! -d "$TASKS_DIR" ]]; then
-    echo "Error: Task directory does not exist: $TASKS_DIR"
-    echo ""
-    echo "Please ensure you are using a real taskListId:"
-    echo "- Copy it from the TaskCreate tool output"
-    echo "- If you didn't see taskListId, expand the tool output (e.g., ctrl+o) and copy the JSON value"
-    echo "- Or use: $LOOP_TOOL_ROOT/scripts/find-task-list-id.sh \"Initialize loop\""
-    exit 1
-fi
-
-# ============================================
-# Create loop directory
-# ============================================
-
-LOOP_NAME="${DATE}-${SLUG}"
-LOOP_DIR="$LOOP_BASE_DIR/$LOOP_NAME"
-
-if [[ -d "$LOOP_DIR" ]]; then
-    if [[ "$FORCE" != "--force" ]]; then
-        echo "Error: Loop directory already exists: $LOOP_DIR"
-        echo "Use --force to overwrite"
+    if [[ "$task_list_id" == "default" || -z "$task_list_id" ]]; then
+        echo "Error: taskListId cannot be empty or \"default\""
+        echo ""
+        echo "Please use a real taskListId from TaskCreate output."
         exit 1
     fi
-    echo "Warning: overwriting existing directory: $LOOP_DIR"
-fi
 
-mkdir -p "$LOOP_DIR"
+    local tasks_dir="$CLAUDE_TASKS_BASE/$task_list_id"
+    if [[ ! -d "$tasks_dir" ]]; then
+        echo "Error: Task directory does not exist: $tasks_dir"
+        echo ""
+        echo "Please ensure you are using a real taskListId from TaskCreate output."
+        exit 1
+    fi
+}
 
-# ============================================
-# Write loop marker (Stop Hook will take over; no background process required)
-# ============================================
+resolve_loop_dir() {
+    local loop_ref="$1"
+    local loop_dir=""
 
-CLAUDE_PID="$(find_claude_pid || true)"
-SESSION_PID="$(find_claude_session_pid || true)"
+    if [[ -d "$loop_ref" ]]; then
+        loop_dir="$loop_ref"
+    elif [[ -d "$LOOP_BASE_DIR/$loop_ref" ]]; then
+        loop_dir="$LOOP_BASE_DIR/$loop_ref"
+    else
+        echo "Error: loop directory not found: $loop_ref"
+        echo "Try an absolute path, or a loop name under: $LOOP_BASE_DIR"
+        exit 1
+    fi
 
-if PYTHON_BIN="$(python_bin)"; then
-    PENSIEVE_TASK_LIST_ID="$TASK_LIST_ID" \
-    PENSIEVE_LOOP_DIR="$LOOP_DIR" \
-    PENSIEVE_STARTED_AT="$TIMESTAMP" \
-    PENSIEVE_CLAUDE_PID="${CLAUDE_PID:-}" \
-    PENSIEVE_SESSION_PID="${SESSION_PID:-}" \
-    "$PYTHON_BIN" - "$MARKER_FILE" <<'PY'
+    (cd "$loop_dir" && pwd)
+}
+
+create_loop_dir() {
+    local slug="$1"
+    local force="$2"
+    local date loop_name loop_dir
+    date=$(date +%Y-%m-%d)
+    loop_name="${date}-${slug}"
+    loop_dir="$LOOP_BASE_DIR/$loop_name"
+
+    if [[ -d "$loop_dir" ]]; then
+        if [[ "$force" != "--force" ]]; then
+            echo "Error: Loop directory already exists: $loop_dir"
+            echo "Use --force to overwrite"
+            exit 1
+        fi
+        echo "Warning: overwriting existing directory: $loop_dir"
+    fi
+
+    mkdir -p "$loop_dir"
+    echo "$loop_dir"
+}
+
+write_marker() {
+    local task_list_id="$1"
+    local loop_dir="$2"
+    local marker_file="/tmp/pensieve-loop-$task_list_id"
+    local timestamp
+    timestamp=$(date -Iseconds)
+    local claude_pid session_pid
+    claude_pid="$(find_claude_pid || true)"
+    session_pid="$(find_claude_session_pid || true)"
+
+    if PYTHON_BIN="$(python_bin)"; then
+        PENSIEVE_TASK_LIST_ID="$task_list_id" \
+        PENSIEVE_LOOP_DIR="$loop_dir" \
+        PENSIEVE_STARTED_AT="$timestamp" \
+        PENSIEVE_CLAUDE_PID="${claude_pid:-}" \
+        PENSIEVE_SESSION_PID="${session_pid:-}" \
+        "$PYTHON_BIN" - "$marker_file" <<'PY'
 import json
 import os
 import sys
@@ -126,26 +126,26 @@ with open(marker_path, "w", encoding="utf-8") as f:
     json.dump(payload, f, ensure_ascii=False, indent=2)
     f.write("\n")
 PY
-else
-    cat > "$MARKER_FILE" << EOF
+    else
+        cat > "$marker_file" << EOF
 {
-  "task_list_id": "$TASK_LIST_ID",
-  "loop_dir": "$LOOP_DIR",
-  "started_at": "$TIMESTAMP",
+  "task_list_id": "$task_list_id",
+  "loop_dir": "$loop_dir",
+  "started_at": "$timestamp",
   "tasks_planned": false,
-  "claude_pid": "${CLAUDE_PID:-}",
-  "session_pid": "${SESSION_PID:-}"
+  "claude_pid": "${claude_pid:-}",
+  "session_pid": "${session_pid:-}"
 }
 EOF
-fi
+    fi
 
-echo "Created: $MARKER_FILE"
+    echo "$marker_file"
+}
 
-# ============================================
-# Generate _agent-prompt.md
-# ============================================
+generate_agent_prompt() {
+    local loop_dir="$1"
 
-cat > "$LOOP_DIR/_agent-prompt.md" << EOF
+    cat > "$loop_dir/_agent-prompt.md" << EOF
 ---
 name: expert-developer
 description: Execute a single dev task, then return
@@ -192,22 +192,63 @@ If validation fails, fix and re‑validate before marking completed.
 - No user interaction; all info comes from context and task
 EOF
 
-echo "Created: $LOOP_DIR/_agent-prompt.md"
+    echo "Created: $loop_dir/_agent-prompt.md"
+}
 
-# ============================================
-# Output summary
-# ============================================
+if [[ $# -eq 0 ]]; then
+    usage
+    exit 1
+fi
 
-echo ""
-echo "Loop initialized"
-echo "Directory: $LOOP_DIR"
-echo "Task: $TASKS_DIR"
-echo ""
-echo "TASK_LIST_ID=$TASK_LIST_ID"
-echo "LOOP_DIR=$LOOP_DIR"
-echo ""
-echo "Next steps:"
-echo "1) Create and fill $LOOP_DIR/_context.md (recommend Read before Edit/Write, or Write to create a new file)"
-echo "2) Return to the Loop Pipeline, generate tasks, and execute"
-echo ""
-echo "Tip: Stop Hook will take over based on $MARKER_FILE. No background binding process is needed."
+if [[ "$1" == "--bind" ]]; then
+    if [[ $# -ne 3 ]]; then
+        usage
+        exit 1
+    fi
+
+    TASK_LIST_ID="$2"
+    LOOP_DIR="$(resolve_loop_dir "$3")"
+    fail_task_list_id "$TASK_LIST_ID"
+
+    MARKER_FILE="$(write_marker "$TASK_LIST_ID" "$LOOP_DIR")"
+
+    echo ""
+    echo "Loop bound"
+    echo "Task: $CLAUDE_TASKS_BASE/$TASK_LIST_ID"
+    echo "Directory: $LOOP_DIR"
+    echo ""
+    echo "TASK_LIST_ID=$TASK_LIST_ID"
+    echo "LOOP_DIR=$LOOP_DIR"
+    echo "MARKER_FILE=$MARKER_FILE"
+    echo ""
+    echo "Tip: Stop Hook will take over based on $MARKER_FILE. No background binding process is needed."
+    exit 0
+fi
+
+FORCE=""
+if [[ "${!#}" == "--force" ]]; then
+    FORCE="--force"
+    set -- "${@:1:$(($# - 1))}"
+fi
+
+if [[ $# -eq 1 ]]; then
+    SLUG="$1"
+    LOOP_DIR="$(create_loop_dir "$SLUG" "$FORCE")"
+    generate_agent_prompt "$LOOP_DIR"
+
+    echo ""
+    echo "Loop initialized (prepare-only)"
+    echo "Directory: $LOOP_DIR"
+    echo ""
+    echo "LOOP_DIR=$LOOP_DIR"
+    echo ""
+    echo "Next steps:"
+    echo "1) Create and fill $LOOP_DIR/_context.md"
+    echo "2) Split tasks and create tasks in Claude Task system"
+    echo "3) Bind after getting taskListId:"
+    echo "   bash $SYSTEM_SKILL_ROOT/tools/loop/scripts/init-loop.sh --bind <taskListId> $LOOP_DIR"
+    exit 0
+fi
+
+usage
+exit 1

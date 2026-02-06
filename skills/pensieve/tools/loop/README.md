@@ -12,30 +12,17 @@ Combines the Claude Code Task system with a local tracking directory to auto‑l
 
 ## Startup Flow (Main Window)
 
-### Step 1: Create placeholder task
-
-```
-TaskCreate subject="Initialize loop" description="1. Initialize loop directory 2. Build task context 3. Generate and execute tasks"
-# Returns { taskListId: "abc-123-uuid", taskId: "1" }
-```
-
-### Step 2: Get taskListId (AI‑friendly)
+### Step 1: Initialize loop directory (prepare-only)
 
 ```bash
-<SYSTEM_SKILL_ROOT>/tools/loop/scripts/find-task-list-id.sh "Initialize loop"
-```
-
-### Step 3: Initialize loop directory
-
-```bash
-<SYSTEM_SKILL_ROOT>/tools/loop/scripts/init-loop.sh <taskListId> <slug>
+<SYSTEM_SKILL_ROOT>/tools/loop/scripts/init-loop.sh <slug>
 # Example:
-<SYSTEM_SKILL_ROOT>/tools/loop/scripts/init-loop.sh abc-123-uuid login-feature
+<SYSTEM_SKILL_ROOT>/tools/loop/scripts/init-loop.sh login-feature
 ```
 
-> Note: init-loop.sh runs quickly. Run it in the foreground so you can read the `LOOP_DIR` output. Since `0.3.2`, you no longer need a background bind-loop (Stop Hook auto‑detects via `/tmp/pensieve-loop-<taskListId>`).
+> Note: init-loop.sh runs quickly. Run it in the foreground so you can read the `LOOP_DIR` output.
 
-### Step 4: Fill context (Main Window)
+### Step 2: Fill context (Main Window)
 
 In the loop directory (`.claude/pensieve/loop/{date}-{slug}/`):
 
@@ -95,7 +82,7 @@ In the loop directory (`.claude/pensieve/loop/{date}-{slug}/`):
 [Manual interventions during execution]
 ```
 
-### Step 5: Generate tasks (Main Window)
+### Step 3: Generate tasks (Main Window)
 
 Generate tasks based on context:
 
@@ -110,7 +97,17 @@ Each task includes:
 - description (source + action + completion criteria)
 - activeForm (progressive, e.g., "Implementing user login")
 
-### Step 6: Execute tasks
+### Step 4: Bind Stop Hook with the real taskListId
+
+After creating the first real task, get `taskListId` from TaskCreate output and bind:
+
+```bash
+<SYSTEM_SKILL_ROOT>/tools/loop/scripts/init-loop.sh --bind <taskListId> <LOOP_DIR>
+```
+
+> Since `0.3.2`, Stop Hook auto-detects active loops via `/tmp/pensieve-loop-<taskListId>`. No background bind-loop process is needed.
+
+### Step 5: Execute tasks
 
 Call an agent for each task:
 

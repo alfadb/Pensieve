@@ -305,15 +305,6 @@ read_pipeline() {
     fi
 }
 
-# Ignore Phase 1 placeholder task (only for taskListId)
-is_ignored_task() {
-    local task_file="$1"
-    local id subject
-    id=$(json_get_value "$task_file" "id" "")
-    subject=$(json_get_value "$task_file" "subject" "")
-    [[ "$id" == "1" && "$subject" == "Initialize loop" ]]
-}
-
 is_task_blocked() {
     local task_file="$1"
     local blocked_by
@@ -337,7 +328,6 @@ get_next_task() {
     for task_file in "$TASKS_DIR"/*.json; do
         [[ -f "$task_file" ]] || continue
         [[ "$(basename "$task_file")" == ".DS_Store" ]] && continue
-        is_ignored_task "$task_file" && continue
 
         local status
         status=$(json_get_value "$task_file" "status" "")
@@ -358,7 +348,6 @@ count_tasks() {
     for task_file in "$TASKS_DIR"/*.json; do
         [[ -f "$task_file" ]] || continue
         [[ "$(basename "$task_file")" == ".DS_Store" ]] && continue
-        is_ignored_task "$task_file" && continue
 
         ((total++)) || true
         local status
@@ -380,7 +369,7 @@ check_all_completed_with_stats() {
     local in_progress="$3"
 
     # total==0:
-    # - tasks_planned=false → still in setup (only placeholder task) → do not end
+    # - tasks_planned=false → still in setup (no real tasks yet) → do not end
     # - tasks_planned=true  → tasks finished and cleaned by system → treat as done
     if [[ "$total" -eq 0 ]]; then
         [[ "$MARKER_TASKS_PLANNED" == "true" ]]
