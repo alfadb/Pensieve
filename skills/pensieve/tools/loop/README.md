@@ -84,7 +84,12 @@ In the loop directory (`.claude/pensieve/loop/{date}-{slug}/`):
 
 ### Step 3: Generate tasks (Main Window)
 
-Generate tasks based on context:
+Before splitting tasks, read project maxims:
+
+- `<USER_DATA_ROOT>/maxims/custom.md` (if present)
+- Any other files under `<USER_DATA_ROOT>/maxims/`
+
+Then generate tasks based on context + maxims:
 
 | Workload | Task count |
 |----------|------------|
@@ -96,6 +101,8 @@ Each task includes:
 - subject (imperative, e.g., "Implement user login")
 - description (source + action + completion criteria)
 - activeForm (progressive, e.g., "Implementing user login")
+
+Hard rule: do not generate task lists before maxims are loaded.
 
 ### Step 4: Bind Stop Hook with the real taskListId
 
