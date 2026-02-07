@@ -104,13 +104,9 @@ Each task includes:
 
 Hard rule: do not generate task lists before maxims are loaded.
 
-### Step 4: Bind Stop Hook with the real taskListId
+### Step 4: Auto-bind Stop Hook to the real taskListId
 
-After creating the first real task, get `taskListId` from TaskCreate output and bind:
-
-```bash
-<SYSTEM_SKILL_ROOT>/tools/loop/scripts/init-loop.sh --bind <taskListId> <LOOP_DIR>
-```
+After creating the first real task, Stop Hook auto-binds to the most recent active task list in this loop session.
 
 > Since `0.3.2`, Stop Hook auto-detects active loops via `/tmp/pensieve-loop-<taskListId>`. No background bind-loop process is needed.
 

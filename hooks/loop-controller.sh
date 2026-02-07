@@ -169,6 +169,149 @@ with open(target_file, "w", encoding="utf-8") as f:
 PY
 }
 
+json_promote_pending_marker_file() {
+    local source_file="$1"
+    local target_file="$2"
+    local task_list_id="$3"
+    local auto_bound_at="$4"
+
+    "$PYTHON_BIN" - "$source_file" "$target_file" "$task_list_id" "$auto_bound_at" <<'PY'
+import json
+import sys
+
+source_file, target_file, task_list_id, auto_bound_at = sys.argv[1:5]
+
+with open(source_file, "r", encoding="utf-8") as f:
+    data = json.load(f)
+
+if not isinstance(data, dict):
+    raise ValueError("marker must be an object")
+
+data["task_list_id"] = task_list_id
+data["auto_bound_at"] = auto_bound_at
+if "tasks_planned" not in data:
+    data["tasks_planned"] = False
+
+with open(target_file, "w", encoding="utf-8") as f:
+    json.dump(data, f, ensure_ascii=False, indent=2)
+    f.write("\n")
+PY
+}
+
+find_auto_bind_task_list_id() {
+    local marker_file="$1"
+    local tasks_base="$2"
+
+    "$PYTHON_BIN" - "$marker_file" "$tasks_base" <<'PY'
+from __future__ import annotations
+
+import glob
+import json
+import os
+import sys
+from datetime import datetime
+
+marker_file, tasks_base = sys.argv[1], sys.argv[2]
+
+try:
+    with open(marker_file, "r", encoding="utf-8") as f:
+        marker = json.load(f)
+except Exception:
+    print("")
+    raise SystemExit(0)
+
+if not isinstance(marker, dict):
+    print("")
+    raise SystemExit(0)
+
+started_at = str(marker.get("started_at", "") or "").strip()
+
+def parse_iso_timestamp(value: str) -> float:
+    if not value:
+        return 0.0
+    normalized = value
+    if normalized.endswith("Z"):
+        normalized = normalized[:-1] + "+00:00"
+    try:
+        return datetime.fromisoformat(normalized).timestamp()
+    except Exception:
+        return 0.0
+
+started_epoch = parse_iso_timestamp(started_at)
+
+candidates: list[tuple[float, str]] = []
+for task_dir in glob.glob(os.path.join(tasks_base, "*")):
+    if not os.path.isdir(task_dir):
+        continue
+
+    task_list_id = os.path.basename(task_dir)
+    # Skip already-bound task lists.
+    if os.path.exists(f"/tmp/pensieve-loop-{task_list_id}"):
+        continue
+
+    latest_mtime = 0.0
+    has_active = False
+
+    for path in glob.glob(os.path.join(task_dir, "*.json")):
+        try:
+            stat = os.stat(path)
+            if stat.st_mtime > latest_mtime:
+                latest_mtime = stat.st_mtime
+        except Exception:
+            pass
+
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        except Exception:
+            continue
+
+        if isinstance(data, dict) and data.get("status") in ("pending", "in_progress"):
+            has_active = True
+
+    if not has_active:
+        continue
+    if latest_mtime < started_epoch:
+        continue
+
+    candidates.append((latest_mtime, task_list_id))
+
+if not candidates:
+    print("")
+else:
+    # Pick the most recently updated active task list after this loop started.
+    candidates.sort()
+    print(candidates[-1][1])
+PY
+}
+
+try_auto_bind_pending_marker() {
+    local marker_file="$1"
+    local task_list_id
+    task_list_id=$(json_get_value "$marker_file" "task_list_id" "") || return 1
+    [[ -z "$task_list_id" ]] || return 1
+
+    local tasks_base="$HOME/.claude/tasks"
+    [[ -d "$tasks_base" ]] || return 1
+
+    local candidate_task_list_id
+    candidate_task_list_id=$(find_auto_bind_task_list_id "$marker_file" "$tasks_base")
+    [[ -n "$candidate_task_list_id" ]] || return 1
+
+    local new_marker="/tmp/pensieve-loop-$candidate_task_list_id"
+    if [[ -f "$new_marker" ]]; then
+        rm -f "$marker_file"
+        echo "$new_marker"
+        return 0
+    fi
+
+    local now
+    now=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    json_promote_pending_marker_file "$marker_file" "$new_marker" "$candidate_task_list_id" "$now"
+    rm -f "$marker_file"
+    echo "$new_marker"
+}
+
 emit_block_response() {
     local reason="$1"
     local message="$2"
@@ -272,6 +415,16 @@ for marker in /tmp/pensieve-loop-*; do
         rm -f "$marker"
         log "stale marker removed: $marker claude_pid=$local_claude_pid"
         continue
+    fi
+
+    local_task_list_id=$(json_get_value "$marker" "task_list_id" "") || local_task_list_id=""
+    if [[ -z "$local_task_list_id" ]]; then
+        auto_bound_marker="$(try_auto_bind_pending_marker "$marker" || true)"
+        if [[ -n "$auto_bound_marker" && -f "$auto_bound_marker" ]]; then
+            marker="$auto_bound_marker"
+        else
+            continue
+        fi
     fi
 
     MARKERS+=("$marker")

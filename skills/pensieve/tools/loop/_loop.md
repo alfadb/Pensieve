@@ -153,19 +153,15 @@ Each task must:
 3. Ensure each task has explicit acceptance criteria aligned with maxims
 4. Create tasks incrementally (each task builds on the previous)
 5. **Present the task list to the user for confirmation**
-6. Create the first real task and capture the returned `taskListId`
+6. Create the first real task
 
 ---
 
 ## Phase 4: Activate Stop Hook
 
-**Goal**: Bind the real task list to the loop marker
+**Goal**: Ensure the real task list is bound to the loop marker
 
-After the first real task is created, bind with the returned `taskListId`:
-
-```bash
-bash <SYSTEM_SKILL_ROOT>/tools/loop/scripts/init-loop.sh --bind <taskListId> <LOOP_DIR>
-```
+After the first real task is created, Stop Hook will auto-bind to the most recent active task list for this loop session.
 
 Since `0.3.2`, Stop Hook uses `/tmp/pensieve-loop-<taskListId>` marker to take over.
 

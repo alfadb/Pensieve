@@ -89,6 +89,25 @@ This design gives two direct benefits:
 - Long-running, complex project iterations
 - Teams that want to encode personal craft into default process
 
+## What Belongs in the Pensieve?
+
+**Maxim**: should pass all checks. Still valid across projects? across languages? across domains? useful for future unknown problems?
+
+**Decision**: keep it if any one of these is true. Would deleting it cause repeat mistakes? Would it help make a better choice in 3 months? Could you teach it as a reusable pattern?
+
+**Pipeline**: any task shape that appears repeatedly. Make it runnable first, then refine.
+
+## How Memory Evolves
+
+```text
+Temporary decisions in Loop -> filtered -> Decision
+Repeated similar Decisions -> distilled -> Maxim
+External knowledge + project practice -> Decision
+Decisions guide -> Pipeline improvement
+```
+
+Like memory revealing truth, what you store helps Claude understand your intent.
+
 ## Community
 
 <img src="./QRCode.png" alt="WeChat group QR code" width="200">

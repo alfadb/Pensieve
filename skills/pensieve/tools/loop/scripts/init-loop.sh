@@ -158,6 +158,72 @@ EOF
     echo "$marker_file"
 }
 
+pending_marker_file() {
+    local loop_dir="$1"
+    echo "/tmp/pensieve-loop-pending-$(basename "$loop_dir")"
+}
+
+write_pending_marker() {
+    local loop_dir="$1"
+    local marker_file
+    marker_file="$(pending_marker_file "$loop_dir")"
+    local timestamp
+    timestamp="$(iso_timestamp)"
+    local claude_pid session_pid
+    claude_pid="$(find_claude_pid || true)"
+    session_pid="$(find_claude_session_pid || true)"
+
+    if PYTHON_BIN="$(python_bin)"; then
+        PENSIEVE_TASK_LIST_ID="" \
+        PENSIEVE_LOOP_DIR="$loop_dir" \
+        PENSIEVE_STARTED_AT="$timestamp" \
+        PENSIEVE_CLAUDE_PID="${claude_pid:-}" \
+        PENSIEVE_SESSION_PID="${session_pid:-}" \
+        "$PYTHON_BIN" - "$marker_file" <<'PY'
+import json
+import os
+import sys
+
+marker_path = sys.argv[1]
+claude_pid_raw = os.environ.get("PENSIEVE_CLAUDE_PID", "").strip()
+session_pid_raw = os.environ.get("PENSIEVE_SESSION_PID", "").strip()
+
+payload = {
+    "task_list_id": os.environ.get("PENSIEVE_TASK_LIST_ID", ""),
+    "loop_dir": os.environ.get("PENSIEVE_LOOP_DIR", ""),
+    "started_at": os.environ.get("PENSIEVE_STARTED_AT", ""),
+    "tasks_planned": False,
+    "claude_pid": int(claude_pid_raw) if claude_pid_raw else None,
+    "session_pid": int(session_pid_raw) if session_pid_raw else None,
+}
+
+with open(marker_path, "w", encoding="utf-8") as f:
+    json.dump(payload, f, ensure_ascii=False, indent=2)
+    f.write("\n")
+PY
+    else
+        cat > "$marker_file" << EOF
+{
+  "task_list_id": "",
+  "loop_dir": "$loop_dir",
+  "started_at": "$timestamp",
+  "tasks_planned": false,
+  "claude_pid": "${claude_pid:-}",
+  "session_pid": "${session_pid:-}"
+}
+EOF
+    fi
+
+    echo "$marker_file"
+}
+
+cleanup_pending_marker() {
+    local loop_dir="$1"
+    local marker_file
+    marker_file="$(pending_marker_file "$loop_dir")"
+    rm -f "$marker_file" 2>/dev/null || true
+}
+
 generate_agent_prompt() {
     local loop_dir="$1"
 
@@ -236,6 +302,7 @@ if [[ "$1" == "--bind" ]]; then
     LOOP_DIR="$(resolve_loop_dir "$3")"
     fail_task_list_id "$TASK_LIST_ID"
 
+    cleanup_pending_marker "$LOOP_DIR"
     MARKER_FILE="$(write_marker "$TASK_LIST_ID" "$LOOP_DIR")"
 
     echo ""
@@ -261,18 +328,19 @@ if [[ $# -eq 1 ]]; then
     SLUG="$1"
     LOOP_DIR="$(create_loop_dir "$SLUG" "$FORCE")"
     generate_agent_prompt "$LOOP_DIR"
+    PENDING_MARKER_FILE="$(write_pending_marker "$LOOP_DIR")"
 
     echo ""
     echo "Loop initialized (prepare-only)"
     echo "Directory: $LOOP_DIR"
     echo ""
     echo "LOOP_DIR=$LOOP_DIR"
+    echo "PENDING_MARKER_FILE=$PENDING_MARKER_FILE"
     echo ""
     echo "Next steps:"
     echo "1) Create and fill $LOOP_DIR/_context.md"
     echo "2) Split tasks and create tasks in Claude Task system"
-    echo "3) Bind after getting taskListId:"
-    echo "   bash $SYSTEM_SKILL_ROOT/tools/loop/scripts/init-loop.sh --bind <taskListId> $LOOP_DIR"
+    echo "3) Auto-bind will happen when Stop Hook detects the first active task list"
     exit 0
 fi
 
