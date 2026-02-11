@@ -18,7 +18,6 @@ description: |
   -> 触发此 pipeline
   </example>
 
-signals: ["review", "code review", "check code", "code quality", "代码审查", "审查代码", "检查代码", "代码质量", "review一下"]
 stages: [tasks]
 gate: auto
 ---

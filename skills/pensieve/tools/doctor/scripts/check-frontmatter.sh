@@ -218,7 +218,7 @@ for p in files:
         if fm_state == "unclosed":
             issues.append(Issue("MUST_FIX", "FM-101", rel, "frontmatter 起始存在但未闭合（缺少结束 ---）"))
         else:
-            issues.append(Issue("SHOULD_FIX", "FM-102", rel, "缺少 frontmatter（建议添加统一顶部元数据）"))
+            issues.append(Issue("MUST_FIX", "FM-102", rel, "缺少 frontmatter（必须添加统一顶部元数据）"))
         continue
 
     for err in parse_errors:
@@ -226,28 +226,28 @@ for p in files:
 
     missing = [k for k in required_keys if k not in fm]
     if missing:
-        issues.append(Issue("SHOULD_FIX", "FM-104", rel, f"缺少推荐字段: {', '.join(missing)}"))
+        issues.append(Issue("MUST_FIX", "FM-104", rel, f"缺少必填字段: {', '.join(missing)}"))
 
     v_type = fm.get("type")
     if isinstance(v_type, str) and v_type and v_type not in allowed_types:
-        issues.append(Issue("SHOULD_FIX", "FM-201", rel, f"type 非法: {v_type}（允许: {', '.join(sorted(allowed_types))}）"))
+        issues.append(Issue("MUST_FIX", "FM-201", rel, f"type 非法: {v_type}（允许: {', '.join(sorted(allowed_types))}）"))
 
     v_status = fm.get("status")
     if isinstance(v_status, str) and v_status and v_status not in allowed_status:
-        issues.append(Issue("SHOULD_FIX", "FM-202", rel, f"status 非法: {v_status}（允许: {', '.join(sorted(allowed_status))}）"))
+        issues.append(Issue("MUST_FIX", "FM-202", rel, f"status 非法: {v_status}（允许: {', '.join(sorted(allowed_status))}）"))
 
     v_id = fm.get("id")
     if isinstance(v_id, str) and v_id and not id_re.match(v_id):
-        issues.append(Issue("SHOULD_FIX", "FM-203", rel, "id 非法（仅允许小写字母/数字/中划线，且不能以中划线开头）"))
+        issues.append(Issue("MUST_FIX", "FM-203", rel, "id 非法（仅允许小写字母/数字/中划线，且不能以中划线开头）"))
 
     for key in ["created", "updated"]:
         v = fm.get(key)
         if isinstance(v, str) and v and not valid_date(v):
-            issues.append(Issue("SHOULD_FIX", "FM-204", rel, f"{key} 非法（应为 YYYY-MM-DD）"))
+            issues.append(Issue("MUST_FIX", "FM-204", rel, f"{key} 非法（应为 YYYY-MM-DD）"))
 
     v_tags = fm.get("tags")
     if v_tags is not None and not isinstance(v_tags, list):
-        issues.append(Issue("SHOULD_FIX", "FM-205", rel, "tags 非法（应为数组，如 [pensieve, maxim]）"))
+        issues.append(Issue("MUST_FIX", "FM-205", rel, "tags 非法（应为数组，如 [pensieve, maxim]）"))
 
 must_fix = [x for x in issues if x.level == "MUST_FIX"]
 should_fix = [x for x in issues if x.level == "SHOULD_FIX"]

@@ -116,6 +116,7 @@ bash <SYSTEM_SKILL_ROOT>/tools/doctor/scripts/check-frontmatter.sh
 
 约束：
 - 如果快检存在 frontmatter 语法错误（如未闭合、格式损坏），至少判为 `MUST_FIX`。
+- 如果快检存在 frontmatter 缺失、必填字段缺失或字段值非法，也必须判为 `MUST_FIX`。
 - 未运行此快检不得输出 `最终结论`。
 
 ### Phase 2.5：先生成图谱再下结论（强制）
