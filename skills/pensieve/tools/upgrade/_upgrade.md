@@ -10,6 +10,12 @@ Hard rule：先清理旧插件命名，再迁移用户数据。不要长期并�
 Hard rule：升级/迁移后必须执行一次 doctor 复检。
 Hard rule：不要把“升级前先 doctor”当作门槛；默认流程是 upgrade-first。
 
+## 职责边界（与 Doctor 分工）
+
+- Upgrade 只负责**执行迁移动作**（创建/复制/改名/清理/合并）。
+- Upgrade 不负责输出 `PASS/FAIL`、`MUST_FIX/SHOULD_FIX` 结论。
+- 合规判定统一由 `/doctor` 负责；Upgrade 只产出“做了什么”的迁移报告。
+
 ## 目标结构（项目级，永不被插件覆盖）
 
 ```
@@ -96,16 +102,16 @@ Hard rule：不要把“升级前先 doctor”当作门槛；默认流程是 upg
 
 如果存在多个 key，不要保留兼容键，只保留新键。
 
-## 迁移步骤（建议由 LLM 执行）
+## 迁移步骤（建议由 LLM 执行，偏执行）
 
-1. 扫描并检查：
+1. 读取并定位：
    - `~/.claude/settings.json`
    - `<project>/.claude/settings.json`
 2. 清理旧 `enabledPlugins` 键，仅保留/添加新键。
 3. 清理旧安装引用：
    - 卸载 `pensieve@Pensieve`（若存在）
    - 卸载 `pensieve@pensieve-claude-plugin`（若存在）
-4. 按规则扫描旧位置中的用户内容。
+4. 按规则定位旧位置中的用户内容并执行迁移。
 5. 创建目标目录：
    - `mkdir -p .claude/pensieve/{maxims,decisions,knowledge,pipelines,loop}`
 6. 合并 maxims：
@@ -127,7 +133,7 @@ Hard rule：不要把“升级前先 doctor”当作门槛；默认流程是 upg
    - 不同：追加迁移标记或创建 `*.migrated.md`
 11. 清理上面列出的旧系统副本。
 12. 输出迁移报告（旧路径 -> 新路径）。
-13. 升级后强制复检：
+13. 升级后强制复检（由 Doctor 判定）：
    - 运行一次 `/doctor`
    - 若 doctor 报告迁移/结构问题，继续修复直到 `PASS` 或 `PASS_WITH_WARNINGS`
    - 通过后再按需运行 `/selfimprove`（可选）
@@ -161,3 +167,4 @@ claude plugin update pensieve@kingkongshot-marketplace --scope user
 - 不要删除插件内部系统文件。
 - 不要修改插件托管的系统内容。
 - 只允许为 Pensieve 相关 `enabledPlugins` 键修改 `settings.json`。
+- 不要在 upgrade 阶段输出体检级别结论（`MUST_FIX/SHOULD_FIX`）。

@@ -56,6 +56,9 @@ claude plugin install pensieve@kingkongshot-marketplace --scope project
 
 项目用户数据位于 `.claude/pensieve/`（插件升级不会覆盖）。
 
+> 必须顺序：**安装插件后先初始化，再重启 Claude Code**。  
+> 未初始化就重启，AI 可能不知道项目内置准则与默认审查 pipeline 已经可用。
+
 方式 A：
 
 ```bash
@@ -72,7 +75,7 @@ mkdir -p .claude/pensieve/{maxims,decisions,knowledge,pipelines,loop}
 
 ### 4. 重启 Claude Code
 
-输入 `loop` 验证安装。
+初始化完成后再重启 Claude Code，然后输入 `loop` 验证安装。
 
 ---
 
@@ -101,7 +104,8 @@ claude plugin install pensieve@kingkongshot-marketplace --scope user
 如果你是 LLM agent：
 1. 安装插件
 2. 初始化 `.claude/pensieve/`
-3. **告诉用户只需掌握几个基础命令**：
+3. 重启 Claude Code（不要跳过）
+4. **告诉用户只需掌握几个基础命令**：
    - `/loop`
    - `/doctor`（安装后可选体检；升级后必跑）
    - `/selfimprove`
@@ -129,9 +133,13 @@ claude plugin install pensieve@kingkongshot-marketplace --scope user
 
 安装后：
 
-1. 重启 Claude Code
-2. 输入 `loop`，应触发 Loop 工具流程
-3. 通过 `/help` 确认 `pensieve` skill 已可见
+1. 先运行初始化脚本：`<SYSTEM_SKILL_ROOT>/tools/loop/scripts/init-project-data.sh`
+2. 确认种子文件存在：
+   - `.claude/pensieve/maxims/*.md` 至少 1 个
+   - `.claude/pensieve/pipelines/run-when-reviewing-code.md`
+3. 重启 Claude Code
+4. 输入 `loop`，应触发 Loop 工具流程
+5. 通过 `/help` 确认 `pensieve` skill 已可见
 
 > 说明：`init-loop.sh` 只会创建 loop 目录与 `_agent-prompt.md`。  
 > `_context.md` 在 Phase 2 由主窗口创建并填充。

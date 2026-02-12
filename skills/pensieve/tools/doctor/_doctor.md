@@ -59,6 +59,10 @@ Hard rule：
 - `<project>/.claude/skills/pensieve/`
 - 其他历史用户数据目录（若 upgrade 规则提到）
 
+以及插件启用配置（用于命名一致性检查）：
+- `~/.claude/settings.json`
+- `<project>/.claude/settings.json`
+
 ---
 
 ## 严重性原则（必须遵守）
@@ -73,6 +77,8 @@ Hard rule：
 4. 基础结构缺失：用户数据根目录或关键分类目录缺失，导致流程无法运行。
 5. 流程失焦：`pipeline` 以大段知识堆叠替代 task 编排，且未拆分为链接引用。
 6. 命名违规：`pipeline` 文件名未采用 `run-when-*.md`（包含 legacy `review.md`）。
+7. 初始化断裂：项目用户数据目录存在，但缺少初始种子（如 `maxims/*.md` 为空或缺失 `pipelines/run-when-reviewing-code.md`）。
+8. 插件命名冲突：`enabledPlugins` 同时保留旧键与新键，或缺失新键，导致升级路径不确定。
 
 ### SHOULD_FIX
 
@@ -101,6 +107,7 @@ Hard rule：
 
 - 扫描 `.claude/pensieve/**`
 - 扫描旧路径候选中的用户数据痕迹
+- 扫描用户级/项目级 `settings.json` 中 Pensieve 相关 `enabledPlugins` 键
 - 对每条规则产出：通过 / 失败 / 无法判断
 
 ### Phase 2.2：运行 Frontmatter 快检工具（强制）
