@@ -1,6 +1,6 @@
 ---
 name: pensieve
-description: 项目知识沉淀与工作流路由。探索代码库前先查已有 knowledge，可跳过重复定位；探索后用 self-improve 写入发现。提供 init、upgrade、doctor、self-improve、loop 五个工具。
+description: 项目知识库与工作流路由。knowledge 里有之前探索过的文件位置、模块边界、调用链路，可直接复用不必重新定位；decisions/maxims 是已定论的架构决定和编码准则，应遵守而非重新讨论；pipelines 是可复用的工作流程。完成任务后用 self-improve 沉淀新发现。提供 init、upgrade、doctor、self-improve、loop 五个工具。
 ---
 
 # Pensieve

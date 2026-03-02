@@ -94,7 +94,9 @@ PYTHON_BIN="$(python_bin || true)"
 [[ -n "$PYTHON_BIN" ]] || { echo "Python not found" >&2; exit 1; }
 TODAY_UTC="$(date -u +"%Y-%m-%d")"
 
-"$PYTHON_BIN" - "$SKILL_FILE" "$TMP_GRAPH_FILE" "$EVENT" "$TODAY_UTC" "$PROJECT_ROOT" "$USER_DATA_ROOT" "$NOTE" <<'PY'
+SYSTEM_SKILL_ROOT="$PLUGIN_ROOT/skills/pensieve"
+
+"$PYTHON_BIN" - "$SKILL_FILE" "$TMP_GRAPH_FILE" "$EVENT" "$TODAY_UTC" "$PROJECT_ROOT" "$USER_DATA_ROOT" "$NOTE" "$SYSTEM_SKILL_ROOT" <<'PY'
 from __future__ import annotations
 
 import re
@@ -108,6 +110,7 @@ today = sys.argv[4].strip()
 project_root = sys.argv[5].strip()
 user_data_root = sys.argv[6].strip()
 note = (sys.argv[7] or "").strip().replace("\n", " ")
+system_skill_root = Path(sys.argv[8]) if len(sys.argv) > 8 else None
 
 
 def event_display_name(raw: str) -> str:
@@ -123,14 +126,42 @@ def event_display_name(raw: str) -> str:
     return "self-improve"
 
 
-def read_existing_created_date() -> str:
-    if not skill_file.exists():
-        return today
-    text = skill_file.read_text(encoding="utf-8", errors="replace")
-    m = re.search(r"^created:\s*(\d{4}-\d{2}-\d{2})\s*$", text, flags=re.MULTILINE)
-    if m:
-        return m.group(1)
-    return today
+TOOLS = [
+    ("init", "Init"),
+    ("upgrade", "Upgrade"),
+    ("doctor", "Doctor"),
+    ("self-improve", "Self-Improve"),
+    ("loop", "Loop"),
+]
+
+
+def read_tool_description(tool_dir: str) -> str:
+    """Read description from a tool file's YAML frontmatter."""
+    if system_skill_root is None:
+        return "(description not available)"
+    tool_file = system_skill_root / "tools" / tool_dir / f"_{tool_dir}.md"
+    if not tool_file.exists():
+        return "(description not available)"
+    text = tool_file.read_text(encoding="utf-8", errors="replace")
+    m = re.match(r"^---\s*\n(.*?)\n---", text, flags=re.DOTALL)
+    if not m:
+        return "(no frontmatter)"
+    for line in m.group(1).split("\n"):
+        if line.startswith("description:"):
+            return line[len("description:") :].strip()
+    return "(no description field)"
+
+
+def build_routing_section() -> str:
+    lines = []
+    for tool_dir, display_name in TOOLS:
+        desc = read_tool_description(tool_dir)
+        lines.append(
+            f"- {display_name}：{desc}"
+            f"工具规范：`<SYSTEM_SKILL_ROOT>/tools/{tool_dir}/_{tool_dir}.md`。"
+        )
+    lines.append("- Graph View：读取本文件 `## Graph` 段。")
+    return "\n".join(lines)
 
 
 def load_graph() -> str:
@@ -142,38 +173,77 @@ def load_graph() -> str:
     return txt
 
 
-created_date = read_existing_created_date()
+def replace_section(lines: list[str], header: str, new_body: list[str]) -> list[str]:
+    """Replace the body of a ## section, keeping the header line intact."""
+    start = None
+    end = len(lines)
+    for i, line in enumerate(lines):
+        if start is None and line.rstrip() == header:
+            start = i
+        elif start is not None and i > start and line.startswith("## "):
+            end = i
+            break
+    if start is None:
+        # Section not found — append it
+        return lines + ["", header] + new_body
+    return lines[: start + 1] + new_body + lines[end:]
+
+
 event_name = event_display_name(event)
 graph_markdown = load_graph()
 last_note = note if note else "(none)"
 
-content = f"""---
+if skill_file.exists():
+    # ── Surgical update: only touch Lifecycle State + Graph ──
+    text = skill_file.read_text(encoding="utf-8", errors="replace")
+    lines = text.split("\n")
+
+    lines = replace_section(
+        lines,
+        "## Lifecycle State",
+        [
+            f"- Last Event: {event_name}",
+            f"- Last Note: {last_note}",
+            "",
+        ],
+    )
+
+    lines = replace_section(
+        lines,
+        "## Graph",
+        [
+            "",
+            graph_markdown,
+            "",
+        ],
+    )
+
+    skill_file.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
+
+else:
+    # ── Initial creation: full template ──
+    content = f"""---
 id: pensieve-project-skill
 type: skill
 title: Pensieve Project Skill (Auto Generated)
 status: active
-created: {created_date}
+created: {today}
 tags: [pensieve, skill, project, auto-generated]
 name: pensieve-project-skill
-description: Project-level Pensieve skill file. Auto-maintained route + graph. Do not edit manually.
+description: 项目知识库（自动维护）。knowledge 有已探索过的文件位置与模块边界可直接复用；decisions/maxims 是已定论的决定与准则应遵守；pipelines 是可复用流程。另含路由表、知识图谱、项目路径。
 ---
 
 # Pensieve Project Skill（自动维护）
 
-> AUTO-GENERATED FILE. DO NOT EDIT MANUALLY.
-> Source of truth: `{user_data_root}/SKILL.md`
+> Graph and Lifecycle State are auto-updated by `maintain-project-skill.sh`.
+> Other sections may be manually edited.
 
 ## Lifecycle State
 - Last Event: {event_name}
 - Last Note: {last_note}
 
 ## Routing
-- Init：初始化项目级 skill 数据目录并补齐种子；随后执行首轮提交/代码探索与 review 品味基线分析（只读）。工具规范：`<SYSTEM_SKILL_ROOT>/tools/init/_init.md`（先读 `## Tool Contract`）。
-- Upgrade：先做版本检查；若无新版本，询问是否运行 `doctor` 自检；仅有新版本时执行迁移校准。工具规范：`<SYSTEM_SKILL_ROOT>/tools/upgrade/_upgrade.md`（先读 `## Tool Contract`）。
-- Doctor：做结构/frontmatter/链接体检并给出修复建议。工具规范：`<SYSTEM_SKILL_ROOT>/tools/doctor/_doctor.md`（先读 `## Tool Contract`）。
-- Self-Improve：沉淀 knowledge/decision/maxim/pipeline。工具规范：`<SYSTEM_SKILL_ROOT>/tools/self-improve/_self-improve.md`（先读 `## Tool Contract`）。
-- Loop：进入任务分解与执行闭环。工具规范：`<SYSTEM_SKILL_ROOT>/tools/loop/_loop.md`（先读 `## Tool Contract`）。
-- Graph View：直接读取本文件 `## Graph` 段，不再使用独立 pipeline 命令。
+{build_routing_section()}
 
 ## Project Paths
 - Project Root: `{project_root}`
@@ -188,8 +258,7 @@ description: Project-level Pensieve skill file. Auto-maintained route + graph. D
 
 {graph_markdown}
 """
-
-skill_file.write_text(content.rstrip() + "\n", encoding="utf-8")
+    skill_file.write_text(content.rstrip() + "\n", encoding="utf-8")
 PY
 
 echo "✅ Pensieve project SKILL updated"
