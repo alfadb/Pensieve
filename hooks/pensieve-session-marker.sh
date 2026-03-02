@@ -82,7 +82,7 @@ PY
 
 NOW_UTC="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 
-"$PYTHON_BIN" - "$MODE" "$EVENT" "$MARKER_FILE" "$PLUGIN_VERSION" "$PROJECT_ROOT" "$NOW_UTC" <<'PY'
+"$PYTHON_BIN" - "$MODE" "$EVENT" "$MARKER_FILE" "$PLUGIN_VERSION" "$PROJECT_ROOT" "$NOW_UTC" "$PLUGIN_ROOT" <<'PY'
 from __future__ import annotations
 
 import json
@@ -98,6 +98,8 @@ marker_file = Path(sys.argv[3])
 plugin_version = sys.argv[4].strip()
 project_root = sys.argv[5].strip()
 now_utc = sys.argv[6].strip()
+plugin_root = sys.argv[7].strip()
+system_skill_root = f"{plugin_root}/skills/pensieve"
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -235,9 +237,18 @@ self_check_version = str(state.get("self_check_version") or "")
 self_check_ok = self_check_version == plugin_version
 
 if initialized and self_check_ok:
+    payload = {
+        "hookSpecificOutput": {
+            "hookEventName": "SessionStart",
+            "additionalContext": f"SYSTEM_SKILL_ROOT={system_skill_root}",
+        },
+    }
+    print(json.dumps(payload, ensure_ascii=False))
     sys.exit(0)
 
 messages: list[str] = []
+messages.append(f"SYSTEM_SKILL_ROOT={system_skill_root}")
+messages.append("")
 messages.append("## Pensieve 会话前置检查")
 messages.append("")
 messages.append("- 严重级别：`P0`（会影响后续路由与诊断准确性）")
