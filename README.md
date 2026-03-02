@@ -7,7 +7,7 @@
 [![GitHub Stars](https://img.shields.io/github/stars/kingkongshot/Pensieve?color=ffcb47&labelColor=black&style=flat-square)](https://github.com/kingkongshot/Pensieve/stargazers)
 [![License](https://img.shields.io/badge/license-MIT-white?labelColor=black&style=flat-square)](LICENSE)
 
-[中文 README](https://github.com/mamajiaa/pensieve-claude-plugin/blob/zh/README.md)
+[中文 README](https://github.com/kingkongshot/Pensieve/blob/zh/README.md)
 
 </div>
 
