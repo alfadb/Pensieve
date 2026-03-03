@@ -32,7 +32,7 @@ bash <SYSTEM_SKILL_ROOT>/tools/loop/scripts/init-project-data.sh
 ```
 3. Verify minimum results: `{maxims,decisions,knowledge,pipelines,loop}` directories exist; `pipelines/run-when-reviewing-code.md`, `pipelines/run-when-committing.md`, `knowledge/taste-review/content.md` exist.
 4. Verify project-level SKILL: `.claude/skills/pensieve/SKILL.md` contains auto-generated marker and graph section; `~/.claude/projects/<project>/memory/MEMORY.md` contains Pensieve guidance block.
-5. If legacy directories are detected (`skills/pensieve/` or `.claude/pensieve/`), prompt user to run `upgrade`.
+5. If legacy directories are detected (`skills/pensieve/` or `.claude/pensieve/`), prompt user to run `migrate`.
 
 ## Phase 2: Baseline exploration
 
@@ -56,6 +56,6 @@ bash <SYSTEM_SKILL_ROOT>/tools/loop/scripts/init-project-data.sh
 ## Constraints
 
 - Initialization may include read-only exploration and code review, but does not directly write retention content; that is handled by `self-improve`.
-- Does not perform migration cleanup; that is handled by `upgrade`.
+- Does not perform migration cleanup; that is handled by `migrate`.
 - Never overwrites existing user files.
 - Does not output `doctor`-style compliance severity conclusions.

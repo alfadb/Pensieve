@@ -2,7 +2,7 @@
 # Maintain project-level Pensieve SKILL.md and Claude auto memory guidance block.
 #
 # Usage:
-#   maintain-project-skill.sh --event <install|upgrade|doctor|self-improve|sync> [--note "..."]
+#   maintain-project-skill.sh --event <install|upgrade|migrate|doctor|self-improve|sync> [--note "..."]
 
 set -euo pipefail
 
@@ -27,7 +27,7 @@ while [[ $# -gt 0 ]]; do
     -h|--help)
       cat <<'USAGE'
 Usage:
-  maintain-project-skill.sh --event <install|upgrade|doctor|self-improve|sync> [--note "..."]
+  maintain-project-skill.sh --event <install|upgrade|migrate|doctor|self-improve|sync> [--note "..."]
 
 Options:
   --event <name>   Lifecycle event to record
@@ -49,7 +49,7 @@ if [[ -z "$EVENT" ]]; then
 fi
 
 case "$EVENT" in
-  install|init|upgrade|doctor|self-improve|selfimprove|sync|auto-sync)
+  install|init|upgrade|migrate|doctor|self-improve|selfimprove|sync|auto-sync)
     ;;
   *)
     echo "Unsupported --event: $EVENT" >&2
@@ -94,7 +94,9 @@ PYTHON_BIN="$(python_bin || true)"
 [[ -n "$PYTHON_BIN" ]] || { echo "Python not found" >&2; exit 1; }
 TODAY_UTC="$(date -u +"%Y-%m-%d")"
 
-"$PYTHON_BIN" - "$SKILL_FILE" "$TMP_GRAPH_FILE" "$EVENT" "$TODAY_UTC" "$PROJECT_ROOT" "$USER_DATA_ROOT" "$NOTE" <<'PY'
+SYSTEM_SKILL_ROOT="$PLUGIN_ROOT/skills/pensieve"
+
+"$PYTHON_BIN" - "$SKILL_FILE" "$TMP_GRAPH_FILE" "$EVENT" "$TODAY_UTC" "$PROJECT_ROOT" "$USER_DATA_ROOT" "$NOTE" "$SYSTEM_SKILL_ROOT" <<'PY'
 from __future__ import annotations
 
 import re
@@ -108,6 +110,7 @@ today = sys.argv[4].strip()
 project_root = sys.argv[5].strip()
 user_data_root = sys.argv[6].strip()
 note = (sys.argv[7] or "").strip().replace("\n", " ")
+system_skill_root = Path(sys.argv[8]) if len(sys.argv) > 8 else None
 
 
 def event_display_name(raw: str) -> str:
@@ -116,6 +119,8 @@ def event_display_name(raw: str) -> str:
         return "install/init"
     if r == "upgrade":
         return "upgrade"
+    if r == "migrate":
+        return "migrate"
     if r == "doctor":
         return "doctor"
     if r in {"sync", "auto-sync"}:
@@ -123,14 +128,43 @@ def event_display_name(raw: str) -> str:
     return "self-improve"
 
 
-def read_existing_created_date() -> str:
-    if not skill_file.exists():
-        return today
-    text = skill_file.read_text(encoding="utf-8", errors="replace")
-    m = re.search(r"^created:\s*(\d{4}-\d{2}-\d{2})\s*$", text, flags=re.MULTILINE)
-    if m:
-        return m.group(1)
-    return today
+TOOLS = [
+    ("init", "Init"),
+    ("upgrade", "Upgrade"),
+    ("migrate", "Migrate"),
+    ("doctor", "Doctor"),
+    ("self-improve", "Self-Improve"),
+    ("loop", "Loop"),
+]
+
+
+def read_tool_description(tool_dir: str) -> str:
+    """Read description from a tool file's YAML frontmatter."""
+    if system_skill_root is None:
+        return "(description not available)"
+    tool_file = system_skill_root / "tools" / tool_dir / f"_{tool_dir}.md"
+    if not tool_file.exists():
+        return "(description not available)"
+    text = tool_file.read_text(encoding="utf-8", errors="replace")
+    m = re.match(r"^---\s*\n(.*?)\n---", text, flags=re.DOTALL)
+    if not m:
+        return "(no frontmatter)"
+    for line in m.group(1).split("\n"):
+        if line.startswith("description:"):
+            return line[len("description:") :].strip()
+    return "(no description field)"
+
+
+def build_routing_section() -> str:
+    lines = []
+    for tool_dir, display_name in TOOLS:
+        desc = read_tool_description(tool_dir)
+        lines.append(
+            f"- {display_name}: {desc} "
+            f"Tool spec: `<SYSTEM_SKILL_ROOT>/tools/{tool_dir}/_{tool_dir}.md`."
+        )
+    lines.append("- Graph View: Read the `## Graph` section of this file.")
+    return "\n".join(lines)
 
 
 def load_graph() -> str:
@@ -142,38 +176,77 @@ def load_graph() -> str:
     return txt
 
 
-created_date = read_existing_created_date()
+def replace_section(lines: list[str], header: str, new_body: list[str]) -> list[str]:
+    """Replace the body of a ## section, keeping the header line intact."""
+    start = None
+    end = len(lines)
+    for i, line in enumerate(lines):
+        if start is None and line.rstrip() == header:
+            start = i
+        elif start is not None and i > start and line.startswith("## "):
+            end = i
+            break
+    if start is None:
+        # Section not found — append it
+        return lines + ["", header] + new_body
+    return lines[: start + 1] + new_body + lines[end:]
+
+
 event_name = event_display_name(event)
 graph_markdown = load_graph()
 last_note = note if note else "(none)"
 
-content = f"""---
+if skill_file.exists():
+    # ── Surgical update: only touch Lifecycle State + Graph ──
+    text = skill_file.read_text(encoding="utf-8", errors="replace")
+    lines = text.split("\n")
+
+    lines = replace_section(
+        lines,
+        "## Lifecycle State",
+        [
+            f"- Last Event: {event_name}",
+            f"- Last Note: {last_note}",
+            "",
+        ],
+    )
+
+    lines = replace_section(
+        lines,
+        "## Graph",
+        [
+            "",
+            graph_markdown,
+            "",
+        ],
+    )
+
+    skill_file.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
+
+else:
+    # ── Initial creation: full template ──
+    content = f"""---
 id: pensieve-project-skill
 type: skill
 title: Pensieve Project Skill (Auto Generated)
 status: active
-created: {created_date}
+created: {today}
 tags: [pensieve, skill, project, auto-generated]
 name: pensieve-project-skill
-description: Project knowledge base (auto-maintained). Knowledge contains previously explored file locations and module boundaries for direct reuse; decisions/maxims are settled decisions and principles to follow; pipelines are reusable workflows. Also includes routing table, knowledge graph, and project paths.
+description: Project knowledge base (auto-maintained). knowledge contains previously explored file locations and module boundaries for reuse; decisions/maxims are finalized decisions and guidelines to follow; pipelines are reusable workflows. Also includes routing table, knowledge graph, and project paths.
 ---
 
 # Pensieve Project Skill (Auto-Maintained)
 
-> AUTO-GENERATED FILE. DO NOT EDIT MANUALLY.
-> Source of truth: `{user_data_root}/SKILL.md`
+> Graph and Lifecycle State are auto-updated by `maintain-project-skill.sh`.
+> Other sections may be manually edited.
 
 ## Lifecycle State
 - Last Event: {event_name}
 - Last Note: {last_note}
 
 ## Routing
-- Init: Initialize project-level skill data directory and seed initial content; then perform first-round commit/code exploration and review taste baseline analysis (read-only). Tool spec: `<SYSTEM_SKILL_ROOT>/tools/init/_init.md` (read `## Tool Contract` first).
-- Upgrade: Version check first; if no new version, ask whether to run `doctor` self-check; only perform migration alignment when a new version exists. Tool spec: `<SYSTEM_SKILL_ROOT>/tools/upgrade/_upgrade.md` (read `## Tool Contract` first).
-- Doctor: Structural/frontmatter/link health check with fix suggestions. Tool spec: `<SYSTEM_SKILL_ROOT>/tools/doctor/_doctor.md` (read `## Tool Contract` first).
-- Self-Improve: Capture knowledge/decision/maxim/pipeline. Tool spec: `<SYSTEM_SKILL_ROOT>/tools/self-improve/_self-improve.md` (read `## Tool Contract` first).
-- Loop: Enter task decomposition and execution loop. Tool spec: `<SYSTEM_SKILL_ROOT>/tools/loop/_loop.md` (read `## Tool Contract` first).
-- Graph View: Read this file's `## Graph` section directly; standalone pipeline commands are no longer used.
+{build_routing_section()}
 
 ## Project Paths
 - Project Root: `{project_root}`
@@ -188,15 +261,14 @@ description: Project knowledge base (auto-maintained). Knowledge contains previo
 
 {graph_markdown}
 """
-
-skill_file.write_text(content.rstrip() + "\n", encoding="utf-8")
+    skill_file.write_text(content.rstrip() + "\n", encoding="utf-8")
 PY
 
-echo "Pensieve project SKILL updated"
+echo "✅ Pensieve project SKILL updated"
 echo "  - skill: $SKILL_FILE"
 
 if [[ -x "$AUTO_MEMORY_SCRIPT" ]]; then
   if ! bash "$AUTO_MEMORY_SCRIPT" --event "$EVENT"; then
-    echo "Auto memory update skipped: failed to run maintain-auto-memory.sh" >&2
+    echo "⚠️  Auto memory update skipped: failed to run maintain-auto-memory.sh" >&2
   fi
 fi

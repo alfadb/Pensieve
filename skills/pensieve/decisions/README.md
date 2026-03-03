@@ -43,13 +43,12 @@ Key criteria:
 2. **Would someone three months later make a better choice after reading it?**
 3. **Can it be explained clearly and reused?**
 
-Any clear "yes" -> worth capturing.
-All "uncertain" -> keep in loop temporary directory.
+Any clear "yes" -> worth capturing. If all are uncertain, keep in loop temporary directory.
 
 ### Five Value Dimensions
 
 | Dimension | Question |
-|----------|----------|
+|---|---|
 | Long-term impact | Does it reduce a class of bugs? |
 | Readability | Can it be distilled into a transferable "code taste"? |
 | Locality | Does it define module boundaries or responsibilities? |
@@ -59,7 +58,7 @@ All "uncertain" -> keep in loop temporary directory.
 ## Relationships & Evolution
 
 | Direction | Description |
-|-----------|-------------|
+|---|---|
 | Decision -> Maxim | Repeated decisions can be elevated into maxims |
 | Knowledge -> Decision | External knowledge combined with project practice forms decisions |
 | Loop -> Decision | Temporary loop decisions are filtered and promoted |
@@ -67,14 +66,14 @@ All "uncertain" -> keep in loop temporary directory.
 ### Storage Locations
 
 | Stage | Location | Notes |
-|-------|----------|-------|
+|---|---|---|
 | During loop | `.claude/skills/pensieve/loop/{name}/_decisions/` | Temporary; tied to loop lifecycle |
 | After loop | `.claude/skills/pensieve/decisions/` | Project user data (never overwritten) |
 
 ### Decision Levels
 
 | Level | Characteristics | Scope |
-|-------|-----------------|-------|
+|---|---|---|
 | Hard rule | Violating it causes regressions | Cross-project universal |
 | Coding taste | Reduces special cases; easier to reason about | Implementation guidance |
 | Team preference | Depends on team context | Must be explicitly labeled |

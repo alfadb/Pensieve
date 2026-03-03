@@ -1,6 +1,6 @@
 # User Data Structure Migration Spec
 
-Shared structure history, target layout, and processing rules for Doctor / Upgrade (single source of truth). Structure checks are implemented by the script `<SYSTEM_SKILL_ROOT>/tools/doctor/scripts/scan-structure.sh`.
+Shared structure history, target layout, and processing rules for Doctor / Migrate (single source of truth). Structure checks are implemented by the script `<SYSTEM_SKILL_ROOT>/tools/doctor/scripts/scan-structure.sh`.
 
 ## Current Target Structure (Latest, Active)
 
@@ -13,14 +13,14 @@ Minimum directory structure:
 - `pipelines/`
 - `loop/`
 
-Critical files (should exist after initialization; Upgrade must align primary content):
+Critical files (should exist after initialization; Migrate must align primary content):
 - `pipelines/run-when-reviewing-code.md`
 - `pipelines/run-when-committing.md`
 - `knowledge/taste-review/content.md`
 
 Critical file content sources (single source of truth):
-- `<SYSTEM_SKILL_ROOT>/tools/upgrade/templates/pipeline.run-when-reviewing-code.md`
-- `<SYSTEM_SKILL_ROOT>/tools/upgrade/templates/pipeline.run-when-committing.md`
+- `<SYSTEM_SKILL_ROOT>/tools/migrate/templates/pipeline.run-when-reviewing-code.md`
+- `<SYSTEM_SKILL_ROOT>/tools/migrate/templates/pipeline.run-when-committing.md`
 - `<SYSTEM_SKILL_ROOT>/knowledge/taste-review/content.md`
 
 Auto-maintained files (tools are allowed to update):
@@ -38,7 +38,7 @@ Auto-maintained files (tools are allowed to update):
 | `<project>/.claude/skills/pensieve/{maxims,decisions,knowledge,pipelines,loop}/{README*.md,readme*.md}` | deprecated | Delete (spec single source of truth is plugin-side `<SYSTEM_SKILL_ROOT>/*/README.md`) |
 | `<project>/.claude/skills/pensieve/` | active | Sole read/write root directory |
 
-## Migration Criteria (for Doctor/Upgrade)
+## Migration Criteria (for Doctor/Migrate)
 
 Conditions that indicate a "structure migration issue":
 1. A deprecated path co-exists with the active path (dual sources).
@@ -57,7 +57,7 @@ Conditions that indicate "structure no-op":
 
 ## Critical File Content Alignment Strategy
 
-When critical files are missing or primary content is inconsistent, Upgrade must perform full alignment:
+When critical files are missing or primary content is inconsistent, Migrate must perform full alignment:
 1. If the target file exists, back it up as `*.bak.<timestamp>`.
 2. Overwrite the target file using the template file.
 3. List replaced files and backup paths in the migration report.
@@ -78,5 +78,5 @@ Should not migrate:
 
 ## Maintenance Rules
 
-1. When directory structure changes, update this file first, then update Doctor/Upgrade documentation.
-2. If Doctor/Upgrade conflicts with this file, this file takes precedence.
+1. When directory structure changes, update this file first, then update Doctor/Migrate documentation.
+2. If Doctor/Migrate conflicts with this file, this file takes precedence.

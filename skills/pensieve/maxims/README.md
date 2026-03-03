@@ -40,7 +40,7 @@ Any "no" -> more appropriate as a `decision`, not a `maxim`.
 ## Relationships & Evolution
 
 | Direction | Description |
-|-----------|-------------|
+|---|---|
 | Decision -> Maxim | Repeatedly occurring decisions can be elevated into maxims |
 | Maxim <-> Knowledge | Maxims can absorb external best practices |
 

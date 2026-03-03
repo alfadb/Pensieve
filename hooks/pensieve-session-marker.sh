@@ -1,9 +1,12 @@
 #!/bin/bash
 # Pensieve marker state manager.
 # - SessionStart mode: read-only check and optional context injection.
-# - Record mode: main window updates marker only after init/doctor/upgrade actually finishes.
+# - Record mode: main window updates marker only after init/migrate/doctor/upgrade actually finishes.
 
 set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../skills/pensieve/tools/loop/scripts/_lib.sh"
 
 MODE="session-start"
 EVENT=""
@@ -24,7 +27,7 @@ while [[ $# -gt 0 ]]; do
       cat <<'USAGE'
 Usage:
   pensieve-session-marker.sh --mode session-start
-  pensieve-session-marker.sh --mode record --event <install|init|upgrade|doctor|self-improve|sync>
+  pensieve-session-marker.sh --mode record --event <install|init|upgrade|migrate|doctor|self-improve|sync>
 USAGE
       exit 0
       ;;
@@ -49,39 +52,11 @@ if [[ "$MODE" == "record" && -z "$EVENT" ]]; then
   exit 1
 fi
 
-to_posix_path() {
-  local raw_path="$1"
-  [[ -n "$raw_path" ]] || {
-    echo ""
-    return 0
-  }
-
-  if [[ "$raw_path" =~ ^[A-Za-z]:[\\/].* ]]; then
-    if command -v cygpath >/dev/null 2>&1; then
-      cygpath -u "$raw_path"
-      return 0
-    fi
-
-    local drive rest drive_lower
-    drive="${raw_path:0:1}"
-    rest="${raw_path:2}"
-    rest="${rest//\\//}"
-    drive_lower="$(printf '%s' "$drive" | tr 'A-Z' 'a-z')"
-    echo "/$drive_lower$rest"
-    return 0
-  fi
-
-  echo "$raw_path"
-}
-
 PYTHON_BIN="${PYTHON_BIN:-$(command -v python3 || command -v python || true)}"
 [[ -n "$PYTHON_BIN" ]] || exit 0
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PLUGIN_ROOT_RAW="${CLAUDE_PLUGIN_ROOT:-$(cd "$SCRIPT_DIR/.." && pwd)}"
-PLUGIN_ROOT="$(to_posix_path "$PLUGIN_ROOT_RAW")"
-PROJECT_ROOT_RAW="${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
-PROJECT_ROOT="$(to_posix_path "$PROJECT_ROOT_RAW")"
+PLUGIN_ROOT="$(plugin_root_from_script "$SCRIPT_DIR")"
+PROJECT_ROOT="$(to_posix_path "$(project_root)")"
 PLUGIN_JSON="$PLUGIN_ROOT/.claude-plugin/plugin.json"
 MARKER_FILE="$PROJECT_ROOT/.state/pensieve-session-marker.json"
 
@@ -107,7 +82,7 @@ PY
 
 NOW_UTC="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 
-"$PYTHON_BIN" - "$MODE" "$EVENT" "$MARKER_FILE" "$PLUGIN_VERSION" "$PROJECT_ROOT" "$NOW_UTC" <<'PY'
+"$PYTHON_BIN" - "$MODE" "$EVENT" "$MARKER_FILE" "$PLUGIN_VERSION" "$PROJECT_ROOT" "$NOW_UTC" "$PLUGIN_ROOT" <<'PY'
 from __future__ import annotations
 
 import json
@@ -123,6 +98,8 @@ marker_file = Path(sys.argv[3])
 plugin_version = sys.argv[4].strip()
 project_root = sys.argv[5].strip()
 now_utc = sys.argv[6].strip()
+plugin_root = sys.argv[7].strip()
+system_skill_root = f"{plugin_root}/skills/pensieve"
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -140,6 +117,8 @@ def normalize_event(value: str) -> str:
         return "doctor"
     if value == "upgrade":
         return "upgrade"
+    if value == "migrate":
+        return "migrate"
     if value in {"self-improve", "selfimprove"}:
         return "self-improve"
     if value in {"sync", "auto-sync"}:
@@ -258,30 +237,39 @@ self_check_version = str(state.get("self_check_version") or "")
 self_check_ok = self_check_version == plugin_version
 
 if initialized and self_check_ok:
+    payload = {
+        "hookSpecificOutput": {
+            "hookEventName": "SessionStart",
+            "additionalContext": f"SYSTEM_SKILL_ROOT={system_skill_root}",
+        },
+    }
+    print(json.dumps(payload, ensure_ascii=False))
     sys.exit(0)
 
 messages: list[str] = []
+messages.append(f"SYSTEM_SKILL_ROOT={system_skill_root}")
+messages.append("")
 messages.append("## Pensieve Session Pre-Check")
 messages.append("")
-messages.append("- Severity: `P0` (affects downstream routing and diagnostics accuracy)")
+messages.append("- Severity: `P0` (affects subsequent routing and diagnostic accuracy)")
 messages.append("- Main window strategy: complete prerequisite fixes and update the marker before handling the user's current request.")
-messages.append("- Suggested action: report the status below to the user and ask \"Would you like to run `init/doctor` prerequisite fixes now?\"")
+messages.append(“- Recommended action: report the above status to the user and ask \”Would you like to complete the `init/doctor` prerequisite fix now?\””)
 messages.append(f"- Current plugin version: `{plugin_version}`")
 messages.append(f"- Current project marker: `{marker_file}`")
-messages.append("- Rule: only update this marker file in the main window after migration/fix has been confirmed complete.")
+messages.append("- Rule: only update this marker file after the main window confirms migration/fix is complete.")
 messages.append("- Guidance: invoke the `pensieve` skill in the main window and ask how to complete `init/doctor`.")
 
 if not initialized:
-    messages.append("- Project not initialized: run `init` first.")
-    messages.append("- After `init` succeeds, run in the main window: `bash \"$CLAUDE_PLUGIN_ROOT/hooks/pensieve-session-marker.sh\" --mode record --event init`")
+    messages.append("- Current project is not initialized: run `init` first.")
+    messages.append("- After `init` succeeds, run in the main window: `bash -lc 'root=\"${CLAUDE_PLUGIN_ROOT:-}\"; [[ -n \"$root\" ]] || exit 0; if [[ \"${root:1:1}\" == \":\" && \"${root:0:1}\" =~ [A-Za-z] ]]; then if command -v cygpath >/dev/null 2>&1; then root=\"$(cygpath -u \"$root\")\"; else drive=\"${root:0:1}\"; rest=\"${root:2}\"; rest=\"${rest//\\\\//}\"; drive=\"$(printf \"%s\" \"$drive\" | tr \"A-Z\" \"a-z\")\"; root=\"/$drive$rest\"; fi; fi; exec \"$root/hooks/run-hook.sh\" pensieve-session-marker.sh --mode record --event init'`")
 
 if not self_check_ok:
     recorded = self_check_version if self_check_version else "not recorded"
-    messages.append(f"- Self-check version mismatch: recorded `{recorded}`, required `{plugin_version}`. Run `doctor` first.")
-    messages.append("- After `doctor` passes, run in the main window: `bash \"$CLAUDE_PLUGIN_ROOT/hooks/pensieve-session-marker.sh\" --mode record --event doctor`")
+    messages.append(f"- Self-check version mismatch: recorded as `{recorded}`, required `{plugin_version}`. Run `doctor` first.")
+    messages.append("- After `doctor` passes, run in the main window: `bash -lc 'root=\"${CLAUDE_PLUGIN_ROOT:-}\"; [[ -n \"$root\" ]] || exit 0; if [[ \"${root:1:1}\" == \":\" && \"${root:0:1}\" =~ [A-Za-z] ]]; then if command -v cygpath >/dev/null 2>&1; then root=\"$(cygpath -u \"$root\")\"; else drive=\"${root:0:1}\"; rest=\"${root:2}\"; rest=\"${rest//\\\\//}\"; drive=\"$(printf \"%s\" \"$drive\" | tr \"A-Z\" \"a-z\")\"; root=\"/$drive$rest\"; fi; fi; exec \"$root/hooks/run-hook.sh\" pensieve-session-marker.sh --mode record --event doctor'`")
 
 if not initialized:
-    messages.append("- Recommended sequence: `init` -> `doctor`.")
+    messages.append("- Recommended order: `init` -> `doctor`.")
 else:
     messages.append("- Recommended action: run `doctor` and update the marker.")
 
@@ -289,8 +277,8 @@ user_parts: list[str] = []
 if not initialized:
     user_parts.append("project not initialized")
 if not self_check_ok:
-    user_parts.append("self-check version mismatch")
-user_summary = f"Pensieve (v{plugin_version}): {', '.join(user_parts)}. Run /pensieve to fix."
+    user_parts.append("check version mismatch")
+user_summary = f"Pensieve (v{plugin_version}): {', '.join(user_parts)}. Type /pensieve to run fix."
 
 payload = {
     "hookSpecificOutput": {

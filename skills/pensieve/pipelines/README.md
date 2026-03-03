@@ -57,7 +57,7 @@ Input -> Execute -> Validate -> Output
 ## What Makes a Good Pipeline
 
 | Trait | Value (LLM Perspective) |
-|-------|------------------------|
+|---|---|
 | Clear closed loop | Prevents drift; clear when to start/end |
 | Uses real signals | Validates via actual output, not "looks right" |
 | File-based trail | Traceable; can locate the problem step |
@@ -71,7 +71,7 @@ Anti-pattern: read code -> feels correct -> continue
 Correct approach: execute -> get output/logs -> judge based on results
 
 | Validation type | Real feedback source |
-|-----------------|----------------------|
+|---|---|
 | Build | Compiler output, build logs |
 | Tests | Test results, coverage |
 | Runtime | Application logs, error stacks |
@@ -88,7 +88,7 @@ Core question: **If this workflow is not solidified, which decisions will be rep
 First ask: can we solve this by composing existing pipelines?
 
 | Situation | Action |
-|-----------|--------|
+|---|---|
 | Existing pipeline combination covers it | Compose/reorder; do not add new |
 | Only missing a validation step | Add to an existing pipeline |
 | Entirely different execution loop | Create a new pipeline |
@@ -102,7 +102,7 @@ Before adding, pass one more check:
 ### Signals Worth Capturing
 
 | Signal | Explanation |
-|--------|-------------|
+|---|---|
 | Multiple loops share the same task structure | Steps have stabilized; ready to extract |
 | A step is repeatedly missed | Pipeline needed to enforce completeness |
 | Execution depends on multiple knowledge sources | Pipeline should unify orchestration |
@@ -118,7 +118,7 @@ Anti-pattern: pursuing "perfect design" before it has ever run.
 ## Relationships & Evolution
 
 | Direction | Description |
-|-----------|-------------|
+|---|---|
 | Pipeline <- Knowledge | External standards constrain the flow |
 | Pipeline -> Tasks | Pipeline defines the blueprint; tasks are runtime instances |
 | Pipeline <-> Decision | Decisions from execution can feed back into the flow |
@@ -138,7 +138,7 @@ Hard rule:
 ## Pipeline vs Tasks
 
 | Type | Essence | Focus |
-|------|---------|-------|
+|---|---|---|
 | Pipeline | Task blueprint + validation loop | "In what order to do what" |
 | Tasks | Runtime instances | "Execute this step now" |
 
@@ -160,7 +160,7 @@ Hard rule (mandatory):
 - Legacy naming is not preserved for compatibility (e.g. `review.md` must be renamed)
 
 | Pattern | Type | Notes |
-|---------|------|-------|
+|---|---|---|
 | `run-when-*.md` | user-defined | Filename directly reveals "when to call it" |
 | `_*.md` | forbidden | Legacy system naming, no longer used |
 
@@ -256,7 +256,7 @@ description: [Constrained scenario + cost of skipping + trigger words]. Example:
 ### Format Checklist
 
 | Element | Requirement |
-|---------|------------|
+|---|---|
 | Filename | Must be `run-when-*.md`; trigger scenario discernible from filename |
 | Required frontmatter | `id/type/title/status/created/updated/tags/description` |
 | `description` | In frontmatter; includes trigger words |

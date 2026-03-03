@@ -21,7 +21,7 @@ Without this knowledge, where does the model get stuck, and how costly is that?
 ### Three Types of Friction
 
 | Friction type | Characteristics | Examples |
-|--------------|-----------------|----------|
+|---|---|---|
 | Time gap | Knowledge newer than model training cutoff | Next.js 15 APIs, new Claude Code features |
 | Implicit knowledge | Must be inferred from structure, not explicit | Naming conventions, architectural rationale |
 | Scattered knowledge | Exists but retrieval cost is high | GitHub issues, mailing lists, source comments |
@@ -31,7 +31,7 @@ Without this knowledge, where does the model get stuck, and how costly is that?
 Core question: **If we don't write this down, what execution friction will it cause?**
 
 | Friction level | Action |
-|---------------|--------|
+|---|---|
 | High-frequency blocker with high recovery cost | Must capture |
 | Occasional blocker, quickly searchable | Don't capture; keep a link only |
 | One-off issue | Don't capture |
@@ -39,7 +39,7 @@ Core question: **If we don't write this down, what execution friction will it ca
 ### Capture Signals
 
 | Signal | Explanation |
-|--------|-------------|
+|---|---|
 | The model keeps asking the same question | Time gap or missing implicit knowledge |
 | Search results are inaccurate or outdated | Time gap |
 | Must infer a convention from code every time | Implicit knowledge not made explicit |
@@ -62,7 +62,7 @@ When a task's primary cost is exploration and locating information, and the cont
 ## Relationships & Evolution
 
 | Direction | Description |
-|-----------|-------------|
+|---|---|
 | Knowledge -> Decision | External knowledge + project practice forms decisions |
 | Knowledge -> Pipeline | External standards inform pipeline execution |
 | Knowledge -> Maxim | Best practices internalized into maxims |
@@ -70,7 +70,7 @@ When a task's primary cost is exploration and locating information, and the cont
 ### Knowledge vs Decision
 
 | Type | Essence | Test |
-|------|---------|------|
+|---|---|---|
 | Knowledge | External input | "This is how the world works" |
 | Decision | Internal output | "We chose to do this" |
 

@@ -42,7 +42,7 @@
 
 ## Approach Overview
 
-[High-level description; avoid too much detail]
+[High‑level description; avoid too much detail]
 
 ## Context Links (recommended)
 - Based on: [[prior decision or knowledge]]
@@ -92,8 +92,8 @@
 Discussion: state synchronization
 
 Options:
-1. Main-window continuation -- read pending tasks and dispatch subagents one by one
-2. .active file -- simple JSON file for local state only
+1. Main-window continuation — read pending tasks and dispatch subagents one by one
+2. .active file — simple JSON file for local state only
 
 User preference: Option 2, because "simpler is better"
 
@@ -109,5 +109,5 @@ Final choice: .active file
 | Only describe the approach, not the rationale | "Why" matters more than "how" |
 | No alternatives | Consider at least one alternative |
 | Ignoring risks | Be honest about what can go wrong |
-| Too detailed | This is design, not implementation -- stay high-level |
+| Too detailed | This is design, not implementation — stay high‑level |
 | Detached from requirements | Every decision should trace back to requirements |

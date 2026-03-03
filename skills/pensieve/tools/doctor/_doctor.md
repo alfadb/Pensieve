@@ -18,7 +18,7 @@ description: Read-only check tool that outputs PASS/PASS_WITH_WARNINGS/FAIL with
 Derive check items from specs rather than hardcoding.
 
 ---
-Spec sources (see `shared-rules.md` section on spec sources): `<SYSTEM_SKILL_ROOT>/maxims/README.md`, `decisions/README.md`, `pipelines/README.md`, `knowledge/README.md`, `tools/doctor/migrations/README.md`, `tools/upgrade/_upgrade.md` (upgrade flow only).
+Spec sources (see `shared-rules.md` section on spec sources): `<SYSTEM_SKILL_ROOT>/maxims/README.md`, `decisions/README.md`, `pipelines/README.md`, `knowledge/README.md`, `tools/doctor/migrations/README.md`, `tools/upgrade/_upgrade.md` (upgrade flow only), `tools/migrate/_migrate.md` (migrate flow only).
 
 Check scope: project-level user data (latest per `migrations/README.md`) and legacy path candidates (deprecated list). Plugin config: `~/.claude/settings.json`, `<project>/.claude/settings.json`.
 
@@ -37,11 +37,11 @@ Check scope: project-level user data (latest per `migrations/README.md`) and leg
 11. Found legacy spec README copies in project-level subdirectories
 12. `~/.claude/projects/<project>/memory/MEMORY.md` missing Pensieve guidance block or not aligned with system SKILL.md `description`
 
-**SHOULD_FIX**: recommended/prefer rules not met but do not block the main flow. Includes `decision` missing "Exploration Shortcut" section or missing "What to ask less next time"/"What to look up less next time"/"Invalidation conditions".
+**SHOULD_FIX**: recommended/prefer rules not met but do not block the main flow. Includes `decision` missing "Exploration Reduction" section or missing "What to ask less next time"/"What to search less next time"/"Invalidation conditions".
 
 **INFO**: observations, statistics, or tradeoff items requiring user decision.
 
-**Status determination** (hard rule): `MUST_FIX > 0` -> `FAIL` (migration issues -> `upgrade`; non-migration issues -> `self-improve`) | `MUST_FIX = 0` and `SHOULD_FIX + INFO > 0` -> `PASS_WITH_WARNINGS` (-> `self-improve`) | all zero -> `PASS` (-> `none`)
+**Status determination** (hard rule): `MUST_FIX > 0` -> `FAIL` (structure migration issues -> `migrate`; plugin key issues -> `upgrade`; others -> `self-improve`) | `MUST_FIX = 0` and `SHOULD_FIX + INFO > 0` -> `PASS_WITH_WARNINGS` (-> `self-improve`) | all zero -> `PASS` (-> `none`)
 
 **Execution principle (simplified)**: Prefer running `run-doctor.sh` and use its summary/report as the sole basis for judgment; do not add manual inference.
 
@@ -66,7 +66,7 @@ bash <SYSTEM_SKILL_ROOT>/tools/doctor/scripts/run-doctor.sh --strict
 bash <SYSTEM_SKILL_ROOT>/tools/doctor/scripts/scan-structure.sh --output .state/pensieve-structure-scan.json
 ```
 2. Read `status`, `summary.must_fix_count`/`should_fix_count`, `flags.*`, `findings[]`
-3. If `must_fix_count > 0`, conclusion is at least `FAIL`; recommended action is `upgrade` only for migration-type issues
+3. If `must_fix_count > 0`, conclusion is at least `FAIL`; recommended action for structure migration issues is `migrate`, for plugin key issues is `upgrade`
 
 ## Phase 2.2: Frontmatter quick check
 **Goal**: Cover frontmatter format validation and incorporate into judgment.
@@ -76,7 +76,7 @@ bash <SYSTEM_SKILL_ROOT>/tools/doctor/scripts/scan-structure.sh --output .state/
 bash <SYSTEM_SKILL_ROOT>/tools/doctor/scripts/check-frontmatter.sh --format text
 ```
 2. Read files scanned, MUST_FIX/SHOULD_FIX counts and details
-3. Frontmatter syntax errors/missing/required field missing/invalid values -> `MUST_FIX`; pipeline naming violations (`FM-301/FM-302`) -> `MUST_FIX`; `decision` exploration shortcut missing (`FM-401~FM-404`) -> `SHOULD_FIX`
+3. Frontmatter syntax errors/missing/required field missing/invalid values -> `MUST_FIX`; pipeline naming violations (`FM-301/FM-302`) -> `MUST_FIX`; `decision` exploration reduction missing (`FM-401~FM-404`) -> `SHOULD_FIX`
 
 ## Phase 2.5: Generate graph and verify links
 **Goal**: Verify knowledge network link connectivity.
@@ -106,7 +106,7 @@ bash <SYSTEM_SKILL_ROOT>/tools/upgrade/scripts/generate-user-data-graph.sh
 - MUST_FIX: {n}
 - SHOULD_FIX: {n}
 - INFO: {n}
-- Recommended next step: {`upgrade` | `self-improve` | `none`}
+- Recommended next step: {`migrate` | `upgrade` | `self-improve` | `none`}
 
 ## 1.5) Graph Summary (pre-conclusion evidence)
 - Graph file: `{<project>/.claude/skills/pensieve/SKILL.md#Graph}`
@@ -132,7 +132,7 @@ Fix: {one-line fix suggestion}
 - Standalone graph files found: {yes/no}
 - Missing critical directories: {yes/no}
 - MEMORY.md missing/drifted: {yes/no}
-- Suggested action: {`upgrade` | `self-improve` | `none`}
+- Suggested action: {`migrate` | `upgrade` | `self-improve` | `none`}
 
 ## 5) Three-Step Action Plan
 1. {step 1 (specific, actionable)}
@@ -152,7 +152,7 @@ Fix: {one-line fix suggestion}
 |---|---|---|---|
 ```
 
-2. When `FAIL` and migration-related, `next step` is `upgrade`; when `FAIL` and non-migration, `next step` is `self-improve`; `decision`/`pipeline` broken links are at least `MUST_FIX`
+2. When `FAIL` and structure migration related, `next step` is `migrate`; when plugin key related, `next step` is `upgrade`; `decision`/`pipeline` broken links are at least `MUST_FIX`
 3. Doctor does not modify user data files; only allowed to auto-maintain `SKILL.md` and auto memory
 
 ## Phase 3.5: Maintain project-level SKILL + MEMORY

@@ -43,10 +43,10 @@ Add this to the project root (`CLAUDE.md` only):
 Explore the project first, then decide whether to use Pensieve tools.
 
 When the user needs a structured workflow:
-- Upgrade is only for version updates / legacy data migration / residue cleanup (on demand)
+- Upgrade is only for version updates and plugin key alignment (on demand)
+- Migrate is only for legacy data migration and residue cleanup (on demand)
 - Use the Init tool to initialize project-level user data and generate an initial exploration + taste baseline (first-time setup)
 - Use the Loop tool for split + auto-loop execution
-- Use the Upgrade tool to migrate user data
 - View the graph by reading the project-level `SKILL.md` under `## Graph`
 
 When the user asks to improve Pensieve (pipelines/scripts/rules/behavior),
@@ -86,12 +86,12 @@ Restart Claude Code only after initialization is complete, then say "use loop to
 
 ## Legacy Migration
 
-If you previously copied system content into the project (e.g., `skills/pensieve/`), use the **Upgrade tool** to migrate and clean:
+If you previously copied system content into the project (e.g., `skills/pensieve/`), use the **Migrate tool** to migrate and clean:
 
 - Merge project-level maxims
 - Align key modules and file locations (including `run-when-*.md`, `knowledge/taste-review/content.md`)
 - Replace key file content when mismatched (with backup first)
-- Remove legacy system copies and old directories (README and `_*.md`, deprecated paths)
+- Remove legacy system copies and deprecated paths, and clean up historical spec copies (`README*.md` / `readme*.md`) and standalone graph residue
 
 ---
 
@@ -113,7 +113,8 @@ If you are an LLM agent:
 3. Explore the project based on commit history and code, then produce an initial taste analysis using the review pipeline
 4. Restart Claude Code (do not skip)
 5. **Tell the user they only need to express a few basic intents**:
-   - Upgrade or migrate (Upgrade)
+   - Upgrade version (Upgrade)
+   - Migrate structure (Migrate)
    - Initialize (Init)
    - Split and execute (Loop)
    - Health check (Doctor -- required after init; required after upgrade)

@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "required_dirs": ["maxims", "decisions", "knowledge", "pipelines", "loop"],
+  "critical_files": [
+    {
+      "target": "pipelines/run-when-reviewing-code.md",
+      "template": "tools/migrate/templates/pipeline.run-when-reviewing-code.md",
+      "compare_mode": "pipeline_context_links_ignored"
+    },
+    {
+      "target": "pipelines/run-when-committing.md",
+      "template": "tools/migrate/templates/pipeline.run-when-committing.md",
+      "compare_mode": "pipeline_context_links_ignored"
+    },
+    {
+      "target": "knowledge/taste-review/content.md",
+      "template": "knowledge/taste-review/content.md",
+      "compare_mode": "exact"
+    }
+  ],
+  "legacy_paths": {
+    "project": ["skills/pensieve", ".claude/pensieve"],
+    "user": [".claude/skills/pensieve", ".claude/pensieve"]
+  },
+  "legacy_graph_patterns": ["_pensieve-graph*.md", "pensieve-graph*.md", "graph*.md"],
+  "legacy_readme_regex": "(?i)^readme(?:.*\\.md)?$",
+  "plugin_keys": {
+    "current": "pensieve@kingkongshot-marketplace",
+    "legacy": ["pensieve@Pensieve", "pensieve@pensieve-claude-plugin"]
+  },
+  "memory": {
+    "start_marker": "<!-- pensieve:auto-memory:start -->",
+    "end_marker": "<!-- pensieve:auto-memory:end -->",
+    "guidance_line": "- Guidance: when the task involves knowledge accumulation, structure diagnostics, version migration, or complex task decomposition, prefer invoking the `pensieve` skill."
+  },
+  "doctor": {
+    "next_step": {
+      "migrate_categories": [
+        "missing_root",
+        "missing_directory",
+        "deprecated_path",
+        "legacy_graph_file",
+        "legacy_spec_readme_copy",
+        "missing_critical_file",
+        "critical_file_drift",
+        "review_pipeline_path_drift"
+      ],
+      "upgrade_categories": [
+        "legacy_enabled_plugins_key",
+        "missing_enabled_plugins_key"
+      ]
+    }
+  },
+  "findings": {
+    "STR-001": {
+      "message": "Project-level user data root directory does not exist.",
+      "recommendation": "Run init or migrate first to create the .claude/skills/pensieve base structure."
+    },
+    "STR-002": {
+      "message": "Missing critical directory: {dir}/",
+      "recommendation": "Run migrate to complete directory structure, then re-run doctor."
+    },
+    "STR-101": {
+      "message": "Deprecated legacy path coexists with active root directory.",
+      "recommendation": "Run migrate to move data and remove legacy paths, converging to .claude/skills/pensieve as the single root."
+    },
+    "STR-111": {
+      "message": "Standalone legacy graph file found.",
+      "recommendation": "Run migrate to remove standalone graph files; the graph should only exist in SKILL.md#Graph."
+    },
+    "STR-121": {
+      "message": "Legacy spec README copy found in project-level subdirectory.",
+      "recommendation": "Run migrate to remove this copy; the canonical spec is at <SYSTEM_SKILL_ROOT>/*/README.md."
+    },
+    "STR-201": {
+      "message": "Missing critical seed file.",
+      "recommendation": "Run migrate to force-align critical files."
+    },
+    "STR-202": {
+      "message": "Critical file body content differs from template (context link value differences are ignored).",
+      "recommendation": "Run migrate to back up then replace, restoring the critical workflow file body to match the template."
+    },
+    "STR-301": {
+      "message": "Review pipeline still references plugin-internal Knowledge path.",
+      "recommendation": "Run migrate to switch references to the project-level .claude/skills/pensieve/knowledge/... path."
+    },
+    "STR-401": {
+      "message": "Failed to parse settings.json, cannot fully validate enabledPlugins: {err}",
+      "recommendation": "Fix the settings.json syntax and retry."
+    },
+    "STR-402": {
+      "message": "Legacy plugin key is still enabled in enabledPlugins.",
+      "recommendation": "Run upgrade to clean up legacy keys, keeping only pensieve@kingkongshot-marketplace."
+    },
+    "STR-403": {
+      "message": "New plugin key is missing or not enabled in enabledPlugins.",
+      "recommendation": "Run upgrade to write pensieve@kingkongshot-marketplace: true."
+    },
+    "STR-501": {
+      "message": "Missing Claude Code auto memory entry file MEMORY.md.",
+      "recommendation": "Run init/migrate/doctor to trigger auto memory creation, or manually write the Pensieve guidance block in ~/.claude/projects/<project>/memory/MEMORY.md."
+    },
+    "STR-502": {
+      "message": "MEMORY.md is missing the Pensieve description or its content is not aligned with the system skill description.",
+      "recommendation": "Run init/migrate/doctor to trigger auto memory alignment, ensuring ~/.claude/projects/<project>/memory/MEMORY.md matches the skill description and includes the pensieve skill guidance."
+    },
+    "STR-901": {
+      "message": "Required scan template is missing, cannot complete validation: {detail}",
+      "recommendation": "Fix the plugin installation or update to the full version and retry."
+    }
+  }
+}

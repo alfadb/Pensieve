@@ -57,7 +57,7 @@ That's it. Then say **"use loop to finish this task"** to kick off your first ta
 
 [Installation Guide](docs/installation.md) · [Update Guide](docs/update.md) · [Uninstall](docs/installation.md#uninstall)
 
-## Five Built-in Tools
+## Six Built-in Tools
 
 Ready to use after install, no extra configuration needed. Just describe what you want in plain language.
 
@@ -86,11 +86,17 @@ Read-only scan of all user data: frontmatter format, semantic link integrity, di
 
 > "Check if there are any data issues"
 
-### `upgrade` — Version Upgrade and Migration
+### `upgrade` — Version Upgrade
 
-Highest priority. Runs scripted version comparison and pull, and cleans up legacy version residue (old plugin keys / old plugin names / old directories). After upgrade completes, guides you to manually run doctor for verification.
+Only performs version-level actions: version comparison, pull latest, plugin key alignment and old plugin name cleanup. Does not perform directory migration or content repair. After upgrade completes, guides you to manually run doctor for verification.
 
 > "Upgrade pensieve"
+
+### `migrate` — Structure Migration and Residue Cleanup
+
+Only performs user data structure actions: old directory migration, key seed file alignment, old graph/README residue cleanup. Does not update plugin versions, does not output PASS/FAIL. After completion, guides you to manually run doctor for verification.
+
+> "Migrate pensieve legacy data"
 
 ## Four-Layer Knowledge Model
 
@@ -140,9 +146,10 @@ Reusing native capabilities means: no extra wrappers, and when Claude Code upgra
 ### Design Principles
 
 - **System capabilities separated from user data** — plugin updates never overwrite your accumulated project knowledge
+- **Single source of truth for rules** — directories/key files/old paths/plugin keys are uniformly defined by `tools/core/schema.json`
 - **Confirm before executing** — when scope is unclear, confirm first; never auto-start
 - **Read before write** — read format specs before creating any user data
-- **Confidence requirements** — pipeline outputs require ≥80% confidence to report; no guesswork in output
+- **Confidence requirements** — pipeline outputs require >=80% confidence to report; no guesswork in output
 
 ### Directory Structure
 

@@ -56,7 +56,7 @@ event = (sys.argv[3] or "").strip()
 
 start_marker = "<!-- pensieve:auto-memory:start -->"
 end_marker = "<!-- pensieve:auto-memory:end -->"
-guidance_line = "- Guidance: When a request involves project knowledge capture, structural health checks, version migration, or complex task decomposition, prefer invoking the `pensieve` skill."
+guidance_line = "- Guidance: when the task involves knowledge accumulation, structure diagnostics, version migration, or complex task decomposition, prefer invoking the `pensieve` skill."
 
 
 def load_skill_description(path: Path) -> str:
@@ -113,5 +113,5 @@ else:
     action = "unchanged"
 
 event_label = event if event else "unknown"
-print(f"Pensieve auto memory {action}: {memory_file} (event={event_label})")
+print(f"✅ Pensieve auto memory {action}: {memory_file} (event={event_label})")
 PY

@@ -78,7 +78,7 @@
 
 User: "I want multiple terminals to share state."
 
-Follow-ups:
+Follow‑ups:
 Q: What scenario do you expect?
 A: I started a task in terminal A and want to continue in terminal B.
 
@@ -103,4 +103,4 @@ Clarified experience:
 | Requirements too vague | Success criteria must be verifiable |
 | Unclear boundaries | "Out of scope" must be explicit |
 | Forgot to update | Update the anchor when requirements change |
-| Writing a PRD | This is an anchor, not a full doc -- keep it short |
+| Writing a PRD | This is an anchor, not a full doc — keep it short |

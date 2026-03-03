@@ -1,8 +1,8 @@
 #!/bin/bash
-# Initialize project-level Pensieve user data directory:
+# Initialize project-level pensieve user data directory:
 #   <project>/.claude/skills/pensieve/
 #
-# This directory is user-owned and never overwritten by plugin updates.
+# This directory is owned by the user; plugin updates never overwrite it.
 #
 # Safe to run repeatedly (idempotent).
 
@@ -26,7 +26,7 @@ PROJECT_ROOT="$(project_root)"
 DATA_ROOT="$(user_data_root)"
 
 PLUGIN_ROOT="$(plugin_root_from_script "$SCRIPT_DIR")"
-TEMPLATES_ROOT="$PLUGIN_ROOT/skills/pensieve/tools/upgrade/templates"
+TEMPLATES_ROOT="$PLUGIN_ROOT/skills/pensieve/tools/migrate/templates"
 SYSTEM_KNOWLEDGE_ROOT="$PLUGIN_ROOT/skills/pensieve/knowledge"
 PROJECT_SKILL_SCRIPT="$PLUGIN_ROOT/skills/pensieve/tools/project-skill/scripts/maintain-project-skill.sh"
 
@@ -64,7 +64,7 @@ if [[ ! -f "$README" ]]; then
   cat > "$README" << 'EOF'
 # .claude/skills/pensieve (Project Skill Data)
 
-This directory is the project-level Pensieve user data area:
+This directory is the project‑level Pensieve user data area:
 - **NEVER** overwritten by plugin updates
 - Safe to commit for team sharing, or ignore as needed
 
@@ -74,7 +74,7 @@ This directory is the project-level Pensieve user data area:
 - `decisions/`: decision records (format: `<SYSTEM_SKILL_ROOT>/decisions/README.md`)
 - `knowledge/`: external knowledge (format: `<SYSTEM_SKILL_ROOT>/knowledge/README.md`)
 - `loop/`: loop runs (one folder per loop)
-- `pipelines/`: project-level pipelines (seeded at install)
+- `pipelines/`: project‑level pipelines (seeded at install)
 - `SKILL.md`: project-level skill route + graph (auto-generated, do not edit manually)
 EOF
 fi
@@ -90,7 +90,7 @@ for template_pipeline in "$TEMPLATES_ROOT"/pipeline.run-when-*.md; do
   fi
 done
 
-echo "Initialization complete: $DATA_ROOT"
+echo "✅ Initialization complete: $DATA_ROOT"
 MAXIM_COUNT=0
 if [[ -d "$DATA_ROOT/maxims" ]]; then
   MAXIM_COUNT="$(find "$DATA_ROOT/maxims" -maxdepth 1 -type f -name '*.md' | wc -l | tr -d ' ')"
@@ -101,6 +101,6 @@ echo "  - pipelines/*: seeded $PIPELINE_SEEDED_COUNT new file(s)"
 
 if [[ -x "$PROJECT_SKILL_SCRIPT" ]]; then
   if ! bash "$PROJECT_SKILL_SCRIPT" --event install --note "seeded project skill data via init-project-data.sh"; then
-    echo "Warning: Project skill update skipped: failed to run maintain-project-skill.sh" >&2
+    echo "⚠️  Project skill update skipped: failed to run maintain-project-skill.sh" >&2
   fi
 fi

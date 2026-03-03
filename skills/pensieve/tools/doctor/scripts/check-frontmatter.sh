@@ -236,7 +236,7 @@ issues: list[Issue] = []
 files = list_markdown_files(root)
 
 if not root.exists():
-    issues.append(Issue("MUST_FIX", "FM-000", str(root), "用户数据根目录不存在"))
+    issues.append(Issue("MUST_FIX", "FM-000", str(root), "User data root directory does not exist"))
 
 for p in files:
     rel = str(p.relative_to(root))
@@ -248,7 +248,7 @@ for p in files:
                     "MUST_FIX",
                     "FM-301",
                     rel,
-                    "legacy pipeline 文件名 `review.md` 已废弃，必须改为 `run-when-*.md`（推荐 `run-when-reviewing-code.md`）",
+                    "Legacy pipeline filename `review.md` is deprecated; must be renamed to `run-when-*.md` (recommended: `run-when-reviewing-code.md`)",
                 )
             )
         elif not pipeline_name_re.match(p.name):
@@ -257,7 +257,7 @@ for p in files:
                     "MUST_FIX",
                     "FM-302",
                     rel,
-                    "pipeline 文件名必须为 `run-when-*.md`，从文件名可直接判断触发场景",
+                    "Pipeline filename must match `run-when-*.md` so the trigger scenario is clear from the name",
                 )
             )
 
@@ -266,76 +266,76 @@ for p in files:
 
     if fm is None:
         if fm_state == "unclosed":
-            issues.append(Issue("MUST_FIX", "FM-101", rel, "frontmatter 起始存在但未闭合（缺少结束 ---）"))
+            issues.append(Issue("MUST_FIX", "FM-101", rel, "Frontmatter opening exists but is not closed (missing closing ---)"))
         else:
-            issues.append(Issue("MUST_FIX", "FM-102", rel, "缺少 frontmatter（必须添加统一顶部元数据）"))
+            issues.append(Issue("MUST_FIX", "FM-102", rel, "Missing frontmatter (unified top metadata block must be added)"))
         continue
 
     for err in parse_errors:
-        issues.append(Issue("MUST_FIX", "FM-103", rel, f"frontmatter 语法错误: {err}"))
+        issues.append(Issue("MUST_FIX", "FM-103", rel, f"Frontmatter syntax error: {err}"))
 
     missing = [k for k in required_keys if k not in fm]
     if missing:
-        issues.append(Issue("MUST_FIX", "FM-104", rel, f"缺少必填字段: {', '.join(missing)}"))
+        issues.append(Issue("MUST_FIX", "FM-104", rel, f"Missing required fields: {', '.join(missing)}"))
 
     v_type = fm.get("type")
     if isinstance(v_type, str) and v_type and v_type not in allowed_types:
-        issues.append(Issue("MUST_FIX", "FM-201", rel, f"type 非法: {v_type}（允许: {', '.join(sorted(allowed_types))}）"))
+        issues.append(Issue("MUST_FIX", "FM-201", rel, f"Invalid type: {v_type} (allowed: {', '.join(sorted(allowed_types))})"))
 
     v_status = fm.get("status")
     if isinstance(v_status, str) and v_status and v_status not in allowed_status:
-        issues.append(Issue("MUST_FIX", "FM-202", rel, f"status 非法: {v_status}（允许: {', '.join(sorted(allowed_status))}）"))
+        issues.append(Issue("MUST_FIX", "FM-202", rel, f"Invalid status: {v_status} (allowed: {', '.join(sorted(allowed_status))})"))
 
     v_id = fm.get("id")
     if isinstance(v_id, str) and v_id and not id_re.match(v_id):
-        issues.append(Issue("MUST_FIX", "FM-203", rel, "id 非法（仅允许小写字母/数字/中划线，且不能以中划线开头）"))
+        issues.append(Issue("MUST_FIX", "FM-203", rel, "Invalid id (only lowercase letters, digits, and hyphens allowed; must not start with a hyphen)"))
 
     for key in ["created", "updated"]:
         v = fm.get(key)
         if isinstance(v, str) and v and not valid_date(v):
-            issues.append(Issue("MUST_FIX", "FM-204", rel, f"{key} 非法（应为 YYYY-MM-DD）"))
+            issues.append(Issue("MUST_FIX", "FM-204", rel, f"Invalid {key} (must be YYYY-MM-DD)"))
 
     v_tags = fm.get("tags")
     if v_tags is not None and not isinstance(v_tags, list):
-        issues.append(Issue("MUST_FIX", "FM-205", rel, "tags 非法（应为数组，如 [pensieve, maxim]）"))
+        issues.append(Issue("MUST_FIX", "FM-205", rel, "Invalid tags (must be an array, e.g. [pensieve, maxim])"))
 
     if rel.startswith("decisions/"):
         body = body_without_frontmatter(text)
-        if not re.search(r"^\s*##\s*(?:探索减负|Exploration Reduction)\s*$", body, flags=re.MULTILINE):
+        if not re.search(r”^\s*##\s*(?:探索减负|Exploration Reduction)\s*$”, body, flags=re.MULTILINE):
             issues.append(
                 Issue(
-                    "SHOULD_FIX",
-                    "FM-401",
+                    “SHOULD_FIX”,
+                    “FM-401”,
                     rel,
-                    "decision should contain an `## Exploration Reduction` section",
+                    “Decision should contain an `## Exploration Reduction` section”,
                 )
             )
         else:
-            if "下次可以少问什么" not in body and "What to ask less" not in body:
+            if “下次可以少问什么” not in body and “What to ask less” not in body:
                 issues.append(
                     Issue(
-                        "SHOULD_FIX",
-                        "FM-402",
+                        “SHOULD_FIX”,
+                        “FM-402”,
                         rel,
-                        "Exploration Reduction section missing 'What to ask less' entry",
+                        “Exploration Reduction section is missing a 'What to ask less' entry”,
                     )
                 )
-            if "下次可以少查什么" not in body and "What to look up less" not in body:
+            if “下次可以少查什么” not in body and “What to look up less” not in body:
                 issues.append(
                     Issue(
-                        "SHOULD_FIX",
-                        "FM-403",
+                        “SHOULD_FIX”,
+                        “FM-403”,
                         rel,
-                        "Exploration Reduction section missing 'What to look up less' entry",
+                        “Exploration Reduction section is missing a 'What to look up less' entry”,
                     )
                 )
-            if "失效条件" not in body and "Invalidation condition" not in body:
+            if “失效条件” not in body and “Invalidation condition” not in body:
                 issues.append(
                     Issue(
-                        "SHOULD_FIX",
-                        "FM-404",
+                        “SHOULD_FIX”,
+                        “FM-404”,
                         rel,
-                        "Exploration Reduction section missing 'Invalidation conditions' entry",
+                        “Exploration Reduction section is missing an 'Invalidation conditions' entry”,
                     )
                 )
 
@@ -363,7 +363,7 @@ if fmt == "json":
     }
     print(json.dumps(out, ensure_ascii=False, indent=2))
 else:
-    print("# Frontmatter 快检报告")
+    print("# Frontmatter Quick Check Report")
     print()
     print(f"- Root: `{root}`")
     print(f"- Files scanned: {len(files)}")

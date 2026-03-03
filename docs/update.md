@@ -58,35 +58,41 @@ To run health check only (can serve as a strict CI check):
 bash <SYSTEM_SKILL_ROOT>/tools/doctor/scripts/run-doctor.sh --strict
 ```
 
-`run-upgrade.sh` automatically executes: version comparison -> pull latest -> clean up legacy version residue (no doctor).
+`run-upgrade.sh` automatically executes: version comparison -> pull latest -> plugin key and old plugin name cleanup (no doctor, no structure migration).
 
 **Upgrade core logic (scripted simplified version)**:
 - Only performs version-related actions: compare pre/post upgrade versions + pull latest version
-- Only performs legacy version cleanup: old plugin keys, old plugin names, old directories and historical residue files
+- Only performs plugin config cleanup: old plugin keys, old plugin names
 - Does not perform pre-upgrade structure checks, and does not run Doctor during the Upgrade stage
 - After upgrade completes, the user manually runs Doctor for health check
+- Structure migration (old directories/key files/historical residue) is handled separately via `run-migrate.sh`
 
 Then:
-- Only run Upgrade when version migration / residue cleanup is needed (do not treat Upgrade as a health-check step)
+- Only run Upgrade when version update is needed (do not treat Upgrade as a health-check or migration step)
 - Manually run Doctor once after upgrade completes
 - If Doctor reports migration/structure issues, continue fixing per the report
-- If Doctor passes, run Self-Improve as needed
-- After running Upgrade, Doctor, or Self-Improve, the following should be maintained:
+- If Doctor passes, run Self-Improve as needed to capture lessons
+- Doctor, Self-Improve (and post-migration flows) should maintain:
   - Project-level `.claude/skills/pensieve/SKILL.md` (fixed routing + graph)
   - The Pensieve guidance block in Claude auto memory `~/.claude/projects/<project>/memory/MEMORY.md` (description aligned with system skill `description`)
 
 Recommended order:
-1. Run Upgrade (version comparison + pull + cleanup)
+1. Run Upgrade (version comparison + pull + plugin config cleanup)
 2. If a version was upgraded, restart Claude Code
 3. Run Doctor once (required, manually triggered)
-4. If Doctor reports issues, fix per the report then rerun Doctor
-5. Run Self-Improve only when you want to capture reusable improvements
+4. If Doctor reports migration-type issues, run:
+```bash
+bash <SYSTEM_SKILL_ROOT>/tools/migrate/scripts/run-migrate.sh
+```
+5. After migration, run Doctor again to confirm MUST_FIX count is zero
+6. Run Self-Improve only when you want to capture reusable improvements
 
 If you are guiding the user, remind them they only need to express these intents:
 - Loop execution
 - Doctor health check
 - Self-Improve capture
-- Upgrade migration
+- Upgrade version update
+- Migrate structure migration
 - View graph (read the project-level `SKILL.md` under `## Graph`)
 
 ---

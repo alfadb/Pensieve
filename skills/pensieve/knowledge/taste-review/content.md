@@ -88,7 +88,7 @@ Key practices:
 ### Structure Warning Signs
 
 | Signal | Threshold | Severity |
-|--------|-----------|----------|
+|---|---|---|
 | Nesting depth | > 3 levels | CRITICAL |
 | Function length | > 100 lines | CRITICAL |
 | Local variable count | > 10 | WARNING |
@@ -97,7 +97,7 @@ Key practices:
 ### Error Handling Warning Signs
 
 | Signal | Description | Severity |
-|--------|-------------|----------|
+|---|---|---|
 | Defensive defaults everywhere | e.g. `?? 0` / `|| default` scattered throughout | WARNING |
 | Exception handling outweighs main logic | try/catch blocks outnumber business code | CRITICAL |
 | Fallback masks upstream problems | Issues never surface | WARNING |
@@ -105,7 +105,7 @@ Key practices:
 ### Module and Interface Warning Signs
 
 | Signal | Description | Severity |
-|--------|-------------|----------|
+|---|---|---|
 | Shallow module | Interface complexity approaches implementation complexity | CRITICAL |
 | Information leakage | Internal module decisions exposed externally | CRITICAL |
 | Hard to name | Difficult to name or explain | WARNING |
