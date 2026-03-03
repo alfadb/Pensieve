@@ -37,5 +37,5 @@ try:
 except Exception:
     sys.exit(0)
 
-print(json.dumps({"additionalContext": guidance + content}))
+print(json.dumps({"hookSpecificOutput": {"hookEventName": "SubagentStart", "additionalContext": guidance + content}}))
 PY
