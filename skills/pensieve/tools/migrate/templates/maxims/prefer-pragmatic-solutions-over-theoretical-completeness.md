@@ -25,6 +25,6 @@ tags: [pensieve, maxim]
 - Do not use pragmatism as an excuse to skip critical quality checks.
 
 ## Context Links (recommended)
-- Based on: [[preserve-user-visible-behavior-as-a-hard-rule]]
-- Led to: [[reduce-complexity-before-adding-branches]]
-- Related: [[knowledge/taste-review/content]]
+- Based on: [[knowledge/taste-review/content]]
+- Related: [[maxims/preserve-user-visible-behavior-as-a-hard-rule]]
+- Related: [[maxims/reduce-complexity-before-adding-branches]]

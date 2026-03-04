@@ -26,5 +26,5 @@ tags: [pensieve, maxim]
 
 ## Context Links (recommended)
 - Based on: [[knowledge/taste-review/content]]
-- Led to: [[preserve-user-visible-behavior-as-a-hard-rule]]
-- Related: [[reduce-complexity-before-adding-branches]]
+- Related: [[maxims/preserve-user-visible-behavior-as-a-hard-rule]]
+- Related: [[maxims/reduce-complexity-before-adding-branches]]

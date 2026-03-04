@@ -75,6 +75,11 @@ Each maxim should include:
 - Rule 1
 - Rule 2
 
+## Examples (optional, recommended for generalization)
+- Scenario A: {concrete example} (see [[knowledge/xxx/content]])
+- Scenario B: {cross-domain analogy}
+- Scenario C: {cross-domain analogy}
+
 ## Boundaries
 - Does not apply when...
 
@@ -83,6 +88,8 @@ Each maxim should include:
 - Leads to: [[related pipeline or subsequent decision]]
 - Related: [[related maxim]]
 ```
+
+> **Purpose of Examples**: When self-check reveals domain-specificity (e.g., "only applies to UI"), adding cross-domain examples can elevate the principle to a universal level. Title and conclusion remain universal; examples provide actionable grounding scenarios. Examples may use `[[knowledge/...]]` links to actual cases in the project knowledge base.
 
 ### Conflict Resolution (Index-Free Mode)
 
@@ -113,6 +120,7 @@ When two maxims conflict, resolve in this order:
 - Maxims should be **scarce** -- do not add frequently
 - If a maxim is frequently rewritten, the abstraction level may be wrong
 - Links are recommended (not mandatory), but preserving provenance is encouraged
+- **Link types must match target types**: `Based on` → knowledge/decision, `Leads to` → pipeline/decision, `Related` → maxim. Do not use `Based on` or `Leads to` between maxims -- it creates circular dependencies and semantic confusion
 
 Recommended traceability format:
 

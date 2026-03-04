@@ -25,6 +25,6 @@ tags: [pensieve, maxim]
 - Small, local branches are acceptable when they improve clarity.
 
 ## Context Links (recommended)
-- Based on: [[prefer-pragmatic-solutions-over-theoretical-completeness]]
-- Led to: [[eliminate-special-cases-by-redesigning-data-flow]]
-- Related: [[knowledge/taste-review/content]]
+- Based on: [[knowledge/taste-review/content]]
+- Related: [[maxims/prefer-pragmatic-solutions-over-theoretical-completeness]]
+- Related: [[maxims/eliminate-special-cases-by-redesigning-data-flow]]
