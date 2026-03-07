@@ -32,6 +32,25 @@ PROJECT_SKILL_SCRIPT="$SKILL_ROOT/.src/scripts/maintain-project-skill.sh"
 
 mkdir -p "$DATA_ROOT"/{maxims,decisions,knowledge,loop,pipelines}
 
+GITIGNORE_FILE="$DATA_ROOT/.gitignore"
+if [[ ! -f "$GITIGNORE_FILE" ]]; then
+  cat > "$GITIGNORE_FILE" <<'GITIGNORE'
+# Pensieve: only commit user data, ignore system files
+*
+!.gitignore
+!maxims/
+!maxims/**
+!decisions/
+!decisions/**
+!knowledge/
+!knowledge/**
+!pipelines/
+!pipelines/**
+!loop/
+!loop/**
+GITIGNORE
+fi
+
 TEMPLATE_MAXIMS_DIR="$TEMPLATES_ROOT/maxims"
 if [[ -d "$TEMPLATE_MAXIMS_DIR" ]]; then
   for template_maxim in "$TEMPLATE_MAXIMS_DIR"/*.md; do
