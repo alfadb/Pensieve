@@ -1,16 +1,9 @@
-.DS_Store
-/temp
-.backup
-push-to-github.sh
-/resource
-/.obsidian
+# Ignore everything by default
+*
 
-# Hidden runtime state
-/.state/
-
-# Pensieve local user data (created by init, never tracked)
-/maxims/
-/decisions/
-/knowledge/
-/pipelines/
-/loop/
+# Allow user data directories
+!/maxims/
+!/decisions/
+!/knowledge/
+!/pipelines/
+!/loop/
