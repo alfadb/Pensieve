@@ -220,32 +220,32 @@ messages: list[str] = []
 messages.append(f"PENSIEVE_SKILL_ROOT={skill_root}")
 messages.append(f"PENSIEVE_PROJECT_ROOT={project_root}")
 messages.append("")
-messages.append("## Pensieve 会话前置检查")
+messages.append("## Pensieve Session Pre-check")
 messages.append("")
-messages.append("- 严重级别：`P0`（会影响后续路由与诊断准确性）")
-messages.append("- 主窗口策略：先完成前置修复并更新 marker，再处理用户当前需求。")
-messages.append("- 行动建议：先向用户汇报以上状态，并询问“是否现在先完成 `init/doctor` 前置修复？”")
-messages.append(f"- 当前 skill 版本：`{skill_version}`")
-messages.append(f"- 当前项目 marker：`{marker_file}`")
-messages.append("- 规则：仅在主窗口确认迁移/修复已完成后，才主动更新这个 marker 文件。")
+messages.append("- Severity: `P0` (affects downstream routing and diagnostic accuracy)")
+messages.append("- Main window strategy: complete pre-check fixes and update marker before handling the user's current request.")
+messages.append(“- Action: report the status above to the user and ask whether to complete `init/doctor` pre-check fixes now.”)
+messages.append(f"- Current skill version: `{skill_version}`")
+messages.append(f"- Current project marker: `{marker_file}`")
+messages.append("- Rule: only update this marker file after the main window confirms migration/fix is complete.")
 
 if not initialized:
-    messages.append("- 当前项目未初始化：先执行 `init`。")
-    messages.append(f"- `init` 成功后，主窗口执行：`{record_init_cmd}`")
+    messages.append("- Project not initialized: run `init` first.")
+    messages.append(f"- After `init` succeeds, run in main window: `{record_init_cmd}`")
 
 if not self_check_ok:
-    recorded = self_check_version if self_check_version else "未记录"
-    messages.append(f"- 自检版本不匹配：记录为 `{recorded}`，需要 `{skill_version}`。先执行 `doctor`。")
-    messages.append(f"- `doctor` 通过后，主窗口执行：`{record_doctor_cmd}`")
+    recorded = self_check_version if self_check_version else "not recorded"
+    messages.append(f"- Self-check version mismatch: recorded `{recorded}`, required `{skill_version}`. Run `doctor` first.")
+    messages.append(f"- After `doctor` passes, run in main window: `{record_doctor_cmd}`")
 
-messages.append("- 建议顺序：`init` -> `doctor`。" if not initialized else "- 建议动作：执行 `doctor` 并更新 marker。")
+messages.append("- Suggested order: `init` -> `doctor`." if not initialized else "- Suggested action: run `doctor` and update marker.")
 
 user_parts: list[str] = []
 if not initialized:
-    user_parts.append("项目未初始化")
+    user_parts.append("not initialized")
 if not self_check_ok:
-    user_parts.append("体检版本不匹配")
-user_summary = f"Pensieve（{skill_version}）：{'，'.join(user_parts)}。输入 /pensieve doctor 执行修复。"
+    user_parts.append("doctor version mismatch")
+user_summary = f"Pensieve ({skill_version}): {', '.join(user_parts)}. Run /pensieve doctor to fix."
 
 payload = {
     "hookSpecificOutput": {

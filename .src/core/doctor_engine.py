@@ -28,10 +28,10 @@ def _parse_graph(path: Path) -> tuple[dict[str, int], list[tuple[str, str]]]:
     }
 
     patterns = {
-        "notes": re.compile(r"^- 扫描笔记数:\s*(\d+)\s*$", flags=re.MULTILINE),
-        "links": re.compile(r"^- 发现链接数:\s*(\d+)\s*$", flags=re.MULTILINE),
-        "resolved": re.compile(r"^- 已解析链接:\s*(\d+)\s*$", flags=re.MULTILINE),
-        "unresolved": re.compile(r"^- 未解析链接:\s*(\d+)\s*$", flags=re.MULTILINE),
+        "notes": re.compile(r"^- Notes scanned:\s*(\d+)\s*$", flags=re.MULTILINE),
+        "links": re.compile(r"^- Links found:\s*(\d+)\s*$", flags=re.MULTILINE),
+        "resolved": re.compile(r"^- Links resolved:\s*(\d+)\s*$", flags=re.MULTILINE),
+        "unresolved": re.compile(r"^- Links unresolved:\s*(\d+)\s*$", flags=re.MULTILINE),
     }
     for key, pat in patterns.items():
         m = pat.search(text)
@@ -98,89 +98,89 @@ def _build_report(
     has_upgrade_must_fix: bool,
 ) -> str:
     if graph_stats["unresolved"] == 0:
-        graph_observation = "图谱链接全部可解析。"
+        graph_observation = "All graph links resolved."
     else:
         hard = sum(1 for src, _ in unresolved_links if src.startswith("decisions/") or src.startswith("pipelines/"))
-        graph_observation = f"发现 {graph_stats['unresolved']} 条未解析链接（decision/pipeline 断链 {hard} 条）。"
+        graph_observation = f"{graph_stats['unresolved']} unresolved links ({hard} decision/pipeline broken links)."
 
     lines: list[str] = []
-    lines.append("# Pensieve Doctor 报告")
+    lines.append("# Pensieve Doctor Report")
     lines.append("")
-    lines.append("## 0) 头信息")
-    lines.append(f"- 检查时间: {check_time}")
-    lines.append(f"- 项目根目录: `{project_root}`")
-    lines.append(f"- 数据目录: `{user_root}`")
+    lines.append("## 0) Header")
+    lines.append(f"- Check time: {check_time}")
+    lines.append(f"- Project root: `{project_root}`")
+    lines.append(f"- Data root: `{user_root}`")
     lines.append("")
-    lines.append("## 1) 执行摘要（先看这里）")
-    lines.append(f"- 总体状态: {status}")
+    lines.append("## 1) Executive Summary")
+    lines.append(f"- Overall status: {status}")
     lines.append(f"- MUST_FIX: {len(must_fix)}")
     lines.append(f"- SHOULD_FIX: {len(should_fix)}")
     lines.append(f"- INFO: {len(info)}")
-    lines.append(f"- 建议下一步: `{next_step}`")
+    lines.append(f"- Suggested next step: `{next_step}`")
     lines.append("")
-    lines.append("## 1.5) 图谱摘要（结论前置依据）")
-    lines.append(f"- 图谱文件: `{graph_file}`")
-    lines.append(f"- 扫描笔记数: {graph_stats['notes']}")
-    lines.append(f"- 发现链接数: {graph_stats['links']}")
-    lines.append(f"- 已解析链接: {graph_stats['resolved']}")
-    lines.append(f"- 未解析链接: {graph_stats['unresolved']}")
-    lines.append(f"- 图谱观察: {graph_observation}")
+    lines.append("## 1.5) Graph Summary")
+    lines.append(f"- Graph file: `{graph_file}`")
+    lines.append(f"- Notes scanned: {graph_stats['notes']}")
+    lines.append(f"- Links found: {graph_stats['links']}")
+    lines.append(f"- Links resolved: {graph_stats['resolved']}")
+    lines.append(f"- Links unresolved: {graph_stats['unresolved']}")
+    lines.append(f"- Observation: {graph_observation}")
     lines.append("")
-    lines.append("## 2) 需优先处理（MUST_FIX，按优先级）")
+    lines.append("## 2) Must Fix (by priority)")
     if not must_fix:
         lines.append("- (none)")
     else:
         for i, f in enumerate(must_fix, start=1):
             lines.append(f"{i}. [{f.finding_id}] {f.message}")
-            lines.append(f"文件: `{f.path}`")
-            lines.append(f"依据: `{f.rule_source}`")
-            lines.append(f"修复: {f.recommendation}")
+            lines.append(f"   File: `{f.path}`")
+            lines.append(f"   Rule: `{f.rule_source}`")
+            lines.append(f"   Fix: {f.recommendation}")
             lines.append("")
     if lines and lines[-1] == "":
         lines.pop()
     lines.append("")
-    lines.append("## 3) 建议处理（SHOULD_FIX）")
+    lines.append("## 3) Should Fix")
     if not should_fix:
         lines.append("- (none)")
     else:
         for i, f in enumerate(should_fix, start=1):
-            lines.append(f"{i}. [{f.finding_id}] {f.message}（`{f.path}`）")
+            lines.append(f"{i}. [{f.finding_id}] {f.message} (`{f.path}`)")
     lines.append("")
-    lines.append("## 4) 迁移与结构检查")
-    lines.append(f"- 发现旧路径: {_yes_no(flags.get('has_deprecated_paths'))}")
-    lines.append(f"- 发现多份 skill 副本: {_yes_no(flags.get('has_deprecated_paths'))}")
-    lines.append(f"- 发现历史 skill 副本: {_yes_no(flags.get('has_deprecated_paths'))}")
-    lines.append(f"- 发现独立 graph 文件: {_yes_no(flags.get('has_legacy_graph_files'))}")
-    lines.append(f"- 缺失关键目录: {_yes_no(flags.get('has_missing_directories'))}")
+    lines.append("## 4) Migration & Structure Check")
+    lines.append(f"- Deprecated paths found: {_yes_no(flags.get('has_deprecated_paths'))}")
+    lines.append(f"- Duplicate skill copies: {_yes_no(flags.get('has_deprecated_paths'))}")
+    lines.append(f"- Legacy skill copies: {_yes_no(flags.get('has_deprecated_paths'))}")
+    lines.append(f"- Standalone graph files: {_yes_no(flags.get('has_legacy_graph_files'))}")
+    lines.append(f"- Missing required dirs: {_yes_no(flags.get('has_missing_directories'))}")
     lines.append(
-        f"- MEMORY.md 缺失/漂移: {_yes_no(flags.get('has_missing_memory_file') or flags.get('has_memory_content_drift'))}"
+        f"- MEMORY.md missing/drifted: {_yes_no(flags.get('has_missing_memory_file') or flags.get('has_memory_content_drift'))}"
     )
-    lines.append(f"- 建议动作: `{next_step if next_step in {'migrate', 'upgrade', 'self-improve'} else 'none'}`")
+    lines.append(f"- Suggested action: `{next_step if next_step in {'migrate', 'upgrade', 'self-improve'} else 'none'}`")
     lines.append("")
-    lines.append("## 5) 三步行动计划")
+    lines.append("## 5) Action Plan")
     if must_fix and has_migrate_must_fix:
-        lines.append("1. 先运行 `migrate` 脚本完成结构迁移与关键文件对齐。")
-        lines.append("2. 再运行一次 `doctor`，确认 MUST_FIX 清零。")
-        lines.append("3. 若仍有 SHOULD_FIX/INFO，再按优先级逐项修复。")
+        lines.append("1. Run `migrate` to complete structure migration and align key files.")
+        lines.append("2. Re-run `doctor` to confirm MUST_FIX count is zero.")
+        lines.append("3. If SHOULD_FIX/INFO remain, fix them by priority.")
     elif must_fix and has_upgrade_must_fix:
-        lines.append("1. 先运行 `upgrade` 脚本完成 skill 源码更新。")
-        lines.append("2. 再运行一次 `doctor`，确认 MUST_FIX 清零。")
-        lines.append("3. 若后续出现结构迁移类问题，再执行 `migrate`。")
+        lines.append("1. Run `upgrade` to update skill source code.")
+        lines.append("2. Re-run `doctor` to confirm MUST_FIX count is zero.")
+        lines.append("3. If structure migration issues appear later, run `migrate`.")
     elif must_fix:
-        lines.append("1. 先按报告逐项修复 MUST_FIX（frontmatter/断链/MEMORY 等内容问题），无需先执行 `migrate`。")
-        lines.append("2. 修复后重跑 `doctor`，确认 MUST_FIX 清零。")
-        lines.append("3. 若后续出现迁移类问题（旧路径/关键文件漂移），再执行 `migrate`。")
+        lines.append("1. Fix MUST_FIX items per report (frontmatter/broken links/MEMORY). No need to run `migrate` first.")
+        lines.append("2. Re-run `doctor` to confirm MUST_FIX count is zero.")
+        lines.append("3. If migration issues appear later (deprecated paths/file drift), run `migrate`.")
     elif should_fix or info:
-        lines.append("1. 先处理 SHOULD_FIX 项，保证规范可长期维护。")
-        lines.append("2. 修复后重跑 `doctor`，确认状态变为 PASS。")
-        lines.append("3. 将有效修复经验沉淀到 `self-improve`。")
+        lines.append("1. Fix SHOULD_FIX items to maintain long-term spec compliance.")
+        lines.append("2. Re-run `doctor` to confirm status is PASS.")
+        lines.append("3. Capture effective fixes via `self-improve`.")
     else:
-        lines.append("1. 当前无需结构修复。")
-        lines.append("2. 继续按现有流程使用 self-improve。")
-        lines.append("3. 下次升级后重复执行 doctor。")
+        lines.append("1. No structural fixes needed.")
+        lines.append("2. Continue using self-improve as usual.")
+        lines.append("3. Re-run doctor after next upgrade.")
     lines.append("")
-    lines.append("## 6) 规则命中明细（附录）")
-    lines.append("| ID | 严重级别 | 分类 | 文件/路径 | 规则来源 | 问题 | 修复建议 |")
+    lines.append("## 6) Findings Detail (Appendix)")
+    lines.append("| ID | Severity | Category | File/Path | Rule Source | Issue | Recommendation |")
     lines.append("|---|---|---|---|---|---|---|")
     if findings:
         for f in findings:
@@ -192,18 +192,18 @@ def _build_report(
     else:
         lines.append("| - | - | - | - | - | - | - |")
     lines.append("")
-    lines.append("## 7) 图谱断链明细（附录）")
-    lines.append("| 源文件 | 未解析链接 | 备注 |")
+    lines.append("## 7) Broken Links Detail (Appendix)")
+    lines.append("| Source File | Unresolved Link | Note |")
     lines.append("|---|---|---|")
     if unresolved_links:
         for src, target in unresolved_links:
-            memo = "decision/pipeline 断链（MUST_FIX）" if (src.startswith("decisions/") or src.startswith("pipelines/")) else "一般断链"
+            memo = "decision/pipeline broken link (MUST_FIX)" if (src.startswith("decisions/") or src.startswith("pipelines/")) else "general broken link"
             lines.append(f"| {src} | [[{target}]] | {memo} |")
     else:
-        lines.append("| - | - | 无断链 |")
+        lines.append("| - | - | No broken links |")
     lines.append("")
-    lines.append("## 8) Frontmatter 快检结果（附录）")
-    lines.append("| 文件 | 级别 | 检查码 | 问题 |")
+    lines.append("## 8) Frontmatter Check Results (Appendix)")
+    lines.append("| File | Severity | Code | Issue |")
     lines.append("|---|---|---|---|")
     fm_issues = [f for f in findings if f.category == "frontmatter"]
     if fm_issues:
@@ -211,7 +211,7 @@ def _build_report(
             msg = f.message.replace("|", "\\|")
             lines.append(f"| {f.path} | {f.severity} | {f.finding_id} | {msg} |")
     else:
-        lines.append("| - | - | - | 无 frontmatter 问题 |")
+        lines.append("| - | - | - | No frontmatter issues |")
 
     return "\n".join(lines).rstrip() + "\n"
 
@@ -250,7 +250,7 @@ def run(argv: list[str]) -> int:
                 path=str(item.get("path", "")),
                 rule_source=".src/references/directory-layout.md",
                 message=str(item.get("message", "")),
-                recommendation=str(item.get("recommended_action", "按建议修复后重跑 doctor")),
+                recommendation=str(item.get("recommended_action", "Fix per recommendation and re-run doctor")),
             )
         )
 
@@ -267,7 +267,7 @@ def run(argv: list[str]) -> int:
                 path=str(issue.get("path", "")),
                 rule_source=".src/scripts/check-frontmatter.sh",
                 message=str(issue.get("message", "")),
-                recommendation="修复 frontmatter 字段与命名规则后重跑 doctor",
+                recommendation="Fix frontmatter fields and naming rules, then re-run doctor",
             )
         )
 
@@ -280,8 +280,8 @@ def run(argv: list[str]) -> int:
                 category="graph_unresolved_link",
                 path=src,
                 rule_source=".src/tools/doctor.md",
-                message=f"未解析链接 [[{target}]]",
-                recommendation="补齐目标文件或修正链接目标名称",
+                message=f"Unresolved link [[{target}]]",
+                recommendation="Create the target file or fix the link target name",
             )
         )
 

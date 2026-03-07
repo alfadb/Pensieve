@@ -27,7 +27,7 @@
   "memory": {
     "start_marker": "<!-- pensieve:auto-memory:start -->",
     "end_marker": "<!-- pensieve:auto-memory:end -->",
-    "guidance_line": "- 引导：当需求涉及项目知识沉淀、结构体检、版本迁移或复杂任务拆解时，优先调用 `pensieve` skill。"
+    "guidance_line": "- Guidance: When a request involves knowledge retention, structural checks, version migration, or complex task decomposition, prefer invoking the `pensieve` skill."
   },
   "doctor": {
     "next_step": {
@@ -46,52 +46,52 @@
   },
   "findings": {
     "STR-001": {
-      "message": "当前用户数据根目录不存在。",
-      "recommendation": "先安装或恢复 pensieve skill，再执行 init。"
+      "message": "User data root directory does not exist.",
+      "recommendation": "Install or restore the pensieve skill first, then run init."
     },
     "STR-002": {
-      "message": "缺少关键目录: {dir}/",
-      "recommendation": "执行 init 或 migrate 补齐目录结构，并复跑 doctor。"
+      "message": "Missing required directory: {dir}/",
+      "recommendation": "Run init or migrate to restore the directory structure, then re-run doctor."
     },
     "STR-003": {
-      "message": "SKILL.md 路由文件不存在。",
-      "recommendation": "执行 init 生成 SKILL.md。"
+      "message": "SKILL.md routing file does not exist.",
+      "recommendation": "Run init to generate SKILL.md."
     },
     "STR-101": {
-      "message": "发现旧版路径残留，与当前用户数据根目录并存。",
-      "recommendation": "执行 migrate 清理旧路径，收敛到当前用户数据根目录。"
+      "message": "Legacy path remnant found, coexisting with the current user data root.",
+      "recommendation": "Run migrate to clean up legacy paths and converge to the current user data root."
     },
     "STR-111": {
-      "message": "发现独立 graph 遗留文件。",
-      "recommendation": "执行 migrate 删除独立 graph 文件；规范图谱写回根目录生成的 `SKILL.md#Graph`，`.state/` 只保留运行时输出。"
+      "message": "Legacy standalone graph file found.",
+      "recommendation": "Run migrate to remove standalone graph files; the canonical graph is written to the generated `SKILL.md#Graph`, `.state/` retains only runtime output."
     },
     "STR-121": {
-      "message": "发现用户数据目录中的历史 README 副本。",
-      "recommendation": "执行 migrate 删除该副本；规范 README 仅保留在根目录或 .src。"
+      "message": "Legacy README copy found in user data directory.",
+      "recommendation": "Run migrate to remove this copy; READMEs should only exist in the root or .src."
     },
     "STR-201": {
-      "message": "缺少关键种子文件。",
-      "recommendation": "执行 migrate 进行关键文件强对齐。"
+      "message": "Missing critical seed file.",
+      "recommendation": "Run migrate to force-align critical files."
     },
     "STR-202": {
-      "message": "关键文件主体内容与模板不一致（上下文链接值差异已忽略）。",
-      "recommendation": "执行 migrate 先备份再替换，恢复关键流程文件主体与模板一致。"
+      "message": "Critical file body content differs from template (context link value differences ignored).",
+      "recommendation": "Run migrate to back up and replace, restoring critical workflow file body alignment with the template."
     },
     "STR-301": {
-      "message": "review pipeline 仍引用旧 skill 路径或隐藏模板路径。",
-      "recommendation": "执行 migrate，或手动改为引用当前用户数据根目录下的 knowledge/... 路径。"
+      "message": "Review pipeline still references legacy skill paths or hidden template paths.",
+      "recommendation": "Run migrate, or manually update references to use knowledge/... paths under the current user data root."
     },
     "STR-501": {
-      "message": "缺少 Claude Code auto memory 入口 MEMORY.md。",
-      "recommendation": "执行 init/migrate/doctor 触发 auto memory 补齐，或在 ~/.claude/projects/<project>/memory/MEMORY.md 写入 Pensieve 引导块。"
+      "message": "Claude Code auto memory entry MEMORY.md is missing.",
+      "recommendation": "Run init/migrate/doctor to trigger auto memory creation, or manually add the Pensieve guidance block to ~/.claude/projects/<project>/memory/MEMORY.md."
     },
     "STR-502": {
-      "message": "MEMORY.md 缺少 Pensieve 说明，或内容未与 skill description 对齐。",
-      "recommendation": "执行 init/migrate/doctor 触发 auto memory 对齐，确保 MEMORY.md 与 SKILL.md description 一致并包含 pensieve skill 引导。"
+      "message": "MEMORY.md is missing the Pensieve description, or its content is not aligned with the skill description.",
+      "recommendation": "Run init/migrate/doctor to trigger auto memory alignment, ensuring MEMORY.md matches the SKILL.md description and includes the pensieve skill guidance."
     },
     "STR-901": {
-      "message": "扫描所需模板缺失，无法完成校验：{detail}",
-      "recommendation": "修复 skill 安装或更新到完整版本后重试。"
+      "message": "Template required for scanning is missing, cannot complete verification: {detail}",
+      "recommendation": "Fix the skill installation or update to a complete version, then retry."
     }
   }
 }

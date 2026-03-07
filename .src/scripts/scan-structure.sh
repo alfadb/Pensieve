@@ -173,7 +173,7 @@ memory_end_marker = str(schema.get("memory", {}).get("end_marker", "<!-- pensiev
 memory_guidance_line = str(
     schema.get("memory", {}).get(
         "guidance_line",
-        "- 引导：当需求涉及项目知识沉淀、结构体检、版本迁移或复杂任务拆解时，优先调用 `pensieve` skill。",
+        "- Guidance: When a request involves knowledge retention, structural checks, version migration, or complex task decomposition, prefer invoking the `pensieve` skill.",
     )
 )
 
@@ -236,7 +236,7 @@ def add_finding_by_id(
         category,
         path,
         finding_text(finding_id, "message", "", **kwargs),
-        finding_text(finding_id, "recommendation", "按建议修复后重跑 doctor", **kwargs),
+        finding_text(finding_id, "recommendation", "Fix as recommended, then re-run doctor", **kwargs),
     )
 
 
@@ -258,7 +258,7 @@ def has_legacy_knowledge_path_reference(text: str) -> bool:
 
 
 def normalize_context_link_line(line: str) -> str:
-    m = re.match(r"^(\s*-\s*(?:基于|导致|相关)：)\s*.*$", line)
+    m = re.match(r"^(\s*-\s*(?:基于|导致|相关|based-on|leads-to|related)[:：])\s*.*$", line)
     if not m:
         return line.rstrip()
     return f"{m.group(1)} <context-value>"
@@ -404,7 +404,7 @@ for target, template in critical_files:
             "MUST_FIX",
             "scanner_template_missing",
             template,
-            detail="关键文件模板不存在，无法判定关键文件是否漂移",
+            detail="Critical file template missing, cannot verify critical file alignment",
         )
         continue
     target_text = normalize_critical_file_content(target, read_text_normalized(target))
@@ -435,7 +435,7 @@ if system_skill_description is None:
         "MUST_FIX",
         "scanner_template_missing",
         system_skill_file,
-        detail="系统 skill 描述缺失，无法校验 MEMORY.md 的 Pensieve 引导块",
+        detail="System skill description missing, cannot verify MEMORY.md Pensieve guidance block",
     )
 else:
     if not memory_file.is_file():

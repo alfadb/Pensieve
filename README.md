@@ -54,6 +54,8 @@ bash .claude/skills/pensieve/.src/scripts/run-doctor.sh --strict
 
 ## 安装
 
+前置条件：`git`、`bash`、`Python 3.8+`。
+
 ```bash
 # 1. 安装 skill
 git clone -b zh https://github.com/kingkongshot/Pensieve.git .claude/skills/pensieve

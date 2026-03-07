@@ -1,12 +1,12 @@
 #!/bin/bash
-# 初始化当前 pensieve 用户数据根目录。
+# Initialize the current pensieve user data root directory.
 #
-# `.src/`、`agents/`、`SKILL.md` 是 git tracked 的系统文件。
-# `SKILL.md` 由 maintain-project-skill.sh 在本地覆盖更新。
-# 用户数据（maxims/decisions/knowledge/pipelines）由 .gitignore 忽略，
-# 不参与 git 更新。
+# `.src/`, `agents/`, `SKILL.md` are git-tracked system files.
+# `SKILL.md` is locally overwritten by maintain-project-skill.sh.
+# User data (maxims/decisions/knowledge/pipelines) is ignored by .gitignore
+# and does not participate in git updates.
 #
-# 可重复执行（幂等）。
+# Idempotent — safe to run repeatedly.
 
 set -euo pipefail
 

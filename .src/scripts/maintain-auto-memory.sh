@@ -56,7 +56,7 @@ event = (sys.argv[3] or "").strip()
 
 start_marker = "<!-- pensieve:auto-memory:start -->"
 end_marker = "<!-- pensieve:auto-memory:end -->"
-guidance_line = "- 引导：当需求涉及项目知识沉淀、结构体检、版本迁移或复杂任务拆解时，优先调用 `pensieve` skill。"
+guidance_line = "- Guidance: When a request involves knowledge retention, structural checks, version migration, or complex task decomposition, prefer invoking the `pensieve` skill."
 
 
 def load_skill_description(path: Path) -> str:

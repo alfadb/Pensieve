@@ -403,45 +403,45 @@ summary = {
 summary_file.write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 lines = [
-    "# Pensieve Migrate 报告",
+    "# Pensieve Migrate Report",
     "",
-    "## 1) 结果",
-    f"- 状态: {status}",
+    "## 1) Result",
+    f"- Status: {status}",
     f"- Dry-run: {'yes' if dry_run else 'no'}",
-    f"- 数据根目录: `{user_root}`",
+    f"- Data root: `{user_root}`",
     "",
-    "## 2) 迁移与清理统计",
-    f"- 创建目录: {len(created_dirs)}",
-    f"- 迁移文件: {len(migrated_files)}",
-    f"- 冲突落盘(*.migrated.*): {len(conflicts)}",
-    f"- 关键文件替换: {len(replaced)}",
-    f"- 关键文件补齐: {len(created_critical)}",
-    f"- 删除旧路径: {len(removed_paths)}",
-    f"- 删除旧 graph 文件: {len(removed_graphs)}",
-    f"- 删除历史 README 副本: {len(removed_readmes)}",
-    f"- 备份目录: `{backup_dir}`",
+    "## 2) Migration & Cleanup Stats",
+    f"- Directories created: {len(created_dirs)}",
+    f"- Files migrated: {len(migrated_files)}",
+    f"- Conflicts written(*.migrated.*): {len(conflicts)}",
+    f"- Critical files replaced: {len(replaced)}",
+    f"- Critical files created: {len(created_critical)}",
+    f"- Legacy paths removed: {len(removed_paths)}",
+    f"- Legacy graph files removed: {len(removed_graphs)}",
+    f"- Legacy README copies removed: {len(removed_readmes)}",
+    f"- Backup dir: `{backup_dir}`",
     "",
-    "## 3) 下一步（手动）",
-    "- 迁移完成后请手动运行 doctor：",
+    "## 3) Next Steps (manual)",
+    "- Run doctor manually after migration:",
     "```bash",
     "bash .src/scripts/run-doctor.sh --strict",
     "```",
     "",
-    "## 4) 文件",
-    f"- 迁移动作清单: `{actions_file}`",
-    f"- 迁移报告: `{report_file}`",
-    f"- 迁移摘要: `{summary_file}`",
+    "## 4) Files",
+    f"- Migration actions: `{actions_file}`",
+    f"- Migration report: `{report_file}`",
+    f"- Migration summary: `{summary_file}`",
 ]
 
 if conflicts:
     lines.append("")
-    lines.append("## 5) 冲突文件（需人工合并）")
+    lines.append("## 5) Conflict Files (manual merge required)")
     for item in conflicts[:30]:
         lines.append(f"- target: `{item.get('target','')}` | migrated: `{item.get('written','')}`")
 
 if warnings:
     lines.append("")
-    lines.append("## 6) 警告")
+    lines.append("## 6) Warnings")
     for w in warnings[:60]:
         lines.append(f"- {w}")
 

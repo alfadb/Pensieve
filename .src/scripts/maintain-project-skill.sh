@@ -149,8 +149,8 @@ def build_routing_section() -> str:
     lines = []
     for tool_dir, display_name in TOOLS:
         desc = read_tool_description(tool_dir)
-        lines.append(f"- {display_name}：{desc} 工具规范：`.src/tools/{tool_dir}.md`。")
-    lines.append("- Graph View：读取本文件 `## Graph` 段。")
+        lines.append(f"- {display_name}: {desc} Tool spec: `.src/tools/{tool_dir}.md`.")
+    lines.append("- Graph View: Read the `## Graph` section of this file.")
     return "\n".join(lines)
 
 
@@ -209,12 +209,12 @@ if skill_file.exists():
 else:
     content = f"""---
 name: pensieve
-description: 项目知识库与工作流路由。knowledge 里有之前探索过的文件位置、模块边界、调用链路，可直接复用不必重新定位；decisions/maxims 是已定论的架构决定和编码准则，应遵守而非重新讨论；pipelines 是可复用的工作流程。完成任务后用 self-improve 沉淀新发现。提供 init、upgrade、migrate、doctor、self-improve 五个工具。
+description: Project knowledge base and workflow router. knowledge/ caches previously explored file locations, module boundaries, and call chains for direct reuse; decisions/maxims are established architectural decisions and coding standards to follow, not re-debate; pipelines are reusable workflows. Use self-improve to capture new insights after completing tasks. Provides init, upgrade, migrate, doctor, self-improve — five tools.
 ---
 
 # Pensieve
 
-将用户请求路由到正确的工具。不确定时先确认。
+Route user requests to the correct tool. Confirm when uncertain.
 
 ## Lifecycle State
 - Last Event: {event_name}
