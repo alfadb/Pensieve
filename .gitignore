@@ -1,9 +1,16 @@
-# Ignore everything by default
-*
+.DS_Store
+/temp
+.backup
+push-to-github.sh
+/resource
+/.obsidian
 
-# Allow user data directories
-!/maxims/
-!/decisions/
-!/knowledge/
-!/pipelines/
-!/loop/
+# Hidden runtime state
+/.state/
+
+# Pensieve local user data (created by init, never tracked)
+/maxims/
+/decisions/
+/knowledge/
+/pipelines/
+/loop/
