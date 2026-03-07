@@ -21,7 +21,8 @@ bash .src/scripts/run-doctor.sh --strict
 
 Doctor 只维护：
 
-- 用户数据根目录 `SKILL.md` 的 graph
+- 根目录生成的 `SKILL.md`（生命周期状态 + Graph）
+- `.state/pensieve-user-data-graph.md` 这类运行时图谱输出
 - Claude auto memory `~/.claude/projects/<project>/memory/MEMORY.md`
 
 不会改你的业务代码。

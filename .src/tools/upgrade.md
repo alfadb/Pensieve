@@ -1,5 +1,5 @@
 ---
-description: 刷新 Pensieve skill 源码。优先通过 git pull 或 npx skills update 完成更新；不做结构迁移与 doctor 分级。
+description: 刷新当前 git clone 的 Pensieve skill 源码。升级只走 git pull --ff-only；不做结构迁移与 doctor 分级。
 ---
 
 # Upgrade 工具
@@ -12,6 +12,9 @@ description: 刷新 Pensieve skill 源码。优先通过 git pull 或 npx skills
 - 需要确认升级前后版本变化
 
 如果用户先问“怎么更新 Pensieve”，先读 `.src/references/skill-lifecycle.md`，再执行本工具。
+
+这个工具只负责当前 skill checkout。
+Claude plugin 分支的 hooks 更新，走 Claude 自己的 plugin 生命周期，不在这里处理。
 
 ## 标准执行
 

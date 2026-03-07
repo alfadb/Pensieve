@@ -6,12 +6,11 @@ push-to-github.sh
 /.obsidian
 
 # Hidden runtime state
-.state/
+/.state/
 
-# Loop runtime files (skill-root user data)
-loop/.active
-loop/current
-loop/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-*/
-skill-source/pensieve/loop/.active
-skill-source/pensieve/loop/current
-skill-source/pensieve/loop/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-*/
+# Pensieve local user data (created by init, never tracked)
+/maxims/
+/decisions/
+/knowledge/
+/pipelines/
+/loop/

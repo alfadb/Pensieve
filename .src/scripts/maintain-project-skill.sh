@@ -1,5 +1,5 @@
 #!/bin/bash
-# Maintain Pensieve SKILL.md and Claude auto memory guidance block.
+# Maintain generated Pensieve SKILL.md and Claude auto memory guidance.
 #
 # Usage:
 #   maintain-project-skill.sh --event <install|upgrade|migrate|doctor|self-improve|sync> [--note "..."]
@@ -59,27 +59,22 @@ esac
 
 PROJECT_ROOT="$(to_posix_path "$(project_root "$SCRIPT_DIR")")"
 USER_DATA_ROOT="$(user_data_root "$SCRIPT_DIR")"
-STATE_ROOT="$(to_posix_path "$(state_root "$SCRIPT_DIR")")"
+STATE_ROOT="$(ensure_state_dir "$(state_root "$SCRIPT_DIR")")"
 SKILL_FILE="$(project_skill_file "$SCRIPT_DIR")"
+GRAPH_FILE="$(project_graph_file "$SCRIPT_DIR")"
 SKILL_ROOT="$(skill_root_from_script "$SCRIPT_DIR")"
 GRAPH_SCRIPT="$SKILL_ROOT/.src/scripts/generate-user-data-graph.sh"
 AUTO_MEMORY_SCRIPT="$SKILL_ROOT/.src/scripts/maintain-auto-memory.sh"
-TMP_GRAPH_FILE="$(mktemp "${TMPDIR:-/tmp}/pensieve-graph.XXXXXX")"
-
-cleanup_tmp_graph() {
-  rm -f "$TMP_GRAPH_FILE"
-}
-trap cleanup_tmp_graph EXIT
 
 mkdir -p "$USER_DATA_ROOT"/{maxims,decisions,knowledge,pipelines,loop}
 
 if [[ -x "$GRAPH_SCRIPT" ]]; then
-  bash "$GRAPH_SCRIPT" --root "$USER_DATA_ROOT" --output "$TMP_GRAPH_FILE" >/dev/null
+  bash "$GRAPH_SCRIPT" --root "$USER_DATA_ROOT" --output "$GRAPH_FILE" >/dev/null
 else
-  printf '%s\n' "_(graph not generated yet)_" > "$TMP_GRAPH_FILE"
+  printf '%s\n' "_(graph not generated yet)_" > "$GRAPH_FILE"
 fi
 
-# Graph is embedded in SKILL.md only. Remove legacy standalone graph files.
+# Remove legacy standalone graph files from the user data root.
 for legacy_graph in \
   "$USER_DATA_ROOT"/_pensieve-graph.md \
   "$USER_DATA_ROOT"/_pensieve-graph.*.md \
@@ -95,7 +90,7 @@ PYTHON_BIN="$(python_bin || true)"
 [[ -n "$PYTHON_BIN" ]] || { echo "Python not found" >&2; exit 1; }
 TODAY_UTC="$(date -u +"%Y-%m-%d")"
 
-"$PYTHON_BIN" - "$SKILL_FILE" "$TMP_GRAPH_FILE" "$EVENT" "$TODAY_UTC" "$PROJECT_ROOT" "$USER_DATA_ROOT" "$STATE_ROOT" "$NOTE" <<'PY'
+"$PYTHON_BIN" - "$SKILL_FILE" "$GRAPH_FILE" "$EVENT" "$TODAY_UTC" "$PROJECT_ROOT" "$USER_DATA_ROOT" "$STATE_ROOT" "$NOTE" <<'PY'
 from __future__ import annotations
 
 import re
@@ -138,9 +133,7 @@ TOOLS = [
 
 
 def read_tool_description(tool_dir: str) -> str:
-    """Read description from a tool file's YAML frontmatter."""
-    user_data_path = Path(user_data_root)
-    tool_file = user_data_path / ".src" / "tools" / f"{tool_dir}.md"
+    tool_file = Path(user_data_root) / ".src" / "tools" / f"{tool_dir}.md"
     if not tool_file.exists():
         return "(description not available)"
     text = tool_file.read_text(encoding="utf-8", errors="replace")
@@ -157,10 +150,7 @@ def build_routing_section() -> str:
     lines = []
     for tool_dir, display_name in TOOLS:
         desc = read_tool_description(tool_dir)
-        lines.append(
-            f"- {display_name}：{desc}"
-            f" 工具规范：`.src/tools/{tool_dir}.md`。"
-        )
+        lines.append(f"- {display_name}：{desc} 工具规范：`.src/tools/{tool_dir}.md`。")
     lines.append("- Graph View：读取本文件 `## Graph` 段。")
     return "\n".join(lines)
 
@@ -175,7 +165,6 @@ def load_graph() -> str:
 
 
 def replace_section(lines: list[str], header: str, new_body: list[str]) -> list[str]:
-    """Replace the body of a ## section, keeping the header line intact."""
     start = None
     end = len(lines)
     for i, line in enumerate(lines):
@@ -185,7 +174,6 @@ def replace_section(lines: list[str], header: str, new_body: list[str]) -> list[
             end = i
             break
     if start is None:
-        # Section not found — append it
         return lines + ["", header] + new_body
     return lines[: start + 1] + new_body + lines[end:]
 
@@ -195,7 +183,6 @@ graph_markdown = load_graph()
 last_note = note if note else "(none)"
 
 if skill_file.exists():
-    # ── Surgical update: only touch Lifecycle State + Graph ──
     text = skill_file.read_text(encoding="utf-8", errors="replace")
     lines = text.split("\n")
 
@@ -220,9 +207,7 @@ if skill_file.exists():
     )
 
     skill_file.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
-
 else:
-    # ── Initial creation: full template ──
     content = f"""---
 name: pensieve
 description: 项目知识库与工作流路由。knowledge 里有之前探索过的文件位置、模块边界、调用链路，可直接复用不必重新定位；decisions/maxims 是已定论的架构决定和编码准则，应遵守而非重新讨论；pipelines 是可复用的工作流程。完成任务后用 self-improve 沉淀新发现。提供 init、upgrade、migrate、doctor、self-improve、loop 六个工具。
@@ -242,7 +227,8 @@ description: 项目知识库与工作流路由。knowledge 里有之前探索过
 ## Project Paths
 - Project Root: `{project_root}`
 - Skill Root: `{user_data_root}`
-- System Files: `.src/`
+- System Files: `.src/`, `agents/`
+- Generated Route File: `SKILL.md`
 - Runtime State: `{state_root}/`
 - Maxims: `maxims/`
 - Decisions: `decisions/`
@@ -259,6 +245,7 @@ PY
 
 echo "✅ Pensieve project SKILL updated"
 echo "  - skill: $SKILL_FILE"
+echo "  - graph: $GRAPH_FILE"
 
 if [[ -x "$AUTO_MEMORY_SCRIPT" ]]; then
   if ! bash "$AUTO_MEMORY_SCRIPT" --event "$EVENT"; then

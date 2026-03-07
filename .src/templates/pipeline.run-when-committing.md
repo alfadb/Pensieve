@@ -80,7 +80,7 @@ gate: auto
    - 探索型 `knowledge`：包含（状态转换 / 症状→根因→定位 / 边界与所有权 / 反模式 / 验证信号）
    - `pipeline`：需满足条件（重复出现 + 不可交换 + 可验证）
 6. 写入目标路径，补关联链接
-7. 运行根目录 SKILL 维护：
+7. 刷新 Pensieve 生成型 `SKILL.md`：
    ```
    bash .src/scripts/maintain-project-skill.sh --event self-improve --note "auto-improve: {files}"
    ```
@@ -88,7 +88,7 @@ gate: auto
 
 **DO NOT**：不询问用户确认，不展示草稿等待批准，直接写入
 
-**完成标准**：洞察已写入用户数据（或明确无需沉淀），根目录 `SKILL.md` 已同步
+**完成标准**：洞察已写入用户数据（或明确无需沉淀），根目录 `SKILL.md` 与 `.state/pensieve-user-data-graph.md` 已刷新
 
 ---
 
@@ -116,7 +116,7 @@ gate: auto
 
 1. `git diff --cached` 为空：跳过 Task 2/Task 3，输出“无 staged 变更，不提交”。
 2. 沉淀步骤失败：记录阻塞原因并跳过沉淀，继续 Task 3；结尾追加“建议运行 `doctor`”。
-3. 根目录 SKILL 维护失败：保留已沉淀内容，报告失败命令与重试建议，不回滚已写入文件。
+3. 生成型 `SKILL.md` 维护失败：保留已沉淀内容，报告失败命令与重试建议，不回滚已写入文件。
 
 ## 执行规则（给 loop 用）
 

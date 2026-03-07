@@ -59,7 +59,7 @@
     },
     "STR-111": {
       "message": "发现独立 graph 遗留文件。",
-      "recommendation": "执行 migrate 删除独立 graph 文件，图谱仅保留在 SKILL.md#Graph。"
+      "recommendation": "执行 migrate 删除独立 graph 文件；规范图谱写回根目录生成的 `SKILL.md#Graph`，`.state/` 只保留运行时输出。"
     },
     "STR-121": {
       "message": "发现用户数据目录中的历史 README 副本。",

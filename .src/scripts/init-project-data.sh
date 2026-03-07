@@ -1,8 +1,10 @@
 #!/bin/bash
 # 初始化当前 pensieve 用户数据根目录。
 #
-# `.src/` 是系统文件，用户数据（maxims/decisions/knowledge/pipelines/loop）
-# 与 `.src/` 同级，均位于 skill 根目录下。
+# `.src/`、`agents/`、`SKILL.md` 是 git tracked 的系统文件。
+# `SKILL.md` 由 maintain-project-skill.sh 在本地覆盖更新。
+# 用户数据（maxims/decisions/knowledge/pipelines/loop）由 .gitignore 忽略，
+# 不参与 git 更新。
 #
 # 可重复执行（幂等）。
 
@@ -32,24 +34,6 @@ PROJECT_SKILL_SCRIPT="$SKILL_ROOT/.src/scripts/maintain-project-skill.sh"
 
 mkdir -p "$DATA_ROOT"/{maxims,decisions,knowledge,loop,pipelines}
 
-GITIGNORE_FILE="$DATA_ROOT/.gitignore"
-if [[ ! -f "$GITIGNORE_FILE" ]]; then
-  cat > "$GITIGNORE_FILE" <<'GITIGNORE'
-# Pensieve: only commit user data, ignore system files
-*
-!.gitignore
-!maxims/
-!maxims/**
-!decisions/
-!decisions/**
-!knowledge/
-!knowledge/**
-!pipelines/
-!pipelines/**
-!loop/
-!loop/**
-GITIGNORE
-fi
 
 TEMPLATE_MAXIMS_DIR="$TEMPLATES_ROOT/maxims"
 if [[ -d "$TEMPLATE_MAXIMS_DIR" ]]; then
@@ -101,8 +85,8 @@ echo "  - pipelines/*: seeded $PIPELINE_SEEDED_COUNT new file(s)"
 echo "  - runtime state: $STATE_ROOT"
 
 if [[ -x "$PROJECT_SKILL_SCRIPT" ]]; then
-  if ! bash "$PROJECT_SKILL_SCRIPT" --event install --note "seeded project skill data via init-project-data.sh"; then
-    echo "⚠️  Project skill update skipped: failed to run maintain-project-skill.sh" >&2
+  if ! bash "$PROJECT_SKILL_SCRIPT" --event install --note "seeded project data via init-project-data.sh"; then
+    echo "⚠️  Generated SKILL update skipped: failed to run maintain-project-skill.sh" >&2
   fi
 fi
 

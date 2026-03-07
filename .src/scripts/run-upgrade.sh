@@ -1,7 +1,7 @@
 #!/bin/bash
-# Upgrade runner:
+# Upgrade runner for a git-cloned Pensieve checkout.
 # 1) Detect current skill version
-# 2) Refresh via claude plugin update, git pull, or npx skills update
+# 2) Refresh via git pull --ff-only
 # 3) Record the result
 # 4) Tell the user to run doctor manually
 
@@ -19,7 +19,7 @@ Options:
   --state-dir <path>        Runtime state dir. Default: <project>/.state
   --report <path>           Upgrade markdown report. Default: <state-dir>/pensieve-upgrade-report.md
   --summary-json <path>     Upgrade summary json. Default: <state-dir>/pensieve-upgrade-summary.json
-  --skip-version-check      Skip external update command
+  --skip-version-check      Skip git pull and only refresh local reports
   --dry-run                 Print and record actions without changing files
   -h, --help                Show help
 USAGE
@@ -105,39 +105,21 @@ mkdir -p "$(dirname "$REPORT")" "$(dirname "$SUMMARY_JSON")"
 PYTHON_BIN="$(python_bin || true)"
 [[ -n "$PYTHON_BIN" ]] || { echo "Python not found" >&2; exit 1; }
 
+if ! git -C "$SKILL_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  echo "Pensieve upgrade requires a git checkout at: $SKILL_ROOT" >&2
+  exit 1
+fi
+
 PRE_VERSION="$(skill_version "$SCRIPT_DIR")"
 POST_VERSION="$PRE_VERSION"
 UPDATE_STRATEGY="skipped"
-INSTALL_MODE="${PENSIEVE_INSTALL_MODE:-skill}"
-PLUGIN_NAME="${PENSIEVE_PLUGIN_NAME:-pensieve}"
 
-run_with_claude_plugin_update() {
-  if [[ "$INSTALL_MODE" != "claude-plugin" ]]; then
-    return 1
-  fi
+handle_upgrade() {
+  : >"$VERSION_LOG"
 
-  if ! command -v claude >/dev/null 2>&1; then
-    return 1
-  fi
-
-  if [[ "$DRY_RUN" -eq 1 ]]; then
-    echo "[dry-run] claude plugin update $PLUGIN_NAME" >>"$VERSION_LOG"
-    UPDATE_STRATEGY="claude-plugin-update"
+  if [[ "$SKIP_VERSION_CHECK" -eq 1 ]]; then
+    echo "[skip] external update command disabled" >>"$VERSION_LOG"
     return 0
-  fi
-
-  if claude plugin update "$PLUGIN_NAME" >>"$VERSION_LOG" 2>&1; then
-    UPDATE_STRATEGY="claude-plugin-update"
-    return 0
-  fi
-
-  echo "[warn] claude plugin update failed, falling back to checkout-based strategies" >>"$VERSION_LOG"
-  return 1
-}
-
-run_with_git_pull() {
-  if ! git -C "$SKILL_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-    return 1
   fi
 
   if [[ "$DRY_RUN" -eq 1 ]]; then
@@ -148,70 +130,6 @@ run_with_git_pull() {
 
   git -C "$SKILL_ROOT" pull --ff-only >>"$VERSION_LOG" 2>&1
   UPDATE_STRATEGY="git-pull"
-}
-
-run_with_skills_cli() {
-  if ! command -v npx >/dev/null 2>&1; then
-    return 1
-  fi
-
-  local cwd
-  if [[ -f "$PROJECT_ROOT/skills-lock.json" ]]; then
-    cwd="$PROJECT_ROOT"
-  else
-    cwd="$SKILL_ROOT"
-  fi
-
-  if [[ "$DRY_RUN" -eq 1 ]]; then
-    echo "[dry-run] (cd $cwd && npx skills update)" >>"$VERSION_LOG"
-    UPDATE_STRATEGY="skills-update"
-    return 0
-  fi
-
-  local data_root
-  data_root="$(user_data_root "$SCRIPT_DIR")"
-  local backup_dir="$STATE_DIR/pensieve-upgrade-backup-$$"
-
-  if backup_user_data "$data_root" "$backup_dir"; then
-    echo "[info] user data backed up to $backup_dir" >>"$VERSION_LOG"
-  fi
-
-  (
-    cd "$cwd"
-    npx skills update
-  ) >>"$VERSION_LOG" 2>&1
-
-  if [[ -d "$backup_dir" ]]; then
-    restore_user_data "$data_root" "$backup_dir"
-    cleanup_backup "$backup_dir"
-    echo "[info] user data restored" >>"$VERSION_LOG"
-  fi
-
-  UPDATE_STRATEGY="skills-update"
-}
-
-handle_upgrade() {
-  : >"$VERSION_LOG"
-
-  if [[ "$SKIP_VERSION_CHECK" -eq 1 ]]; then
-    echo "[skip] external update command disabled" >>"$VERSION_LOG"
-    return 0
-  fi
-
-  if run_with_claude_plugin_update; then
-    return 0
-  fi
-
-  if run_with_git_pull; then
-    return 0
-  fi
-
-  if run_with_skills_cli; then
-    return 0
-  fi
-
-  echo "No supported upgrade strategy found. Expected claude plugin update, a git checkout, or npx skills update." >>"$VERSION_LOG"
-  return 2
 }
 
 if ! handle_upgrade; then
