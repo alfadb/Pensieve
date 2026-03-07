@@ -86,3 +86,8 @@ if [[ -x "$PROJECT_SKILL_SCRIPT" ]]; then
     echo "⚠️  Project skill update skipped: failed to run maintain-project-skill.sh" >&2
   fi
 fi
+
+MARKER_SCRIPT="$SKILL_ROOT/.src/scripts/pensieve-session-marker.sh"
+if [[ -f "$MARKER_SCRIPT" ]]; then
+  bash "$MARKER_SCRIPT" --mode record --event init || true
+fi

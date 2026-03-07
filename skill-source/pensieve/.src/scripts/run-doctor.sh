@@ -171,6 +171,11 @@ echo "  - info: $SUMMARY_INFO"
 echo "  - report: $REPORT"
 echo "  - summary: $SUMMARY_JSON"
 
+MARKER_SCRIPT="$SCRIPT_DIR/pensieve-session-marker.sh"
+if [[ "$SUMMARY_STATUS" != "FAIL" && -f "$MARKER_SCRIPT" ]]; then
+  bash "$MARKER_SCRIPT" --mode record --event doctor || true
+fi
+
 if [[ "$STRICT_MODE" -eq 1 && "$SUMMARY_STATUS" == "FAIL" ]]; then
   exit 3
 fi
