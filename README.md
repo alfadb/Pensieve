@@ -50,6 +50,20 @@ claude plugin marketplace add kingkongshot/Pensieve#experimental
 claude plugin install pensieve@kingkongshot-marketplace --scope project
 ```
 
+> **提示**：以上两条命令执行成功后**不会有任何输出**，这是正常行为。如果需要确认安装是否成功，可以运行：
+>
+> ```bash
+> claude plugin marketplace list   # 确认 marketplace 源已添加
+> claude plugin list                # 确认插件已安装
+> ```
+>
+> 如果这两条命令同样没有输出，可以直接检查配置文件来验证：
+>
+> ```bash
+> cat ~/.claude/plugins/known_marketplaces.json   # 应包含 kingkongshot-marketplace
+> cat ~/.claude/plugins/installed_plugins.json     # 应包含 pensieve@kingkongshot-marketplace
+> ```
+
 本地开发直接加载（仅开发调试用）：
 
 ```bash
