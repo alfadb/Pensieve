@@ -34,6 +34,18 @@ PROJECT_SKILL_SCRIPT="$SKILL_ROOT/.src/scripts/maintain-project-skill.sh"
 
 mkdir -p "$DATA_ROOT"/{maxims,decisions,knowledge,loop,pipelines}
 
+# 确保项目根 .gitignore 忽略 pensieve skill 目录和运行时状态
+PROJECT_ROOT="$(project_root "$SCRIPT_DIR")"
+PROJECT_GITIGNORE="$PROJECT_ROOT/.gitignore"
+SKILL_REL_PATH="${SKILL_ROOT#$PROJECT_ROOT/}"
+if [[ -f "$PROJECT_GITIGNORE" ]]; then
+  for entry in "/$SKILL_REL_PATH/" "/.state/"; do
+    if ! grep -Fxq "$entry" "$PROJECT_GITIGNORE" 2>/dev/null; then
+      printf '\n%s' "$entry" >> "$PROJECT_GITIGNORE"
+      echo "  + added $entry to $PROJECT_GITIGNORE"
+    fi
+  done
+fi
 
 TEMPLATE_MAXIMS_DIR="$TEMPLATES_ROOT/maxims"
 if [[ -d "$TEMPLATE_MAXIMS_DIR" ]]; then
