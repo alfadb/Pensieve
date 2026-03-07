@@ -16,10 +16,10 @@ tags: [pensieve, install, update, operations]
 
 ### 方式 A：作为通用 skill（Codex / Vercel skills / 其他兼容 agent）
 
-推荐直接安装仓库里的 `skills/pensieve/`：
+推荐直接安装仓库里的 `skill-source/pensieve/`：
 
 ```bash
-npx skills add kingkongshot/Pensieve/skills/pensieve --branch experimental --copy
+npx skills add https://github.com/kingkongshot/Pensieve/tree/experimental/skill-source/pensieve --copy
 ```
 
 说明：
@@ -40,7 +40,7 @@ bash .src/scripts/init-project-data.sh
 
 ### 方式 B：作为 Claude Code 插件
 
-本仓库根目录就是 Claude plugin 根，内嵌同一份 `skills/pensieve/`。
+本仓库根目录就是 Claude plugin 根，skill 源码位于 `skill-source/pensieve/`（使用 `skill-source` 而非 `skills` 以避免 CC 插件自动发现导致重复加载）。
 
 本地开发可直接加载：
 
