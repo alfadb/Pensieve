@@ -19,7 +19,7 @@ tags: [pensieve, install, update, operations]
 推荐直接安装仓库里的 `skills/pensieve/`：
 
 ```bash
-npx skills add kingkongshot/Pensieve/tree/main/skills/pensieve --copy
+npx skills add kingkongshot/Pensieve/skills/pensieve --branch experimental --copy
 ```
 
 说明：
@@ -51,7 +51,7 @@ claude --plugin-dir /path/to/Pensieve
 如果把本仓库作为 marketplace source 发布，也可以：
 
 ```bash
-claude plugin marketplace add kingkongshot/Pensieve#main
+claude plugin marketplace add kingkongshot/Pensieve#experimental
 claude plugin install pensieve@kingkongshot-marketplace
 ```
 
