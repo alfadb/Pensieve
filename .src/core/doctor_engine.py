@@ -153,6 +153,7 @@ def _build_report(
     lines.append(
         f"- MEMORY.md missing/drifted: {_yes_no(flags.get('has_missing_memory_file') or flags.get('has_memory_content_drift'))}"
     )
+    lines.append(f"- state.md inline graph: {_yes_no(flags.get('has_state_inline_graph'))}")
     lines.append(f"- Suggested action: `{next_step if next_step in {'migrate', 'upgrade', 'self-improve'} else 'none'}`")
     lines.append("")
     lines.append("## 5) Action Plan")

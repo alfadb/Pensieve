@@ -19,8 +19,8 @@ description: >-
 - Migrate: 结构迁移和遗留清理。工具规格：`.src/tools/migrate.md`。
 - Doctor: 只读扫描当前项目用户数据目录。工具规格：`.src/tools/doctor.md`。
 - Self-Improve: 提取可复用结论并写入用户数据。工具规格：`.src/tools/self-improve.md`。
-- Graph View: 读取 `<project-root>/.pensieve/state.md` 的 `## Graph` 部分。
+- Graph View: 读取 `<project-root>/.pensieve/.state/pensieve-user-data-graph.md`。
 
 ## Project Data
 项目级用户数据存储在 `<project-root>/.pensieve/`。
-当前项目的生命周期状态和知识图谱见 `.pensieve/state.md`。
+当前项目的生命周期状态见 `.pensieve/state.md`；知识图谱见 `.pensieve/.state/pensieve-user-data-graph.md`（按需读取）。
