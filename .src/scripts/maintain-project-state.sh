@@ -111,13 +111,10 @@ def event_display_name(raw: str) -> str:
     return "self-improve"
 
 
-def load_graph() -> str:
+def load_graph_ref() -> str:
     if not graph_file.exists():
         return "_(graph not generated yet)_"
-    txt = graph_file.read_text(encoding="utf-8", errors="replace").strip()
-    if txt == "":
-        return "_(graph is empty)_"
-    return txt
+    return f"见 `.pensieve/.state/{graph_file.name}`（按需读取）"
 
 
 def replace_section(lines: list[str], header: str, new_body: list[str]) -> list[str]:
@@ -135,7 +132,7 @@ def replace_section(lines: list[str], header: str, new_body: list[str]) -> list[
 
 
 event_name = event_display_name(event)
-graph_markdown = load_graph()
+graph_markdown = load_graph_ref()
 last_note = note if note else "(none)"
 
 if state_file.exists():

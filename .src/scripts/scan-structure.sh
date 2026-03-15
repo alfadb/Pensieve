@@ -342,6 +342,16 @@ else:
                 "Run init/migrate/doctor to trigger auto memory alignment, ensuring MEMORY.md matches the SKILL.md description and includes the pensieve skill guidance.",
             )
 
+# Check for inline graph in state.md (should be a reference pointer, not full content).
+if state_file.is_file():
+    state_text = read_text_normalized(state_file)
+    if "```mermaid" in state_text:
+        add_finding(
+            "STR-601", "SHOULD_FIX", "state_inline_graph", state_file,
+            "state.md contains inline mermaid graph. Graph should be a reference to .state/pensieve-user-data-graph.md.",
+            "Run migrate or doctor to regenerate state.md with graph reference pointer.",
+        )
+
 must_fix = sum(1 for f in findings if f.severity == "MUST_FIX")
 should_fix = sum(1 for f in findings if f.severity == "SHOULD_FIX")
 status = "aligned" if must_fix == 0 else "drift"
@@ -360,6 +370,7 @@ flags = {
     "has_critical_file_drift": any(f.finding_id == "STR-202" for f in findings),
     "has_missing_memory_file": any(f.finding_id == "STR-501" for f in findings),
     "has_memory_content_drift": any(f.finding_id == "STR-502" for f in findings),
+    "has_state_inline_graph": any(f.finding_id == "STR-601" for f in findings),
 }
 
 report = {
