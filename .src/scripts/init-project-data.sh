@@ -86,6 +86,23 @@ for template_pipeline in "$TEMPLATES_ROOT"/pipeline.run-when-*.md; do
   fi
 done
 
+# Seed Claude Code custom agents into <project>/.claude/agents/
+TEMPLATE_AGENTS_DIR="$TEMPLATES_ROOT/agents"
+AGENT_SEEDED_COUNT=0
+if [[ -d "$TEMPLATE_AGENTS_DIR" ]]; then
+  CC_AGENTS_DIR="$_PROJECT_ROOT/.claude/agents"
+  mkdir -p "$CC_AGENTS_DIR"
+  for template_agent in "$TEMPLATE_AGENTS_DIR"/*.md; do
+    [[ -f "$template_agent" ]] || continue
+    is_readme_file "$template_agent" && continue
+    target_agent="$CC_AGENTS_DIR/$(basename "$template_agent")"
+    if [[ ! -f "$target_agent" ]]; then
+      cp "$template_agent" "$target_agent"
+      ((AGENT_SEEDED_COUNT++)) || true
+    fi
+  done
+fi
+
 echo "✅ Initialization complete: $DATA_ROOT"
 MAXIM_COUNT=0
 if [[ -d "$DATA_ROOT/maxims" ]]; then
@@ -94,6 +111,7 @@ fi
 echo "  - maxims/*.md: $MAXIM_COUNT files present"
 echo "  - knowledge/*: seeded $KNOWLEDGE_SEEDED_COUNT new file(s)"
 echo "  - pipelines/*: seeded $PIPELINE_SEEDED_COUNT new file(s)"
+echo "  - agents: seeded $AGENT_SEEDED_COUNT new file(s) → .claude/agents/"
 echo "  - runtime state: $STATE_ROOT"
 
 if [[ -f "$PROJECT_STATE_SCRIPT" ]]; then
