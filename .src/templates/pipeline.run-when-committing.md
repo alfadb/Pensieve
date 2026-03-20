@@ -112,6 +112,14 @@ The value of capturing insights lies in reuse next time; unsubstantiated guesses
 
 ---
 
+## Short-Term Memory Prompt
+
+After committing, if there are expired entries in `short-term/`, append a one-line reminder:
+
+> Short-term memory has N entries pending triage. Run pensieve refine to process them. Tool spec: `.src/tools/refine.md`.
+
+Do not perform triage during the commit flow; only remind.
+
 ## Failure Fallback
 
 1. `git diff --cached` is empty: skip Task 2/Task 3, output "no staged changes, nothing to commit".

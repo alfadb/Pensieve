@@ -1,5 +1,5 @@
 ---
-description: Extract reusable conclusions from conversations, diffs, and review results. Write them to maxim/decision/knowledge/pipeline and sync the graph.
+description: Extract reusable conclusions from conversations, diffs, and review results, write them to short-term or long-term directories, and sync the graph.
 ---
 
 # Self-Improve Tool
@@ -13,10 +13,20 @@ description: Extract reusable conclusions from conversations, diffs, and review 
 
 ## Write targets
 
-- `maxim` → `maxims/{one-sentence-conclusion}.md`
-- `decision` → `decisions/{date}-{conclusion}.md`
-- `pipeline` → `pipelines/run-when-*.md`
-- `knowledge` → `knowledge/{name}/content.md`
+### New files -> Write to short-term by default
+
+- `maxim` → `short-term/maxims/{one-sentence-conclusion}.md`
+- `decision` → `short-term/decisions/{date}-{conclusion}.md`
+- `pipeline` → `short-term/pipelines/run-when-*.md`
+- `knowledge` → `short-term/knowledge/{name}/content.md`
+
+Naming conventions match the corresponding long-term directories. `[[...]]` links do not include the `short-term/` prefix.
+
+### Modifying existing files -> Edit in place
+
+Files already in `maxims/decisions/knowledge/pipelines` are edited directly in place, not via short-term.
+
+### Exception: When the user explicitly requests writing directly to long-term directories, short-term can be skipped.
 
 Read before writing:
 
@@ -24,6 +34,7 @@ Read before writing:
 - `.src/references/decisions.md`
 - `.src/references/pipelines.md`
 - `.src/references/knowledge.md`
+- `.src/references/short-term.md`
 
 ## Post-write refresh
 
